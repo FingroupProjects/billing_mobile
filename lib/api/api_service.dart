@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'package:billing_mobile/models/clientsById_model.dart';
+import 'package:billing_mobile/models/clients_model.dart';
 import 'package:billing_mobile/models/login_model.dart';
+import 'package:billing_mobile/models/organizations_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-final String baseUrl = 'https://billing.sham360.com';
+final String baseUrl = 'https://billing.sham360.com/api';
 
 class ApiService {
   // Общая обработка ответа от сервера 401
@@ -55,8 +58,8 @@ Future<void> clearToken() async {
       },
     );
 
-    // print('Статус ответа! ${response.statusCode}');
-    // print('Тело ответа!${response.body}');
+    print('Статус ответа! ${response.statusCode}');
+    print('Тело ответа!${response.body}');
 
     return _handleResponse(response);
   }
@@ -151,10 +154,64 @@ Future<LoginResponse> login(LoginModel loginModel) async {
 
   // //_________________________________ START_____API_SCREEN__CLIENTS____________________________________________//
 
-  // Future<List<Goods>> getGoods({int page = 1, int perPage = 20}) async {
-  //   final organizationId = await getSelectedOrganization();
-  //   final String path =
-  //       '/good?page=$page&per_page=$perPage&organization_id=$organizationId';
+Future<ClientListResponse> getClients() async {
+  try {
+    final response = await _getRequest('/clients');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      if (jsonData['clients'] != null) {
+        final adaptedJson = {
+          'view': '/clients',
+          'data': {
+            'clients': jsonData['clients'],
+            'partners': jsonData['partners'] ?? [],
+            'tariffs': jsonData['tariffs'] ?? [],
+          }
+        };
+        return ClientListResponse.fromJson(adaptedJson);
+      }
+      return ClientListResponse.fromJson(jsonData);
+    } else {
+      throw Exception('Ошибка загрузки клиентов: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('CATCH ERROR Ошибка загрузки клиентов: $e');
+  }
+}
+
+Future<ClientByIdResponse> getClientById(String clientId) async {
+  try {
+    final response = await _getRequest('/clients/$clientId');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return ClientByIdResponse.fromJson(jsonData);
+    } else {
+      throw Exception('Failed to load client: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load client: $e');
+  }
+}
+
+Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
+  try {
+    final response = await _getRequest('/clients/getOrganizations/$clientId');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> organizationsJson = jsonData['result']['data'];
+      return organizationsJson
+          .map((orgJson) => Organization.fromJson(orgJson))
+          .toList();
+    } else {
+      throw Exception('Failed to load organizations: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load organizations: $e');
+  }
+}
+
+  // Future<List<Goods>> getClients({int page = 1, int perPage = 20}) async {
+  //   final String path ='/client?page=$page&per_page=$perPage';
 
   //   final response = await _getRequest(path);
 

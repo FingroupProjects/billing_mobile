@@ -1,5 +1,8 @@
 import 'package:billing_mobile/api/api_service.dart';
+import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
+import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/login/login_bloc.dart';
+import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
 import 'package:billing_mobile/home_screen.dart';
 import 'package:billing_mobile/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() async {
+  void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(
@@ -42,9 +45,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => LoginBloc(apiService),
-        ),
+        BlocProvider(create: (context) => LoginBloc(apiService)),
+        BlocProvider(create: (context) => ClientBloc(apiService: apiService)),
+        BlocProvider(create: (context) => ClientByIdBloc(apiService)),
+        BlocProvider(create: (context) => OrganizationBloc(apiService: apiService)),
       ],
       child: MaterialApp(
         color: Colors.white,

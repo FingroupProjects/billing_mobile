@@ -1,4 +1,4 @@
-package com.example.billing_mobile
+package com.softtech.billing_mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

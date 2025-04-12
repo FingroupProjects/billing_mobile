@@ -1,7 +1,12 @@
+import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
+import 'package:billing_mobile/bloc/clients/clients_event.dart';
+import 'package:billing_mobile/bloc/clients/clients_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
+import 'package:billing_mobile/screens/clients/clients_card.dart';
+import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ClientsScreen extends StatefulWidget {
   @override
@@ -20,7 +25,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    // context.read<GoodsBloc>().add(FetchGoods());
+    // Загружаем клиентов при инициализации
+    context.read<ClientBloc>().add(FetchClients());
   }
 
   @override
@@ -32,16 +38,17 @@ class _ClientsScreenState extends State<ClientsScreen> {
   }
 
   void _onScroll() {
+    // Реализация бесконечной подгрузки, если нужно
     // if (_scrollController.position.pixels ==
     //         _scrollController.position.maxScrollExtent &&
-    //     !(context.read<GoodsBloc>().allGoodsFetched)) {
-    //   final state = context.read<GoodsBloc>().state;
-    //   if (state is GoodsDataLoaded) {
-    //     context.read<GoodsBloc>().add(FetchMoreGoods(state.currentPage));
-    //   }
+    //     !(context.read<ClientBloc>().state is ClientLoaded && 
+    //        context.read<ClientBloc>().state.clientData.data.clients.currentPage == 
+    //        context.read<ClientBloc>().state.clientData.data.clients.total)) {
+    //   context.read<ClientBloc>().add(FetchMoreClients());
     // }
   }
- @override
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -57,23 +64,67 @@ class _ClientsScreenState extends State<ClientsScreen> {
           showSearchIcon: true,
           showFilterOrderIcon: false,
           showFilterIcon: true,
-          onChangedSearchInput: (input) {},
+          onChangedSearchInput: (input) {
+            // Фильтрация по вводу
+            // context.read<ClientBloc>().add(FilterClients(input));
+          },
           textEditingController: _searchController,
           focusNode: _searchFocusNode,
-          clearButtonClick: (isSearching) {},
+          clearButtonClick: (isSearching) {
+            setState(() {
+              _isSearching = isSearching;
+              if (!isSearching) {
+                _searchController.clear();
+                context.read<ClientBloc>().add(FetchClients());
+              }
+            });
+          },
         ),
       ),
-      body: isClickAvatarIcon
+       body: isClickAvatarIcon
           ? const ProfileScreen()
-          : Center(child: Text("Список клиентов")), 
+          : BlocBuilder<ClientBloc, ClientState>(
+              builder: (context, state) {
+                if (state is ClientLoading) {
+                  return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
+                } else if (state is ClientError) {
+                  return Center(child: Text('Ошибка: ${state.message}'));
+                } else if (state is ClientLoaded) {
+                  return RefreshIndicator(
+                  color: Color(0xff1E2E52),
+                  backgroundColor: Colors.white,
+                    onRefresh: () async {
+                      context.read<ClientBloc>().add(FetchClients());
+                    },
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: state.clientData.data.clients.data.length,
+                      itemBuilder: (context, index) {
+                        final client = state.clientData.data.clients.data[index];
+                        return ClientCard(
+                          client: client,
+                          onTap: () {
+                              Navigator.push(
+                             context,
+                             MaterialPageRoute(builder: (context) => ClientDetailsScreen(clientId: client.id)),
+                           );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                }
+                return const Center(child: Text('Нет данных'));
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           // final result = await Navigator.push(
           //   context,
-          //   // MaterialPageRoute(builder: (context) => GoodsAddScreen()),
+          //   MaterialPageRoute(builder: (context) => AddClientScreen()),
           // );
           // if (result == true) {
-          //   context.read<GoodsBloc>().add(FetchGoods());
+          //   context.read<ClientBloc>().add(FetchClients());
           // }
         },
         backgroundColor: const Color(0xff1E2E52),
