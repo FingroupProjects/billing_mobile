@@ -1,0 +1,66 @@
+name: billing_mobile
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.2.2
+  shared_preferences: ^2.3.5
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+
+  flutter_lints: ^4.0.0
+
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icons/MyNavBar/
+    - assets/icons/AppBar/
+    - assets/icons/Profile/
+    - assets/icons/
+
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+
+  # example:
+  fonts:
+    - family: Gilroy
+      fonts:
+        - asset: assets/fonts/Gilroy-Regular.ttf
+        - asset: assets/fonts/Gilroy-Bold.ttf
+          weight: 700
+    - family: Golos
+      fonts:
+        - asset: assets/fonts/Golos-Regular.ttf
+        - asset: assets/fonts/Golos-Bold.ttf
+          weight: 700
+  #
+  # see https://flutter.dev/to/font-from-package
