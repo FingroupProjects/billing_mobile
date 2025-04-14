@@ -6,8 +6,8 @@ class ClientListResponse {
 
   factory ClientListResponse.fromJson(Map<String, dynamic> json) {
     return ClientListResponse(
-      view: json['view'] ?? '', 
-      data: ClientData.fromJson(json['data'] ?? {}), 
+      view: json['view'] ?? '',
+      data: ClientData.fromJson(json['data'] ?? {}),
     );
   }
 }
@@ -18,12 +18,12 @@ class ClientData {
 
   ClientData({
     required this.clients,
-    this.tariffs = const [], 
+    this.tariffs = const [],
   });
 
   factory ClientData.fromJson(Map<String, dynamic> json) {
     return ClientData(
-      clients: ClientList.fromJson(json['clients'] ?? {}), 
+      clients: ClientList.fromJson(json['clients'] ?? {}),
       tariffs: (json['tariffs'] as List?)?.map((e) => Tariff.fromJson(e)).toList() ?? [],
     );
   }
@@ -35,9 +35,9 @@ class ClientList {
   final int total;
 
   ClientList({
-    this.currentPage = 1, 
-    this.data = const [], 
-    this.total = 0, 
+    this.currentPage = 1,
+    this.data = const [],
+    this.total = 0,
   });
 
   factory ClientList.fromJson(Map<String, dynamic> json) {
@@ -87,42 +87,29 @@ class Client {
       isDemo: json['is_demo'] ?? false,
       email: json['email'],
       clientType: json['client_type'] ?? '',
-       tariff: json['tariff'] != null 
-        ? Tariff.fromJson(json['tariff']) 
-        : Tariff( // Provide default values if tariff is null
-            id: 0,
-            name: 'Unknown',
-            price: 0,
-            userCount: 0,
-            projectCount: 0,
-          ),
+      tariff: json['tariff'] != null
+          ? Tariff.fromJson(json['tariff'])
+          : Tariff(
+              id: 0,
+              name: 'Unknown',
+            ),
     );
   }
 }
 
-
 class Tariff {
   final int id;
   final String name;
-  final int price;
-  final int userCount;
-  final int projectCount;
 
   Tariff({
     required this.id,
     required this.name,
-    required this.price,
-    required this.userCount,
-    required this.projectCount,
   });
 
   factory Tariff.fromJson(Map<String, dynamic> json) {
     return Tariff(
-      id: json['id'],
-      name: json['name'],
-      price: json['price'],
-      userCount: json['user_count'],
-      projectCount: json['project_count'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? 'Unknown',
     );
   }
 }

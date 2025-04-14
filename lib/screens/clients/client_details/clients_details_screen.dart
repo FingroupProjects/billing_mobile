@@ -2,6 +2,7 @@ import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_state.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
+import 'package:billing_mobile/screens/clients/client_delete.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_organizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,7 +33,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   }
 
   void _updateDetails(ClientById client, List<Sale> sales) {
-  // Находим скидку по saleId
+
   Sale? clientSale;
   if (client.saleId != null) {
     clientSale = sales.firstWhere(
@@ -59,13 +60,14 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       {'label': 'Тип клиента:', 'value': client.clientType},
       {'label': 'Тариф:', 'value': client.tariff.name},
       {'label': 'Контактное лицо:', 'value': client.contactPerson ?? 'Не указано'},
-      {'label': 'Партнер ID:', 'value': client.partnerId?.toString() ?? 'Нет'},
+      {'label': 'Партнер ID:', 'value': client.partnerId?.toString() ?? ''},
       {
         'label': 'Скидка:', 
         'value': client.saleId != null 
-            ? '${clientSale?.name} (${clientSale?.saleType == 'procent' ? '${clientSale?.amount}%' : '${clientSale?.amount} sum'})' 
+            ? '${clientSale?.name} (${clientSale?.saleType == 'procent' ? '${clientSale?.amount}%' : '${clientSale?.amount} сумма'})' 
             : 'Нет'
       },
+      {'label': 'Страна:', 'value': client.countryId?.toString() ?? ''},
       {'label': 'Баланс:', 'value': client.balance},
       {
         'label': 'Дата создания:',
@@ -87,7 +89,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       body: BlocListener<ClientByIdBloc, ClientByIdState>(
         listener: (context, state) {  
           if (state is ClientByIdLoaded) {
-         _updateDetails(state.client, state.sales); // Передаем список скидок
+         _updateDetails(state.client, state.sales); 
           } else if (state is ClientByIdError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -158,12 +160,17 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.edit, color: Color(0xff1E2E52)),
+          icon: Image.asset( 'assets/icons/edit.png', width: 24, height: 24 ),
           onPressed: () => _navigateToEditScreen(),
         ),
         IconButton(
-          icon: const Icon(Icons.delete, color: Color(0xff1E2E52)),
-          onPressed: () => _showDeleteDialog(),
+          icon: Image.asset( 'assets/icons/delete.png', width: 24, height: 24),          
+          onPressed: () {
+           showDialog(
+             context: context,
+             builder: (context) => DeleteClientDialog(clientId: currentClient!.id),
+           );
+         },        
         ),
       ],
     );

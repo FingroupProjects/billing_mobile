@@ -8,8 +8,15 @@ class ClientLoading extends ClientState {}
 
 class ClientLoaded extends ClientState {
   final ClientListResponse clientData;
+  final bool isLoadingMore;
 
-  ClientLoaded(this.clientData);
+  ClientLoaded(this.clientData, {this.isLoadingMore = false});
+}
+
+class ClientSuccess extends ClientState {
+  final String message;
+
+  ClientSuccess(this.message);
 }
 
 class ClientError extends ClientState {

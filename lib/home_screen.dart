@@ -33,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> activeIcons = [];
   List<String> inactiveIcons = [];
 
-  // Лиды
     widgets.add(ClientsScreen());
     titleKeys.add('Аппбар клиент');
     navBarTitleKeys.add('Клиентт');
@@ -41,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
     inactiveIcons.add('assets/icons/MyNavBar/clients_OFF.png');
 
 
-    // Проверяем, смонтирован ли виджет перед вызовом setState
   if (mounted) {
     setState(() {
       _widgetOptions = widgets;
@@ -58,13 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
 Widget build(BuildContext context) {
   return Scaffold(
-    body: _selectedIndex == -1 // Экран профиля
+    body: _selectedIndex == -1 
         ? ProfileScreen()
         : (_widgetOptions.isNotEmpty &&
                 _selectedIndex >= 0 &&
                 _selectedIndex < _widgetOptions.length
             ? _widgetOptions[_selectedIndex]
-            : Center(
+            : const Center(
                 child: Text('Нет доступных экранов'),
               )),
     backgroundColor: Colors.white,

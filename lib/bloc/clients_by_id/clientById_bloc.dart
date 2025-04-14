@@ -16,13 +16,10 @@ class ClientByIdBloc extends Bloc<ClientByIdEvent, ClientByIdState> {
 
     if (await _checkInternetConnection()) {
       try {
-        // 1. Get the full response
         final response = await apiService.getClientById(event.clientId);
         
-        // 2. Extract the client and related data
         final client = response.client;
         
-        // 3. Emit the loaded state with all necessary data
         emit(ClientByIdLoaded(
           client: client,
           businessTypes: response.businessTypes,
@@ -31,7 +28,6 @@ class ClientByIdBloc extends Bloc<ClientByIdEvent, ClientByIdState> {
           packs: response.packs,
         ));
       } catch (e) {
-        // 4. Provide more detailed error message
         emit(ClientByIdError('Не удалось загрузить данные клиента: ${e.toString()}'));
       }
     } else {

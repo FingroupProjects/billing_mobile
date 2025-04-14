@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'package:billing_mobile/custom_widget/country_data_list.dart';
+import 'package:billing_mobile/models/Country_model.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
 import 'package:billing_mobile/models/clients_model.dart';
 import 'package:billing_mobile/models/login_model.dart';
 import 'package:billing_mobile/models/organizations_model.dart';
+import 'package:billing_mobile/models/partner_model.dart';
+import 'package:billing_mobile/models/sale_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -154,9 +158,9 @@ Future<LoginResponse> login(LoginModel loginModel) async {
 
   // //_________________________________ START_____API_SCREEN__CLIENTS____________________________________________//
 
-Future<ClientListResponse> getClients() async {
+Future<ClientListResponse> getClients({int page = 1}) async {
   try {
-    final response = await _getRequest('/clients');
+    final response = await _getRequest('/clients?page=$page');
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       if (jsonData['clients'] != null) {
@@ -207,6 +211,100 @@ Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
     }
   } catch (e) {
     throw Exception('Failed to load organizations: $e');
+  }
+}
+
+ Future<Map<String, dynamic>> createClients({
+    required String fio,
+    required String phone,
+    required String email,
+    String? contactPerson,
+    required String subDomain,
+    int? partnerId,
+    String? clientType,
+    int? tariffId,
+    int? saleId,
+    int? countryId,
+    required bool isDemo,
+  }) async {
+
+    final response = await _postRequest(
+        '/clients/store', {
+          'name': fio,
+          'phone': phone,
+          'email': email,
+          'contact_person': contactPerson,
+          'sub_domain': subDomain,
+          'partner_id': partnerId,
+          'client_type': clientType,
+          'tariff_id': tariffId,
+          'sale_id': saleId,
+          'country_id': countryId,
+          'is_demo': isDemo,
+        });
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return {'success': true, 'message': 'Клиент успещно создан!'};
+    } else if (response.statusCode == 422) {
+        if (response.body.contains('phone')) {
+        return {'success': false, 'message': 'Телефон уже зарегистриварон.'};
+      }
+      if (response.body.contains('email')) {
+        return {'success': false, 'message': 'Введите корректный адрес электронной почты.'};
+      } else if (response.body.contains('sub_domain')) {
+        return {'success': false, 'message': 'Поддомен уже зарегистриварон.'};
+      } else {
+        return {'success': false, 'message': 'Неизвестная ошибка!'};
+      }
+    } else {
+      return {'success': false, 'message': 'Ошибка создания клиента!'};
+    }
+  }
+
+
+  Future<List<Partner>> getPartners() async {
+  try {
+    final response = await _getRequest('/partners');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> partnersJson = jsonData['result']['data'];
+      return partnersJson
+          .map((orgJson) => Partner.fromJson(orgJson))
+          .toList();
+    } else {
+      throw Exception('Failed to load partners: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load partners: $e');
+  }
+}
+  Future<List<SaleData>> getSales() async {
+  try {
+    final response = await _getRequest('/sale');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> saleJson = jsonData['result']['data'];
+      return saleJson.map((orgJson) => SaleData.fromJson(orgJson)).toList();
+    } else {
+      throw Exception('Failed to load sales: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load sales: $e');
+  }
+}
+
+  Future<List<CountryData>> getCountries() async {
+  try {
+    final response = await _getRequest('/countries');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> countryJson = jsonData['result']['data'];
+      return countryJson.map((orgJson) => CountryData.fromJson(orgJson)).toList();
+    } else {
+      throw Exception('Failed to load countries: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load countries: $e');
   }
 }
 

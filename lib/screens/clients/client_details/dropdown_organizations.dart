@@ -114,14 +114,14 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
     return GestureDetector(
       onTap: () => _showEditOrganizationDialog(organization) ,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
         child: Container(
           decoration: BoxDecoration(
             color: Color(0xffF4F7FD),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 12),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
             child: Row(
               children: [
                 Icon(Icons.business, color: Color(0xff1E2E52), size: 24),

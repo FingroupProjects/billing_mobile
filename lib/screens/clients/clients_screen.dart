@@ -2,6 +2,7 @@ import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
 import 'package:billing_mobile/bloc/clients/clients_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
+import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
 import 'package:billing_mobile/screens/clients/clients_card.dart';
 import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
@@ -25,7 +26,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    // Загружаем клиентов при инициализации
     context.read<ClientBloc>().add(FetchClients());
   }
 
@@ -37,16 +37,14 @@ class _ClientsScreenState extends State<ClientsScreen> {
     super.dispose();
   }
 
-  void _onScroll() {
-    // Реализация бесконечной подгрузки, если нужно
-    // if (_scrollController.position.pixels ==
-    //         _scrollController.position.maxScrollExtent &&
-    //     !(context.read<ClientBloc>().state is ClientLoaded && 
-    //        context.read<ClientBloc>().state.clientData.data.clients.currentPage == 
-    //        context.read<ClientBloc>().state.clientData.data.clients.total)) {
-    //   context.read<ClientBloc>().add(FetchMoreClients());
-    // }
+void _onScroll() {
+  final state = context.read<ClientBloc>().state;
+  if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 &&
+      (state is ClientLoaded && !state.isLoadingMore)) {
+    context.read<ClientBloc>().add(FetchMoreClients());
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +79,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
           },
         ),
       ),
-       body: isClickAvatarIcon
+      body: isClickAvatarIcon
           ? const ProfileScreen()
           : BlocBuilder<ClientBloc, ClientState>(
               builder: (context, state) {
@@ -91,25 +89,34 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   return Center(child: Text('Ошибка: ${state.message}'));
                 } else if (state is ClientLoaded) {
                   return RefreshIndicator(
-                  color: Color(0xff1E2E52),
-                  backgroundColor: Colors.white,
+                    color: const Color(0xff1E2E52),
+                    backgroundColor: Colors.white,
                     onRefresh: () async {
                       context.read<ClientBloc>().add(FetchClients());
                     },
                     child: ListView.builder(
                       controller: _scrollController,
-                      itemCount: state.clientData.data.clients.data.length,
+                      itemCount: state.clientData.data.clients.data.length + (state.isLoadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final client = state.clientData.data.clients.data[index];
-                        return ClientCard(
-                          client: client,
-                          onTap: () {
+                        if (index < state.clientData.data.clients.data.length) {
+                          final client = state.clientData.data.clients.data[index];
+                          return ClientCard(
+                            client: client,
+                            onTap: () {
                               Navigator.push(
-                             context,
-                             MaterialPageRoute(builder: (context) => ClientDetailsScreen(clientId: client.id)),
-                           );
-                          },
-                        );
+                                context,
+                                MaterialPageRoute(builder: (context) => ClientDetailsScreen(clientId: client.id)),
+                              );
+                            },
+                          );
+                        } else {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(color: Color(0xff1E2E52)),
+                            ),
+                          );
+                        }
                       },
                     ),
                   );
@@ -119,13 +126,13 @@ class _ClientsScreenState extends State<ClientsScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // final result = await Navigator.push(
-          //   context,
-          //   MaterialPageRoute(builder: (context) => AddClientScreen()),
-          // );
-          // if (result == true) {
-          //   context.read<ClientBloc>().add(FetchClients());
-          // }
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ClientAddScreen()),
+          );
+          if (result == true) {
+            context.read<ClientBloc>().add(FetchClients());
+          }
         },
         backgroundColor: const Color(0xff1E2E52),
         child: const Icon(Icons.add, color: Colors.white),

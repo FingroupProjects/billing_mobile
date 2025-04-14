@@ -49,6 +49,7 @@ class ClientById {
   final Tariff tariff;
   final BusinessType? businessType;
   final Sale? sale;
+  final int? countryId;
   final List<HistoryEntry> history;
 
   ClientById({
@@ -73,6 +74,7 @@ class ClientById {
     required this.tariff,
     this.businessType,
     this.sale,
+    this.countryId,
     required this.history,
   });
 
@@ -113,6 +115,7 @@ class ClientById {
       sale: json['sale'] != null
           ? Sale.fromJson(json['sale'])
           : null,
+      countryId: json['country_id'],
       history: (json['history'] as List?)
           ?.map((e) => HistoryEntry.fromJson(e))
           .toList() ?? [],
@@ -429,28 +432,28 @@ class Tariff {
   }
 }
 
-class Partner {
-  final int id;
-  final String name;
-  final String email;
-  final String phone;
-  final String address;
+// class Partner {
+//   final int id;
+//   final String name;
+//   final String email;
+//   final String phone;
+//   final String address;
 
-  Partner({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.address,
-  });
+//   Partner({
+//     required this.id,
+//     required this.name,
+//     required this.email,
+//     required this.phone,
+//     required this.address,
+//   });
 
-  factory Partner.fromJson(Map<String, dynamic> json) {
-    return Partner(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'],
-      address: json['address'],
-    );
-  }
-}
+//   factory Partner.fromJson(Map<String, dynamic> json) {
+//     return Partner(
+//       id: json['id'],
+//       name: json['name'],
+//       email: json['email'],
+//       phone: json['phone'],
+//       address: json['address'],
+//     );
+//   }
+// }
