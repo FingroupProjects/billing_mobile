@@ -7,13 +7,29 @@ abstract class OrganizationEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadOrganizationEvent extends OrganizationEvent {
+class FetchOrganizationEvent extends OrganizationEvent {
   final String clientId;
 
-  const LoadOrganizationEvent(this.clientId);
+  const FetchOrganizationEvent(this.clientId);
 
   @override
   List<Object> get props => [clientId];
 }
 
 class ResetOrganizationEvent extends OrganizationEvent {}
+
+class CreateOrganizations extends OrganizationEvent {
+  final String name;
+  final String phone;
+  final String inn;
+  final String businessTypeId;
+  final String address;   
+
+  CreateOrganizations({
+    required this.name,
+    required this.phone,
+    required this.inn,
+    required this.businessTypeId,
+    required this.address,
+  });
+}

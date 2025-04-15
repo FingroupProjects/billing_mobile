@@ -10,22 +10,48 @@ abstract class OrganizationState extends Equatable {
 
 class OrganizationInitialState extends OrganizationState {}
 
-class OrganizationLoadingState extends OrganizationState {}
+class OrganizationLoading extends OrganizationState {}
 
-class OrganizationLoadedState extends OrganizationState {
+class OrganizationLoaded extends OrganizationState {
   final List<Organization> organizations;
 
-  const OrganizationLoadedState(this.organizations);
+  const OrganizationLoaded(this.organizations);
 
   @override
   List<Object> get props => [organizations];
 }
 
-class OrganizationErrorState extends OrganizationState {
+class OrganizationSuccess extends OrganizationState {
   final String message;
 
-  const OrganizationErrorState(this.message);
+  OrganizationSuccess(this.message);
+}
 
-  @override
-  List<Object> get props => [message];
+class OrganizationCreated extends OrganizationState {
+  final String message;
+
+const OrganizationCreated(this.message);
+
+}
+class OrganizationUpdated extends OrganizationState {
+  final String message;
+
+const OrganizationUpdated(this.message);
+
+}
+
+class OrganizationError extends OrganizationState {
+  final String message;
+
+const OrganizationError(this.message);
+}
+class OrganizationCreateError extends OrganizationState {
+  final String message;
+
+const OrganizationCreateError(this.message);
+}
+class OrganizationUpdateError extends OrganizationState {
+  final String message;
+
+const OrganizationUpdateError(this.message);
 }

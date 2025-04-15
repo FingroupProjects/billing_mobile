@@ -1,9 +1,11 @@
 import 'package:billing_mobile/api/api_service.dart';
+import 'package:billing_mobile/bloc/BusinessType/BusinessType_bloc.dart';
 import 'package:billing_mobile/bloc/Country/Country_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/login/login_bloc.dart';
 import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
+import 'package:billing_mobile/bloc/organizationsById/organizationsById_bloc.dart';
 import 'package:billing_mobile/bloc/partners/partners_bloc.dart';
 import 'package:billing_mobile/bloc/sale/sale_bloc.dart';
 import 'package:billing_mobile/home_screen.dart';
@@ -52,9 +54,11 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ClientBloc(apiService: apiService)),
         BlocProvider(create: (context) => ClientByIdBloc(apiService)),
         BlocProvider(create: (context) => OrganizationBloc(apiService: apiService)),
+        BlocProvider(create: (context) => OrganizationByIdBloc(apiService: apiService)),
         BlocProvider(create: (context) => PartnerBloc(apiService: apiService)),
         BlocProvider(create: (context) => SaleBloc(apiService: apiService)),
         BlocProvider(create: (context) => CountryBloc(apiService: apiService)),
+        BlocProvider(create: (context) => BusinessTypeBloc(apiService: apiService)),
       ],
       child: MaterialApp(
         color: Colors.white,

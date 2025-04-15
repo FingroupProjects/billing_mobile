@@ -1,5 +1,8 @@
 import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
 import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
+import 'package:billing_mobile/screens/clients/client_details/organizations_screen/add_organization.dart';
+import 'package:billing_mobile/screens/clients/client_details/organizations_screen/edit_organization.dart';
+import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_details_screen.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +27,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
   @override
   void initState() {
     super.initState();
-    context.read<OrganizationBloc>().add(LoadOrganizationEvent(widget.clientId.toString()));
+    context.read<OrganizationBloc>().add(FetchOrganizationEvent(widget.clientId.toString()));
   }
 
   @override
@@ -37,11 +40,10 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
     return BlocBuilder<OrganizationBloc, OrganizationState>(
       builder: (context, state) {
         List<Organization> organizations = [];
-        
-        if (state is OrganizationLoadingState) {
-        } else if (state is OrganizationLoadedState) {
+        if (state is OrganizationLoading) {
+        } else if (state is OrganizationLoaded) {
           organizations = state.organizations;
-        } else if (state is OrganizationErrorState) {
+        } else if (state is OrganizationError) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
            showCustomSnackBar(
              context: context,
@@ -106,78 +108,70 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
   }
 
   Widget _buildOrganizationItem(Organization organization) {
-    final createdAt = DateFormat('dd.MM.yyyy ')
-        .format(organization.createdAt);
-    // final updatedAt = DateFormat('dd.MM.yyyy HH:mm')
-    //     .format(organization.updatedAt);
-
-    return GestureDetector(
-      onTap: () => _showEditOrganizationDialog(organization) ,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Color(0xffF4F7FD),
-            borderRadius: BorderRadius.circular(16),
+  final createdAt = DateFormat('dd.MM.yyyy').format(organization.createdAt);
+  final isActive = organization.hasAccess == 1;
+  
+  return GestureDetector(
+    onTap: () => _showDetailsOrganizationScreen(),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Color(0xffF4F7FD),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive ? Colors.green : Colors.red,
+            width: 1.5,
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
-            child: Row(
-              children: [
-                Icon(Icons.business, color: Color(0xff1E2E52), size: 24),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        organization.name,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Gilroy',
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xff1E2E52),
-                        ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
+          child: Row(
+            children: [
+              Icon(Icons.business, color: Color(0xff1E2E52), size: 24),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text( organization.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Gilroy',
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xff1E2E52),
                       ),
-                      SizedBox(height: 4),
-                      Text( 'ИНН: ${organization.INN}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Gilroy',
-                          color: Color(0xff1E2E52),
-                        ),
+                    ),
+                    SizedBox(height: 4),
+                    Text( 'ИНН: ${organization.INN}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Gilroy',
+                        color: Color(0xff1E2E52),
                       ),
-                      SizedBox(height: 4),
-                      Text( 'Статус: ${organization.hasAccess == 1 ? 'Активна' : 'Неактивна'}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Gilroy',
-                          color: Color(0xff1E2E52),
-                        ),
+                    ),
+                    SizedBox(height: 4),
+                    Text( 'Создана: $createdAt',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Gilroy',
+                        color: Color(0xff1E2E52),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Создана: $createdAt',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Gilroy',
-                          color: Color(0xff1E2E52),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                  IconButton(
-                    icon: Icon(Icons.delete, color: Color(0xff1E2E52)),
-                    onPressed: () => _showDeleteOrganizationDialog(organization),
-                  ),
-              ],
-            ),
+              ),
+              IconButton(
+                icon: Icon(Icons.delete, color: Color(0xff1E2E52)),
+                onPressed: () => _showDeleteOrganizationDialog(organization),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Row _buildTitleRow(String title) {
     return Row(
@@ -185,7 +179,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontFamily: 'Gilroy',
             fontWeight: FontWeight.w600,
@@ -193,7 +187,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
           ),
         ),
           TextButton(
-            onPressed: _showAddOrganizationDialog,
+            onPressed: _showAddOrganizationScreen,
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -202,7 +196,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Добавить',
               style: TextStyle(
                 fontSize: 16,
@@ -216,23 +210,57 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
     );
   }
 
-  void _showAddOrganizationDialog() {
-    // showModalBottomSheet(
-    //   context: context,
-    //   backgroundColor: Colors.white,
-    //   isScrollControlled: true,
-    //   builder: (BuildContext context) {
-    //     return Padding(
-    //       padding: EdgeInsets.only(
-    //         bottom: MediaQuery.of(context).viewInsets.bottom),
-    //       child: CreateOrganizationDialog(
-    //         clientId: widget.clientId,
-    //         managerId: widget.managerId,
-    //       ),
-    //     );
-    //   },
-    // );
+
+void _showAddOrganizationScreen() async {
+  final result = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (context) => CreateOrganizationScreen(clientId: widget.clientId),
+    ),
+  );
+
+  if (result == true) {
+    context.read<OrganizationBloc>().add(
+      FetchOrganizationEvent(widget.clientId.toString()),
+    );
   }
+}
+
+
+void _showDetailsOrganizationScreen() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => OrganizationDetailsScreen(clientId: widget.clientId),
+    ),
+  );
+}
+// void _showEditOrganizationScreen(Organization organization) {
+//   Navigator.push(
+//     context,
+//     MaterialPageRoute(
+//       builder: (context) => EditOrganizationScreen(clientId: widget.clientId, organization: organization,),
+//     ),
+//   );
+// }
+
+
+  // void _showAddOrganizationDialog() {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: Colors.white,
+  //     isScrollControlled: true,
+  //     builder: (BuildContext context) {
+  //       return Padding(
+  //         padding: EdgeInsets.only(
+  //           bottom: MediaQuery.of(context).viewInsets.bottom),
+  //         child: CreateOrganizationDialog(
+  //           clientId: widget.clientId,
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   void _showEditOrganizationDialog(Organization organization) {
     // Navigator.push(

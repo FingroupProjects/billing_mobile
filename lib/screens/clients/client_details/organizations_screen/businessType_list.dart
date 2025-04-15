@@ -1,65 +1,55 @@
-import 'package:billing_mobile/bloc/sale/sale_event.dart';
-import 'package:billing_mobile/models/sale_model.dart';
+import 'package:billing_mobile/bloc/BusinessType/BusinessType_bloc.dart';
+import 'package:billing_mobile/bloc/businessType/businessType_event.dart';
+import 'package:billing_mobile/bloc/businessType/businessType_state.dart';
+import 'package:billing_mobile/models/businessType_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:billing_mobile/bloc/sale/sale_bloc.dart';
-import 'package:billing_mobile/bloc/sale/sale_state.dart';
 
-class Sale {
+class BusinessType {
   final int id;
   final String name;
-  // final String saleType;
-  // final String amount;
-  // final int active;
-  // final DateTime createdAt;
-  // final DateTime updatedAt;
 
-  Sale({
+  BusinessType({
     required this.id,
     required this.name,
-    // required this.saleType,
-    // required this.amount,
-    // required this.active,
-    // required this.createdAt,
-    // required this.updatedAt,
+
   });
 }
 
-class SaleList extends StatefulWidget {
-  final String? selectedSale;
+class BusinessTypeList extends StatefulWidget {
+  final String? selectedBusinessType;
   final ValueChanged<String?> onChanged;
 
-  SaleList({required this.selectedSale, required this.onChanged});
+  BusinessTypeList({required this.selectedBusinessType, required this.onChanged});
 
   @override
-  _SaleListState createState() => _SaleListState();
+  _BusinessTypeListState createState() => _BusinessTypeListState();
 }
 
-class _SaleListState extends State<SaleList> {
+class _BusinessTypeListState extends State<BusinessTypeList> {
   @override
   void initState() {
     super.initState();
-    context.read<SaleBloc>().add(LoadSaleEvent());
+    context.read<BusinessTypeBloc>().add(LoadBusinessTypeEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SaleBloc, SaleState>(
+    return BlocBuilder<BusinessTypeBloc, BusinessTypeState>(
       builder: (context, state) {
-        List<SaleData> salesList = [];
+        List<BusinessTypeData> BusnessTypeList = [];
         
-        if (state is SaleLoadedState) {
-          salesList = state.sales;
-        } else if (state is SaleErrorState) {
-          return Text('Ошибка загрузки скидок!');
+        if (state is BusinessTypeLoadedState) {
+          BusnessTypeList = state.businessTypes;
+        } else if (state is BusinessTypeErrorState) {
+          return Text('Ошибка загрузки тип бизнеса!');
         }
 
-        List<DropdownMenuItem<String>> dropdownItems = salesList.map<DropdownMenuItem<String>>((SaleData sale) {
+        List<DropdownMenuItem<String>> dropdownItems = BusnessTypeList.map<DropdownMenuItem<String>>((BusinessTypeData BusinessType) {
           return DropdownMenuItem<String>(
-            value: sale.id.toString(),
+            value: BusinessType.id.toString(),
             child: Text(
-              '${sale.name}' ,
-              // '${sale.name} (${sale.saleType == 'procent' ? '${sale.amount}%' : '${sale.amount} сумма'})' ,
+              '${BusinessType.name}' ,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -71,17 +61,11 @@ class _SaleListState extends State<SaleList> {
           );
         }).toList();
 
-        if (salesList.length == 1) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            widget.onChanged(salesList.first.id.toString());
-          });
-        }
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Скидка',
+              'Тип бизнеса',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -92,11 +76,11 @@ class _SaleListState extends State<SaleList> {
             const SizedBox(height: 4),
             Container(
               child: DropdownButtonFormField<String>(
-                value: dropdownItems.any((item) => item.value == widget.selectedSale)
-                    ? widget.selectedSale
+                value: dropdownItems.any((item) => item.value == widget.selectedBusinessType)
+                    ? widget.selectedBusinessType
                     : null,
                 hint: const Text(
-                  'Выберите скидку',
+                  'Выберите тип бизнеса',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -106,12 +90,12 @@ class _SaleListState extends State<SaleList> {
                 ),
                 items: dropdownItems,
                 onChanged: widget.onChanged,
-                // validator: (value) {
-                //   if (value == null) {
-                //     return 'Поле обязательно для заполнения';
-                //   }
-                //   return null;
-                // },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Поле обязательно для заполнения';
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFFF4F7FD),

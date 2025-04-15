@@ -27,7 +27,7 @@ class Organization {
 
   factory Organization.fromJson(Map<String, dynamic> json) {
     return Organization(
-      id: json['id'] ?? 0, // предоставляем значение по умолчанию
+      id: json['id'] ?? 0,
       name: json['name'] ?? '',
       INN: json['INN'] ?? 0,
       phone: json['phone'] ?? '',

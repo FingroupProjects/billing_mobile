@@ -1,20 +1,21 @@
-import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
-import 'package:billing_mobile/bloc/clients/clients_state.dart';
+
+import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
+import 'package:billing_mobile/bloc/organizations/organizations_state.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DeleteClientDialog extends StatelessWidget {
-  final int clientId;
+class DeleteOrganizationDialog extends StatelessWidget {
+  final int organizationId;
 
-  DeleteClientDialog({required this.clientId});
+  DeleteOrganizationDialog({required this.organizationId});
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ClientBloc, ClientState>(
+    return BlocListener<OrganizationBloc, OrganizationState>(
       listener: (context, state) {
-        if (state is ClientError) {
+        if (state is OrganizationError) {
         showCustomSnackBar(
           context: context,
           message: state.message,
@@ -26,7 +27,7 @@ class DeleteClientDialog extends StatelessWidget {
         backgroundColor: Colors.white,
         title: const Center(
           child: Text(
-          'Удалить клиента', 
+          'Удалить организацию?', 
           style: TextStyle(
             fontSize: 20,
             fontFamily: 'Gilroy',
@@ -36,7 +37,7 @@ class DeleteClientDialog extends StatelessWidget {
         ),
       ),
       content: const Text(
-       'Подтвердите удаление клиента', 
+       'Подтвердите удаление организации', 
         style: TextStyle(
           fontSize: 16,
           fontFamily: 'Gilroy',
@@ -63,12 +64,12 @@ class DeleteClientDialog extends StatelessWidget {
               child: CustomButton(
                 buttonText:  'Удалить', 
                 onPressed: () {
-                  // context.read<ClientBloc>().add(DeleteClient(ClientId,localizations)); 
-                  // context.read<ClientBloc>().add(FetchClientStatuses()); 
+                  // context.read<OrganizationBloc>().add(DeleteOrganization(organizationId)); 
+                  // context.read<OrganizationBloc>().add(FetchOrganizationStatuses()); 
 
                  showCustomSnackBar(
                    context: context,
-                   message: 'Клиент успешно удален!',
+                   message: 'Организация успешно удален!',
                    isSuccess: true,
                  );
              

@@ -2,8 +2,9 @@ import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_state.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
-import 'package:billing_mobile/screens/clients/client_delete.dart';
+import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_delete.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_organizations.dart';
+import 'package:billing_mobile/screens/clients/clients_edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -38,15 +39,6 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   if (client.saleId != null) {
     clientSale = sales.firstWhere(
       (sale) => sale.id == client.saleId,
-      orElse: () => Sale(
-        id: 0,
-        name: 'Не найдена',
-        saleType: '',
-        amount: '0',
-        active: 0,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
     );
   }
 
@@ -61,14 +53,13 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       {'label': 'Тариф:', 'value': client.tariff.name},
       {'label': 'Контактное лицо:', 'value': client.contactPerson ?? 'Не указано'},
       {'label': 'Партнер ID:', 'value': client.partnerId?.toString() ?? ''},
+      {'label': 'Страна:', 'value': client.countryId?.toString() ?? ''},
       {
         'label': 'Скидка:', 
         'value': client.saleId != null 
-            ? '${clientSale?.name} (${clientSale?.saleType == 'procent' ? '${clientSale?.amount}%' : '${clientSale?.amount} сумма'})' 
+            ? '${clientSale?.name}' 
             : 'Нет'
       },
-      {'label': 'Страна:', 'value': client.countryId?.toString() ?? ''},
-      {'label': 'Баланс:', 'value': client.balance},
       {
         'label': 'Дата создания:',
         'value': DateFormat('dd.MM.yyyy').format(client.createdAt)
@@ -163,15 +154,15 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
           icon: Image.asset( 'assets/icons/edit.png', width: 24, height: 24 ),
           onPressed: () => _navigateToEditScreen(),
         ),
-        IconButton(
-          icon: Image.asset( 'assets/icons/delete.png', width: 24, height: 24),          
-          onPressed: () {
-           showDialog(
-             context: context,
-             builder: (context) => DeleteClientDialog(clientId: currentClient!.id),
-           );
-         },        
-        ),
+        // IconButton(
+        //   icon: Image.asset( 'assets/icons/delete.png', width: 24, height: 24),          
+        //   onPressed: () {
+        //    showDialog(
+        //      context: context,
+        //      builder: (context) => DeleteClientDialog(clientId: currentClient!.id),
+        //    );
+        //  },        
+        // ),
       ],
     );
   }
@@ -390,25 +381,30 @@ Widget _buildSectionWithTitle({
   void _navigateToEditScreen() {
     if (currentClient == null) return;
 
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => ClientEditScreen(
-    //       clientId: currentClient!.id.toString(),
-    //       name: currentClient!.name,
-    //       phone: currentClient!.phone,
-    //       email: currentClient!.email ?? '',
-    //       subDomain: currentClient!.subDomain,
-    //       contactPerson: currentClient!.contactPerson ?? '',
-    //       tariffId: currentClient!.tariffId,
-    //       isActive: currentClient!.isActive,
-    //     ),
-    //   ),
-    // ).then((shouldRefresh) {
-    //   if (shouldRefresh == true) {
-    //     context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId));
-    //   }
-    // });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClientEditScreen(
+         clientId: currentClient!.id.toString(),
+         fio: currentClient!.name,
+         phone: currentClient!.phone,
+         email: currentClient!.email.toString(),
+         subDomain: currentClient!.subDomain,
+         clientType: currentClient!.clientType,
+         tariffId: currentClient!.tariffId,
+         contactPerson: currentClient!.contactPerson,
+         partnerId: currentClient!.partnerId,
+         countryId: currentClient!.countryId,
+         saleId: currentClient!.saleId,
+         isDemo: currentClient!.isDemo,
+
+        ),
+      ),
+    ).then((shouldRefresh) {
+      if (shouldRefresh == true) {
+        // context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId));
+      }
+    });
   }
 
   void _showDeleteDialog() {

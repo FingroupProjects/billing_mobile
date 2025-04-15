@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:billing_mobile/custom_widget/country_data_list.dart';
 import 'package:billing_mobile/models/Country_model.dart';
+import 'package:billing_mobile/models/businessType_model.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
 import 'package:billing_mobile/models/clients_model.dart';
 import 'package:billing_mobile/models/login_model.dart';
@@ -32,7 +32,6 @@ class ApiService {
     );
   }
 
-// Добавьте эти методы в класс ApiService
 Future<void> _saveToken(String token) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('token', token);
@@ -138,7 +137,6 @@ Future<void> clearToken() async {
 
   //_________________________________ START___API__LOGIN____________________________________________//
 
-  // // Метод для проверки логина и пароля
 Future<LoginResponse> login(LoginModel loginModel) async {
   final response = await _postRequest('/login', loginModel.toJson());
   if (response.statusCode == 200) {
@@ -197,23 +195,6 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
   }
 }
 
-Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
-  try {
-    final response = await _getRequest('/clients/getOrganizations/$clientId');
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      final List<dynamic> organizationsJson = jsonData['result']['data'];
-      return organizationsJson
-          .map((orgJson) => Organization.fromJson(orgJson))
-          .toList();
-    } else {
-      throw Exception('Failed to load organizations: ${response.statusCode}');
-    }
-  } catch (e) {
-    throw Exception('Failed to load organizations: $e');
-  }
-}
-
  Future<Map<String, dynamic>> createClients({
     required String fio,
     required String phone,
@@ -228,8 +209,8 @@ Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
     required bool isDemo,
   }) async {
 
-    final response = await _postRequest(
-        '/clients/store', {
+    final response = await _postRequest( '/clients/store', 
+        {
           'name': fio,
           'phone': phone,
           'email': email,
@@ -243,16 +224,16 @@ Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
           'is_demo': isDemo,
         });
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return {'success': true, 'message': 'Клиент успещно создан!'};
-    } else if (response.statusCode == 422) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'message': 'Клиент успещно создан!'};
+      } else if (response.statusCode == 422) {
         if (response.body.contains('phone')) {
-        return {'success': false, 'message': 'Телефон уже зарегистриварон.'};
+        return {'success': false, 'message': 'Телефон уже зарегистрирован.'};
       }
       if (response.body.contains('email')) {
         return {'success': false, 'message': 'Введите корректный адрес электронной почты.'};
       } else if (response.body.contains('sub_domain')) {
-        return {'success': false, 'message': 'Поддомен уже зарегистриварон.'};
+        return {'success': false, 'message': 'Поддомен уже зарегистрирован.'};
       } else {
         return {'success': false, 'message': 'Неизвестная ошибка!'};
       }
@@ -268,9 +249,7 @@ Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       final List<dynamic> partnersJson = jsonData['result']['data'];
-      return partnersJson
-          .map((orgJson) => Partner.fromJson(orgJson))
-          .toList();
+      return partnersJson.map((orgJson) => Partner.fromJson(orgJson)).toList();
     } else {
       throw Exception('Failed to load partners: ${response.statusCode}');
     }
@@ -308,242 +287,97 @@ Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
   }
 }
 
-  // Future<List<Goods>> getClients({int page = 1, int perPage = 20}) async {
-  //   final String path ='/client?page=$page&per_page=$perPage';
-
-  //   final response = await _getRequest(path);
-
-  //   if (response.statusCode == 200) {
-  //     final Map<String, dynamic> data = json.decode(response.body);
-  //     if (data.containsKey('result') && data['result']['data'] is List) {
-  //       return (data['result']['data'] as List)
-  //           .map((item) => Goods.fromJson(item as Map<String, dynamic>))
-  //           .toList();
-  //     } else {
-  //       throw Exception('Ошибка: Неверный формат данных');
-  //     }
-  //   } else {
-  //     throw Exception('Ошибка загрузки товаров: ${response.statusCode}');
-  //   }
-  // }
-
-  // Future<List<Goods>> getGoodsById(int goodsId) async {
-  //   final organizationId = await getSelectedOrganization();
-  //   final String path = '/good/$goodsId?organization_id=$organizationId';
-
-  //   final response = await _getRequest(path);
-
-  //   if (response.statusCode == 200) {
-  //     final Map<String, dynamic> data = json.decode(response.body);
-  //     if (data.containsKey('result')) {
-  //       return [Goods.fromJson(data['result'] as Map<String, dynamic>)];
-  //     } else {
-  //       throw Exception('Ошибка: Неверный формат данных');
-  //     }
-  //   } else {
-  //     throw Exception(
-  //         'Ошибка загрузки просмотра товаров: ${response.statusCode}');
-  //   }
-  // }
-
-  // Future<List<SubCategoryAttributesData>> getSubCategoryAttributes() async {
-  //   final organizationId = await getSelectedOrganization();
-  //   final String path =
-  //       '/category/get/subcategories?organization_id=$organizationId';
-
-  //   final response = await _getRequest(path);
-
-  //   if (response.statusCode == 200) {
-  //     final Map<String, dynamic> data = json.decode(response.body);
-  //     if (data.containsKey('data')) {
-  //       return (data['data'] as List)
-  //           .map((item) => SubCategoryAttributesData.fromJson(
-  //               item as Map<String, dynamic>))
-  //           .toList();
-  //     } else {
-  //       throw Exception('Ошибка: Неверный формат данных');
-  //     }
-  //   } else {
-  //     throw Exception(
-  //         'Ошибка загрузки просмотра товаров: ${response.statusCode}');
-  //   }
-  // }
-
-  // Future<Map<String, dynamic>> createGoods({
-  //   required String name,
-  //   required int parentId,
-  //   required String description,
-  //   required int quantity,
-  //   required List<String> attributeNames,
-  //   List<File>? images,
-  //   required bool isActive,
-  //   double? discountPrice, // Добавлено
-  // }) async {
-  //   try {
-  //     final token = await getToken();
-  //     final organizationId = await getSelectedOrganization();
-  //     var uri = Uri.parse(
-  //         '${baseUrl}/good${organizationId != null ? '?organization_id=$organizationId' : ''}');
-  //     var request = http.MultipartRequest('POST', uri);
-  //     request.headers.addAll({
-  //       'Authorization': 'Bearer $token',
-  //       'Accept': 'application/json',
-  //       'Device': 'mobile'
-  //     });
-
-  //     request.fields['name'] = name;
-  //     request.fields['category_id'] = parentId.toString();
-  //     request.fields['description'] = description;
-  //     request.fields['quantity'] = quantity.toString();
-  //     request.fields['is_active'] = isActive.toString();
-  //     if (discountPrice != null) {
-  //       // Добавлено
-  //       request.fields['discount_price'] = discountPrice.toString();
-  //     }
-
-  //     for (int i = 0; i < attributeNames.length; i++) {
-  //       request.fields['attributes[$i][attribute_id]'] = (i + 1).toString();
-  //       request.fields['attributes[$i][value]'] = attributeNames[i];
-  //     }
-
-  //     if (images != null && images.isNotEmpty) {
-  //       for (var image in images) {
-  //         final imageFile =
-  //             await http.MultipartFile.fromPath('files[]', image.path);
-  //         request.files.add(imageFile);
-  //       }
-  //     }
-
-  //     final streamedResponse = await request.send();
-  //     final response = await http.Response.fromStream(streamedResponse);
-  //     final responseBody = json.decode(response.body);
-
-  //     if (response.statusCode == 200 || response.statusCode == 201) {
-  //       return {
-  //         'success': true,
-  //         'message': 'goods_created_successfully',
-  //         'data': CategoryData.fromJson(responseBody),
-  //       };
-  //     } else {
-  //       return {
-  //         'success': false,
-  //         'message': responseBody['message'] ?? 'Failed to create goods',
-  //         'error': responseBody,
-  //       };
-  //     }
-  //   } catch (e) {
-  //     return {
-  //       'success': false,
-  //       'message': 'An error occurred: $e',
-  //     };
-  //   }
-  // }
-
-  // Future<Map<String, dynamic>> updateGoods({
-  //   required int goodId,
-  //   required String name,
-  //   required int parentId,
-  //   required String description,
-  //   required int quantity,
-  //   required List<String> attributeNames,
-  //   List<File>? images,
-  //   required bool isActive,
-  //   double? discountPrice, // Добавлено
-  // }) async {
-  //   try {
-  //     final token = await getToken();
-  //     final organizationId = await getSelectedOrganization();
-  //     var uri = Uri.parse(
-  //         '$baseUrl/good/$goodId${organizationId != null ? '?organization_id=$organizationId' : ''}');
-  //     var request = http.MultipartRequest('POST', uri);
-  //     request.headers.addAll({
-  //       'Authorization': 'Bearer $token',
-  //       'Accept': 'application/json',
-  //       'Device': 'mobile'
-  //     });
-
-  //     request.fields['name'] = name;
-  //     request.fields['category_id'] = parentId.toString();
-  //     request.fields['description'] = description;
-  //     request.fields['quantity'] = quantity.toString();
-  //     request.fields['is_active'] = isActive.toString();
-  //     if (discountPrice != null) {
-  //       // Добавлено
-  //       request.fields['discount_price'] = discountPrice.toString();
-  //     }
-
-  //     for (int i = 0; i < attributeNames.length; i++) {
-  //       request.fields['attributes[$i][attribute_id]'] = (i + 1).toString();
-  //       request.fields['attributes[$i][value]'] = attributeNames[i];
-  //     }
-
-  //     if (images != null && images.isNotEmpty) {
-  //       for (var image in images) {
-  //         final imageFile =
-  //             await http.MultipartFile.fromPath('files[]', image.path);
-  //         request.files.add(imageFile);
-  //       }
-  //     }
-
-  //     final streamedResponse = await request.send();
-  //     final response = await http.Response.fromStream(streamedResponse);
-  //     final responseBody = json.decode(response.body);
-
-  //     if (response.statusCode == 200 || response.statusCode == 201) {
-  //       return {
-  //         'success': true,
-  //         'message': 'goods_updated_successfully',
-  //         'data': responseBody,
-  //       };
-  //     } else {
-  //       return {
-  //         'success': false,
-  //         'message': responseBody['message'] ?? 'Failed to update goods',
-  //         'error': responseBody,
-  //       };
-  //     }
-  //   } catch (e) {
-  //     return {
-  //       'success': false,
-  //       'message': 'An error occurred: $e',
-  //     };
-  //   }
-  // }
-
-  // Future<bool> deleteGoods(int goodId, {int? organizationId}) async {
-  //   try {
-  //     final token = await getToken();
-  //     if (token == null) throw Exception('Токен не найден');
-
-  //     final orgId = await getSelectedOrganization();
-  //     final effectiveOrgId = organizationId ??
-  //         orgId; // Используем переданный organizationId или из getSelectedOrganization
-  //     var uri = Uri.parse(
-  //       '$baseUrl/good/$goodId${effectiveOrgId != null ? '?organization_id=$effectiveOrgId' : ''}',
-  //     );
-
-  //     final response = await http.delete(
-  //       uri,
-  //       headers: {
-  //         'Authorization': 'Bearer $token',
-  //         'Accept': 'application/json',
-  //         'Device': 'mobile',
-  //       },
-  //     );
-
-  //     if (response.statusCode == 200 || response.statusCode == 204) {
-  //       return true;
-  //     } else {
-  //       final jsonResponse = jsonDecode(response.body);
-  //       throw Exception(
-  //           jsonResponse['message'] ?? 'Ошибка при удалении товара');
-  //     }
-  //   } catch (e) {
-  //     print('Ошибка удаления товара: $e');
-  //     return false;
-  //   }
-  // }
-
   //_________________________________ END____API_SCREEN__CLIENTS____________________________________________//
+
+
+  
+  //_________________________________ START____API_SCREEN__ORGANIZATIONS____________________________________________//
+
+  Future<List<BusinessTypeData>> getBusinessType() async {
+  try {
+    final response = await _getRequest('/businessType');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> businessTypeJson = jsonData['result']['data'];
+      return businessTypeJson.map((orgJson) => BusinessTypeData.fromJson(orgJson)).toList();
+    } else {
+      throw Exception('Failed to load businessType: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load businessType: $e');
+  }
+}
+
+
+Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
+  try {
+    final response = await _getRequest('/clients/getOrganizations/$clientId');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> organizationsJson = jsonData['result']['data'];
+      return organizationsJson.map((orgJson) => Organization.fromJson(orgJson)).toList();
+    } else {
+      throw Exception('Failed to load organizations: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load organizations: $e');
+  }
+}
+
+Future<List<Organization>> getOrganizationsById(String clientId) async {
+  try {
+    final response = await _getRequest('/organizations/$clientId');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> organizationsJson = jsonData['result']['data'];
+      return organizationsJson.map((orgJson) => Organization.fromJson(orgJson)).toList();
+    } else {
+      throw Exception('Failed to load organizationsById: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load organizationsById: $e');
+  }
+}
+
+
+Future<Map<String, dynamic>> createOrganizations({
+  required String name,
+  required String phone,
+  required String inn,
+  required String businessTypeId,
+  required String address,
+}) async {
+  final response = await _postRequest('/organizations/store',
+    {
+      'name': name,
+      'phone': phone,
+      'INN': inn,
+      'business_type_id': businessTypeId,
+      'address': address,
+    },
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    return {'success': true, 'message': 'Организация успешно создана!'};
+  } else if (response.statusCode == 422) {
+    if (response.body.contains('phone')) {
+      return {'success': false, 'message': 'Телефон уже зарегистрирован.'};
+    }
+    if (response.body.contains('INN')) {
+      return {'success': false, 'message': 'ИНН уже зарегистрирован.'};
+    }
+    return {'success': false, 'message': 'Ошибка валидации. Проверьте введённые данные.'};
+  } else if (response.statusCode >= 500) {
+    return {'success': false, 'message': 'Ошибка сервера. Попробуйте позже.'};
+  } else {
+    return {
+      'success': false,
+      'message': 'Ошибка создания организации! Код: ${response.statusCode}'
+    };
+  }
+}
+
+
+  //_________________________________ END____API_SCREEN__ORGANIZATIONS____________________________________________//
 
 }
