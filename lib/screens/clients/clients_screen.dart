@@ -52,7 +52,7 @@ void _onScroll() {
       appBar: AppBar(
         forceMaterialTransparency: true,
         title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Клиент',
+          title: isClickAvatarIcon ? 'Настройка' : 'Клиенты',
           onClickProfileAvatar: () {
             setState(() {
               isClickAvatarIcon = !isClickAvatarIcon;

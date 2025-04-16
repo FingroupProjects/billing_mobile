@@ -26,6 +26,7 @@ class ClientByIdBloc extends Bloc<ClientByIdEvent, ClientByIdState> {
           sales: response.sales,
           tariffs: response.tariffs,
           packs: response.packs,
+          expirationDate: response.expirationDate,
         ));
       } catch (e) {
         emit(ClientByIdError('Не удалось загрузить данные клиента: ${e.toString()}'));

@@ -7,6 +7,7 @@ import 'package:billing_mobile/models/login_model.dart';
 import 'package:billing_mobile/models/organizations_model.dart';
 import 'package:billing_mobile/models/partner_model.dart';
 import 'package:billing_mobile/models/sale_model.dart';
+import 'package:billing_mobile/models/transactions_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -324,13 +325,16 @@ Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
   }
 }
 
-Future<List<Organization>> getOrganizationsById(String clientId) async {
+Future<List<Organization>> getOrganizationsById(String organizationId) async {
   try {
-    final response = await _getRequest('/organizations/$clientId');
+    final response = await _getRequest('/organizations/$organizationId');
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      final List<dynamic> organizationsJson = jsonData['result']['data'];
-      return organizationsJson.map((orgJson) => Organization.fromJson(orgJson)).toList();
+      if (jsonData['organization'] != null) {
+        return [Organization.fromJson(jsonData['organization'])];
+      } else {
+        return []; 
+      }
     } else {
       throw Exception('Failed to load organizationsById: ${response.statusCode}');
     }
@@ -379,5 +383,45 @@ Future<Map<String, dynamic>> createOrganizations({
 
 
   //_________________________________ END____API_SCREEN__ORGANIZATIONS____________________________________________//
+
+
+  //_________________________________ START____API_SCREEN__TRANSACTION____________________________________________//
+
+
+  Future<List<Transaction>> getClientByIdTransactions(String clientId) async {
+  try {
+    final response = await _getRequest('/clients/getTransactions/$clientId');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> transactionsJson = jsonData['result']['data'];
+      return transactionsJson.map((trnsJson) => Transaction.fromJson(trnsJson)).toList();
+    } else {
+      throw Exception('Failed to load transactions: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load transactions: $e');
+  }
+}
+
+Future<List<Transaction>> getTransactionsById(String transactionId) async {
+  try {
+    final response = await _getRequest('/transactions/$transactionId');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      if (jsonData['transaction'] != null) {
+        return [Transaction.fromJson(jsonData['transaction'])];
+      } else {
+        return []; 
+      }
+    } else {
+      throw Exception('Failed to load TransactionById: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Failed to load TransactionById: $e');
+  }
+}
+
+  //_________________________________ END____API_SCREEN__TRANSACTION____________________________________________//
+
 
 }

@@ -1,10 +1,10 @@
-// clientsById_model.dart
 class ClientByIdResponse {
   final List<BusinessType> businessTypes;
   final List<Sale> sales;
   final List<Tariff> tariffs;
   final List<Pack> packs;
   final ClientById client;
+  final String expirationDate;
 
   ClientByIdResponse({
     required this.businessTypes,
@@ -12,6 +12,7 @@ class ClientByIdResponse {
     required this.tariffs,
     required this.packs,
     required this.client,
+    required this.expirationDate,
   });
 
   factory ClientByIdResponse.fromJson(Map<String, dynamic> json) {
@@ -23,6 +24,7 @@ class ClientByIdResponse {
       tariffs: (json['tariffs'] as List).map((e) => Tariff.fromJson(e)).toList(),
       packs: (json['packs'] as List).map((e) => Pack.fromJson(e)).toList(),
       client: ClientById.fromJson(json['client']),
+      expirationDate: json['expirationDate'],
     );
   }
 }
@@ -123,74 +125,74 @@ class ClientById {
   }
 }
 
-class TransactionList {
-  final int currentPage;
-  final List<Transaction> data;
-  final int total;
+// class TransactionList {
+//   final int currentPage;
+//   final List<Transaction> data;
+//   final int total;
 
-  TransactionList({
-    required this.currentPage,
-    required this.data,
-    required this.total,
-  });
+//   TransactionList({
+//     required this.currentPage,
+//     required this.data,
+//     required this.total,
+//   });
 
-  factory TransactionList.fromJson(Map<String, dynamic> json) {
-    return TransactionList(
-      currentPage: json['current_page'],
-      data: (json['data'] as List)
-          .map((e) => Transaction.fromJson(e))
-          .toList(),
-      total: json['total'],
-    );
-  }
-}
+//   factory TransactionList.fromJson(Map<String, dynamic> json) {
+//     return TransactionList(
+//       currentPage: json['current_page'],
+//       data: (json['data'] as List)
+//           .map((e) => Transaction.fromJson(e))
+//           .toList(),
+//       total: json['total'],
+//     );
+//   }
+// }
 
-class Transaction {
-  final int id;
-  final int clientId;
-  final int? tariffId;
-  final int? saleId;
-  final String sum;
-  final String type;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final int? organizationId;
-  final Tariff? tariff;
-  final ClientById client;
-  final Sale? sale;
+// class Transaction {
+//   final int id;
+//   final int clientId;
+//   final int? tariffId;
+//   final int? saleId;
+//   final String sum;
+//   final String type;
+//   final DateTime createdAt;
+//   final DateTime updatedAt;
+//   final int? organizationId;
+//   final Tariff? tariff;
+//   final ClientById client;
+//   final Sale? sale;
 
-  Transaction({
-    required this.id,
-    required this.clientId,
-    this.tariffId,
-    this.saleId,
-    required this.sum,
-    required this.type,
-    required this.createdAt,
-    required this.updatedAt,
-    this.organizationId,
-    this.tariff,
-    required this.client,
-    this.sale,
-  });
+//   Transaction({
+//     required this.id,
+//     required this.clientId,
+//     this.tariffId,
+//     this.saleId,
+//     required this.sum,
+//     required this.type,
+//     required this.createdAt,
+//     required this.updatedAt,
+//     this.organizationId,
+//     this.tariff,
+//     required this.client,
+//     this.sale,
+//   });
 
-  factory Transaction.fromJson(Map<String, dynamic> json) {
-    return Transaction(
-      id: json['id'],
-      clientId: json['client_id'],
-      tariffId: json['tariff_id'],
-      saleId: json['sale_id'],
-      sum: json['sum'],
-      type: json['type'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      organizationId: json['organization_id'],
-      tariff: json['tariff'] != null ? Tariff.fromJson(json['tariff']) : null,
-      client: ClientById.fromJson(json['client']),
-      sale: json['sale'] != null ? Sale.fromJson(json['sale']) : null,
-    );
-  }
-}
+//   factory Transaction.fromJson(Map<String, dynamic> json) {
+//     return Transaction(
+//       id: json['id'],
+//       clientId: json['client_id'],
+//       tariffId: json['tariff_id'],
+//       saleId: json['sale_id'],
+//       sum: json['sum'],
+//       type: json['type'],
+//       createdAt: DateTime.parse(json['created_at']),
+//       updatedAt: DateTime.parse(json['updated_at']),
+//       organizationId: json['organization_id'],
+//       tariff: json['tariff'] != null ? Tariff.fromJson(json['tariff']) : null,
+//       client: ClientById.fromJson(json['client']),
+//       sale: json['sale'] != null ? Sale.fromJson(json['sale']) : null,
+//     );
+//   }
+// }
 
 class BusinessType {
   final int id;

@@ -13,6 +13,7 @@ class ClientByIdLoaded extends ClientByIdState {
   final List<Sale> sales;
   final List<Tariff> tariffs;
   final List<Pack> packs;
+  final String expirationDate;
 
   ClientByIdLoaded({
     required this.client,
@@ -20,6 +21,7 @@ class ClientByIdLoaded extends ClientByIdState {
     required this.sales,
     required this.tariffs,
     required this.packs,
+    required this.expirationDate,
   });
 }
 

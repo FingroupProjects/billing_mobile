@@ -1,60 +1,60 @@
-import 'package:billing_mobile/bloc/organizationsById/organizationsById_bloc.dart';
-import 'package:billing_mobile/bloc/organizationsById/organizationsById_event.dart';
-import 'package:billing_mobile/bloc/organizationsById/organizationsById_state.dart';
+import 'package:billing_mobile/bloc/transactionsById/transactionsById_bloc.dart';
+import 'package:billing_mobile/bloc/transactionsById/transactionsById_event.dart';
+import 'package:billing_mobile/bloc/transactionsById/transactionsById_state.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
-import 'package:billing_mobile/models/organizations_model.dart';
+import 'package:billing_mobile/models/transactions_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class OrganizationDetailsScreen extends StatefulWidget {
-  final int organizationId;
+class TransactionDetailsScreen extends StatefulWidget {
+  final int transactionId;
 
-  const OrganizationDetailsScreen({
-    required this.organizationId,
+  const TransactionDetailsScreen({
+    required this.transactionId,
     Key? key,
   }) : super(key: key);
 
   @override
-  _OrganizationDetailsScreenState createState() => _OrganizationDetailsScreenState();
+  _TransactionDetailsScreenState createState() => _TransactionDetailsScreenState();
 }
 
-class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
+class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
   List<Map<String, String>> details = [];
 
   @override
   void initState() {
     super.initState();
-    context.read<OrganizationByIdBloc>().add(FetchOrganizationByIdEvent(widget.organizationId.toString()));
+    context.read<TransactionByIdBloc>().add(FetchTransactionByIdEvent(widget.transactionId.toString()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(context, 'Просмотр организации'),
+      appBar: _buildAppBar(context, 'Просмотр транзакции'),
       backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: BlocConsumer<OrganizationByIdBloc, OrganizationByIdState>(
+        child: BlocConsumer<TransactionByIdBloc, TransactionByIdState>(
           listener: (context, state) {
-            if (state is OrganizationByIdLoaded) {
-              _updateDetails(state.organizations);
-            } else if (state is OrganizationByIdError) {
+            if (state is TransactionByIdLoaded) {
+              _updateDetails(state.transactions);
+            } else if (state is TransactionByIdError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
               );
             }
           },
           builder: (context, state) {
-            if (state is OrganizationByIdLoading) {
+            if (state is TransactionByIdLoading) {
               return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
-            } else if (state is OrganizationByIdLoaded && details.isNotEmpty) {
+            } else if (state is TransactionByIdLoaded && details.isNotEmpty) {
               return ListView(
                 children: [
                   _buildDetailsList(),
                 ],
               );
-            } else if (state is OrganizationByIdError) {
+            } else if (state is TransactionByIdError) {
               return Center(child: Text(state.message));
             }
             return const Center(child: Text('Нет данных для отображения'));
@@ -64,20 +64,13 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
     );
   }
 
-  void _updateDetails(List<Organization> organizations) {
-    if (organizations.isNotEmpty) {
-      final org = organizations.first;
+  void _updateDetails(List<Transaction> trasnsactions) {
+    if (trasnsactions.isNotEmpty) {
+      final trn = trasnsactions.first;
       setState(() {
         details = [
-          {'label': 'Название:', 'value': org.name},
-          {'label': 'ИНН:', 'value': org.INN.toString()},
-          {'label': 'Телефон:', 'value': org.phone},
-          {'label': 'Адрес:', 'value': org.address},
-          {'label': 'Доступ:', 'value': org.hasAccess == 1 ? 'Есть' : 'Нет'},
-          {'label': 'Создано:', 'value': DateFormat('dd.MM.yyyy').format(org.createdAt)},
-          {'label': 'Обновлено:', 'value': DateFormat('dd.MM.yyyy').format(org.updatedAt)},
-          {'label': 'Тип бизнеса:', 'value': org.businessTypeName.toString()},
-          {'label': 'Причина отказа:', 'value': org.rejectCause ?? '' },
+          {'label': 'Создано:', 'value': DateFormat('dd.MM.yyyy').format(trn.createdAt)},
+          {'label': 'Обновлено:', 'value': DateFormat('dd.MM.yyyy').format(trn.updatedAt)},
         ];
       });
     }

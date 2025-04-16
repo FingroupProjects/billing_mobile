@@ -63,19 +63,23 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildTitleRow('Организации'),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         if (organizations.isEmpty)
           _buildEmptyState()
         else
-          Container(
-            height: 350,
-            child: ListView.builder(
-              itemCount: organizations.length,
-              itemBuilder: (context, index) {
-                return _buildOrganizationItem(organizations[index]);
-              },
-            ),
+         ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxHeight: 300, 
+            minHeight: 0,   
           ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: organizations.length,
+            itemBuilder: (context, index) {
+              return _buildOrganizationItem(organizations[index]);
+            },
+          ),
+        )
       ],
     );
   }
@@ -112,7 +116,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
   final isActive = organization.hasAccess == 1;
   
   return GestureDetector(
-    onTap: () => _showDetailsOrganizationScreen(),
+    onTap: () => _showDetailsOrganizationScreen(organization),
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
       child: Container(
@@ -143,7 +147,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
                       ),
                     ),
                     SizedBox(height: 4),
-                    Text( 'ИНН: ${organization.INN}',
+                    Text( 'Телефон: ${organization.phone}',
                       style: const TextStyle(
                         fontSize: 14,
                         fontFamily: 'Gilroy',
@@ -161,10 +165,10 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
                   ],
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.delete, color: Color(0xff1E2E52)),
-                onPressed: () => _showDeleteOrganizationDialog(organization),
-              ),
+              // IconButton(
+              //   icon: Icon(Icons.delete, color: Color(0xff1E2E52)),
+              //   onPressed: () => _showDeleteOrganizationDialog(organization),
+              // ),
             ],
           ),
         ),
@@ -186,26 +190,26 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
             color: Color(0xff1E2E52),
           ),
         ),
-          TextButton(
-            onPressed: _showAddOrganizationScreen,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              backgroundColor: Color(0xff1E2E52),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Добавить',
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Gilroy',
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ),
+          // TextButton(
+          //   onPressed: _showAddOrganizationScreen,
+          //   style: TextButton.styleFrom(
+          //     foregroundColor: Colors.white,
+          //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          //     backgroundColor: Color(0xff1E2E52),
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(8),
+          //     ),
+          //   ),
+          //   child: const Text(
+          //     'Добавить',
+          //     style: TextStyle(
+          //       fontSize: 16,
+          //       fontFamily: 'Gilroy',
+          //       fontWeight: FontWeight.w500,
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          // ),
       ],
     );
   }
@@ -227,41 +231,16 @@ void _showAddOrganizationScreen() async {
 }
 
 
-void _showDetailsOrganizationScreen() {
+void _showDetailsOrganizationScreen(Organization organization) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => OrganizationDetailsScreen(clientId: widget.clientId),
+      builder: (context) => OrganizationDetailsScreen(
+        organizationId: organization.id, 
+      ),
     ),
   );
 }
-// void _showEditOrganizationScreen(Organization organization) {
-//   Navigator.push(
-//     context,
-//     MaterialPageRoute(
-//       builder: (context) => EditOrganizationScreen(clientId: widget.clientId, organization: organization,),
-//     ),
-//   );
-// }
-
-
-  // void _showAddOrganizationDialog() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: Colors.white,
-  //     isScrollControlled: true,
-  //     builder: (BuildContext context) {
-  //       return Padding(
-  //         padding: EdgeInsets.only(
-  //           bottom: MediaQuery.of(context).viewInsets.bottom),
-  //         child: CreateOrganizationDialog(
-  //           clientId: widget.clientId,
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void _showEditOrganizationDialog(Organization organization) {
     // Navigator.push(
     //   context,

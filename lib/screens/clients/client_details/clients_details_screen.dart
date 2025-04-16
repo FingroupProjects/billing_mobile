@@ -2,6 +2,7 @@ import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_state.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
+import 'package:billing_mobile/screens/clients/client_details/dropdown_transactions.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_delete.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_organizations.dart';
 import 'package:billing_mobile/screens/clients/clients_edit_screen.dart';
@@ -33,7 +34,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
     context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
   }
 
-  void _updateDetails(ClientById client, List<Sale> sales) {
+  void _updateDetails(ClientById client, List<Sale> sales, String expirationDate) {
 
   Sale? clientSale;
   if (client.saleId != null) {
@@ -42,32 +43,31 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
     );
   }
 
+    String formattedExpirationDate = '';
+  if (expirationDate.isNotEmpty) {
+    try {
+      final parsedDate = DateTime.parse(expirationDate);
+      formattedExpirationDate = DateFormat('dd.MM.yyyy').format(parsedDate);
+    } catch (e) {
+      formattedExpirationDate = 'Неверный формат даты';
+    }
+  }
+
   setState(() {
     currentClient = client;
     details = [
       {'label': 'ФИО:', 'value': client.name},
       {'label': 'Телефон:', 'value': client.phone},
-      {'label': 'Почта:', 'value': client.email ?? 'Не указан'},
+      {'label': 'Почта:', 'value': client.email ?? ''},
       {'label': 'Поддомен:', 'value': client.subDomain},
       {'label': 'Тип клиента:', 'value': client.clientType},
       {'label': 'Тариф:', 'value': client.tariff.name},
-      {'label': 'Контактное лицо:', 'value': client.contactPerson ?? 'Не указано'},
+      {'label': 'Контактное лицо:', 'value': client.contactPerson ?? ''},
       {'label': 'Партнер ID:', 'value': client.partnerId?.toString() ?? ''},
       {'label': 'Страна:', 'value': client.countryId?.toString() ?? ''},
-      {
-        'label': 'Скидка:', 
-        'value': client.saleId != null 
-            ? '${clientSale?.name}' 
-            : 'Нет'
-      },
-      {
-        'label': 'Дата создания:',
-        'value': DateFormat('dd.MM.yyyy').format(client.createdAt)
-      },
-      {
-        'label': 'Дата окончания доступа:',
-        'value': DateFormat('dd.MM.yyyy').format(client.updatedAt)
-      },
+      {'label': 'Скидка:', 'value': client.saleId != null  ? '${clientSale?.name}' : '' },
+      {'label': 'Дата создания:', 'value': DateFormat('dd.MM.yyyy').format(client.createdAt)},
+      {'label': 'Дата окончания доступа:', 'value': formattedExpirationDate },
     ];
   });
 }
@@ -80,7 +80,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       body: BlocListener<ClientByIdBloc, ClientByIdState>(
         listener: (context, state) {  
           if (state is ClientByIdLoaded) {
-         _updateDetails(state.client, state.sales); 
+         _updateDetails(state.client, state.sales,state.expirationDate); 
           } else if (state is ClientByIdError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -103,8 +103,10 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
                     _buildDetailsList(),
                     const SizedBox(height: 8),
                   OrganizationsWidget( clientId: widget.clientId),
+                    const SizedBox(height: 8),
+                  TransactionsWidget( clientId: widget.clientId),
                     // if (currentClient?.history.isNotEmpty ?? false)
-                    //   _buildHistorySection(),
+                      // _buildHistorySection(),
                   ],
                 ),
               );
@@ -150,10 +152,10 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
         ),
       ),
       actions: [
-        IconButton(
-          icon: Image.asset( 'assets/icons/edit.png', width: 24, height: 24 ),
-          onPressed: () => _navigateToEditScreen(),
-        ),
+        // IconButton(
+        //   icon: Image.asset( 'assets/icons/edit.png', width: 24, height: 24 ),
+        //   onPressed: () => _navigateToEditScreen(),
+        // ),
         // IconButton(
         //   icon: Image.asset( 'assets/icons/delete.png', width: 24, height: 24),          
         //   onPressed: () {

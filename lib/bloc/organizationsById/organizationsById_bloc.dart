@@ -22,8 +22,15 @@ class OrganizationByIdBloc extends Bloc<OrganizationByIdEvent, OrganizationByIdS
   }
 
 Future<void> _fetchOrganizationById( FetchOrganizationByIdEvent event, Emitter<OrganizationByIdState> emit ) async { emit(OrganizationByIdLoading());
+ 
+  final hasConnection = await _checkInternetConnection();
+    if (!hasConnection) {
+      emit(OrganizationByIdError('Нет интернет соединения!'));
+      return;
+    }
+
   try {
-    final organizations = await apiService.getOrganizationsById(event.clientId);
+    final organizations = await apiService.getOrganizationsById(event.organizationId);
     if (organizations.isEmpty) {
       // emit(OrganizationError('No organizations found'));
     } else {

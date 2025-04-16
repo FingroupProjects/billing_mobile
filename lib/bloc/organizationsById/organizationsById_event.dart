@@ -8,11 +8,11 @@ abstract class OrganizationByIdEvent extends Equatable {
 }
 
 class FetchOrganizationByIdEvent extends OrganizationByIdEvent {
-  final String clientId;
+  final String organizationId;
 
-  const FetchOrganizationByIdEvent(this.clientId);
+  const FetchOrganizationByIdEvent(this.organizationId);
 
   @override
-  List<Object> get props => [clientId];
+  List<Object> get props => [organizationId];
 }
 

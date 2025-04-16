@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     widgets.add(ClientsScreen());
     titleKeys.add('Аппбар клиент');
-    navBarTitleKeys.add('Клиентт');
+    navBarTitleKeys.add('Клиенты');
     activeIcons.add('assets/icons/MyNavBar/clients_ON.png');
     inactiveIcons.add('assets/icons/MyNavBar/clients_OFF.png');
 

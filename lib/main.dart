@@ -8,6 +8,8 @@ import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
 import 'package:billing_mobile/bloc/organizationsById/organizationsById_bloc.dart';
 import 'package:billing_mobile/bloc/partners/partners_bloc.dart';
 import 'package:billing_mobile/bloc/sale/sale_bloc.dart';
+import 'package:billing_mobile/bloc/transactions/transactions_bloc.dart';
+import 'package:billing_mobile/bloc/transactionsById/transactionsById_bloc.dart';
 import 'package:billing_mobile/home_screen.dart';
 import 'package:billing_mobile/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +61,10 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => SaleBloc(apiService: apiService)),
         BlocProvider(create: (context) => CountryBloc(apiService: apiService)),
         BlocProvider(create: (context) => BusinessTypeBloc(apiService: apiService)),
+        BlocProvider(create: (context) => TransactionBloc(apiService: apiService)),
+        BlocProvider(create: (context) => TransactionByIdBloc(apiService: apiService)),
+
+
       ],
       child: MaterialApp(
         color: Colors.white,
