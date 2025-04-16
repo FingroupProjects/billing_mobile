@@ -34,7 +34,7 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
       appBar: _buildAppBar(context, 'Просмотр организации'),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: BlocConsumer<OrganizationByIdBloc, OrganizationByIdState>(
           listener: (context, state) {
             if (state is OrganizationByIdLoaded) {
@@ -126,7 +126,7 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
       itemCount: details.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 2),
           child: _buildDetailItem(
             details[index]['label']!,
             details[index]['value']!,
@@ -145,14 +145,14 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
             _buildLabel(label),
             const SizedBox(width: 8),
             Expanded(
-              child: label == 'Адрес'
+              child: label == 'Адрес:'
                   ? GestureDetector(
                       onTap: () {
-                        _showFullTextDialog('Адрес', value);
+                        _showFullTextDialog('Адрес:', value);
                       },
-                      child: _buildValue(value, label, maxLines: 2),
+                      child: _buildValue(value, label, maxLines: 1),
                     )
-                  : _buildValue(value, label, maxLines: 2),
+                  : _buildValue(value, label, maxLines: 1),
             ),
           ],
         );
@@ -181,7 +181,7 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
         fontFamily: 'Gilroy',
         fontWeight: FontWeight.w500,
         color: const Color(0xFF1E2E52),
-        decoration: label == 'Адрес' ? TextDecoration.underline : TextDecoration.none,
+        decoration: label == 'Адрес:' ? TextDecoration.underline : TextDecoration.none,
       ),
       maxLines: maxLines,
       overflow: maxLines != null ? TextOverflow.ellipsis : TextOverflow.visible,

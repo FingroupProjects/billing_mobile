@@ -190,26 +190,26 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
             color: Color(0xff1E2E52),
           ),
         ),
-          // TextButton(
-          //   onPressed: _showAddOrganizationScreen,
-          //   style: TextButton.styleFrom(
-          //     foregroundColor: Colors.white,
-          //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          //     backgroundColor: Color(0xff1E2E52),
-          //     shape: RoundedRectangleBorder(
-          //       borderRadius: BorderRadius.circular(8),
-          //     ),
-          //   ),
-          //   child: const Text(
-          //     'Добавить',
-          //     style: TextStyle(
-          //       fontSize: 16,
-          //       fontFamily: 'Gilroy',
-          //       fontWeight: FontWeight.w500,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          // ),
+          TextButton(
+            onPressed: _showAddOrganizationScreen,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              backgroundColor: Color(0xff1E2E52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Добавить',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Gilroy',
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ),
       ],
     );
   }

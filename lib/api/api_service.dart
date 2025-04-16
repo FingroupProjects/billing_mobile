@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:billing_mobile/models/Country_model.dart';
 import 'package:billing_mobile/models/businessType_model.dart';
+import 'package:billing_mobile/models/client_history_model.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
 import 'package:billing_mobile/models/clients_model.dart';
 import 'package:billing_mobile/models/login_model.dart';
@@ -287,6 +288,24 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
     throw Exception('Failed to load countries: $e');
   }
 }
+
+Future<List<History>> getClientHistory(int clientId) async {
+    try {
+      final response = await _getRequest( '/clients/getHistory/$clientId');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedJson = json.decode(response.body);
+        final List<dynamic> jsonList = decodedJson['result']['history'];
+        return jsonList.map((json) => History.fromJson(json)).toList();
+      } else {
+        print('Failed to load lead history!');
+        throw Exception('Ошибка загрузки истории client!');
+      }
+    } catch (e) {
+      print('Error occurred!');
+      throw Exception('Ошибка загрузки истории client!');
+    }
+  }
 
   //_________________________________ END____API_SCREEN__CLIENTS____________________________________________//
 

@@ -2,6 +2,7 @@ import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_state.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
+import 'package:billing_mobile/screens/clients/client_details/dropdown_history.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_transactions.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_delete.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_organizations.dart';
@@ -63,8 +64,8 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       {'label': 'Тип клиента:', 'value': client.clientType},
       {'label': 'Тариф:', 'value': client.tariff.name},
       {'label': 'Контактное лицо:', 'value': client.contactPerson ?? ''},
-      {'label': 'Партнер ID:', 'value': client.partnerId?.toString() ?? ''},
-      {'label': 'Страна:', 'value': client.countryId?.toString() ?? ''},
+      {'label': 'Партнер:', 'value': client.partnerName ?? ''},
+      {'label': 'Страна:', 'value': client.countryName ?? ''},
       {'label': 'Скидка:', 'value': client.saleId != null  ? '${clientSale?.name}' : '' },
       {'label': 'Дата создания:', 'value': DateFormat('dd.MM.yyyy').format(client.createdAt)},
       {'label': 'Дата окончания доступа:', 'value': formattedExpirationDate },
@@ -102,11 +103,13 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
                   children: [
                     _buildDetailsList(),
                     const SizedBox(height: 8),
+                   ClientHistoryWidget(clientId: widget.clientId),
+                    const SizedBox(height: 8),
                   OrganizationsWidget( clientId: widget.clientId),
                     const SizedBox(height: 8),
                   TransactionsWidget( clientId: widget.clientId),
-                    // if (currentClient?.history.isNotEmpty ?? false)
-                      // _buildHistorySection(),
+
+
                   ],
                 ),
               );
@@ -283,80 +286,6 @@ Widget _buildSectionWithTitle({
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildHistorySection() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'История изменений',
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Gilroy',
-                fontWeight: FontWeight.w600,
-                color: Color(0xff1E2E52),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...currentClient!.history.map((entry) => _buildHistoryItem(entry)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHistoryItem(HistoryEntry entry) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Изменение от ${DateFormat('dd.MM.yyyy').format(entry.createdAt)}',
-            style: const TextStyle(
-              fontSize: 14,
-              fontFamily: 'Gilroy',
-              fontWeight: FontWeight.w600,
-              color: Color(0xff1E2E52),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Пользователь: ${entry.user.name} (${entry.user.role})',
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'Gilroy',
-              color: Color(0xff99A4BA),
-            ),
-          ),
-          Text(
-            'Статус: ${entry.status}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'Gilroy',
-              color: Color(0xff99A4BA),
-            ),
-          ),
-          if (entry.changes.isNotEmpty)
-            ...entry.changes.map((change) => Text(
-                  change.body,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'Gilroy',
-                    color: Color(0xff99A4BA),
-                  ),
-                )),
-        ],
-      ),
     );
   }
 

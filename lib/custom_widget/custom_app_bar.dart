@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:billing_mobile/custom_widget/filter/filter_client_app_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -14,8 +15,8 @@ class CustomAppBar extends StatefulWidget {
   final bool showFilterIcon;
   final bool showFilterOrderIcon;
 
-  final Function(Map)? onFilterGoodsSelected;
-  final VoidCallback? onGoodsResetFilters;
+  final Function(Map)? onFilterClientsSelected;
+  final VoidCallback? onClientsResetFilters;
 
   CustomAppBar({
     super.key,
@@ -29,8 +30,8 @@ class CustomAppBar extends StatefulWidget {
     this.showSearchIcon = true,
     this.showFilterIcon = true,
     this.showFilterOrderIcon = true,
-    this.onFilterGoodsSelected,
-    this.onGoodsResetFilters,
+    this.onFilterClientsSelected,
+    this.onClientsResetFilters,
   });
 
   @override
@@ -186,15 +187,15 @@ class _CustomAppBarState extends State<CustomAppBar>
   }
 
   void navigateToLeadManagerFilterScreen(BuildContext context) {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => GoodsFilterScreen(
-    //       onSelectedDataFilter: widget.onFilterGoodsSelected,
-    //       onResetFilters: widget.onGoodsResetFilters,
-    //     ),
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FilterClientScreen(
+          onFilterSelected: widget.onFilterClientsSelected,
+          onResetFilters: widget.onClientsResetFilters,
+        ),
+      ),
+    );
   }
 
   
