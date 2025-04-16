@@ -12,52 +12,67 @@ import 'package:intl/intl.dart';
 class TransactionsWidget extends StatefulWidget {
   final int clientId;
 
-
-  TransactionsWidget({Key? key, required this.clientId, })
-      : super(key: key);
+  const TransactionsWidget({Key? key, required this.clientId}) : super(key: key);
 
   @override
   _TransactionsWidgetState createState() => _TransactionsWidgetState();
 }
 
 class _TransactionsWidgetState extends State<TransactionsWidget> {
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     context.read<TransactionBloc>().add(FetchTransactionEvent(widget.clientId.toString()));
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    final state = context.read<TransactionBloc>().state;
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        (state is TransactionLoaded && !state.isLoadingMore)) {
+      context.read<TransactionBloc>().add(FetchMoreTransactionsEvent(widget.clientId.toString()));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
-        List<Transaction> transactions = [];
+        TransactionListResponse? transactionData;
+        bool isLoadingMore = false;
+
         if (state is TransactionLoading) {
+          // return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
         } else if (state is TransactionLoaded) {
-          transactions = state.transactions;
+          transactionData = state.transactionData;
+          isLoadingMore = state.isLoadingMore;
         } else if (state is TransactionError) {
-          print(state.message);
           WidgetsBinding.instance.addPostFrameCallback((_) {
-           showCustomSnackBar(
-             context: context,
-             message: state.message,
-             isSuccess: false,
-           );
+            showCustomSnackBar(
+              context: context,
+              message: state.message,
+              isSuccess: false,
+            );
           });
         }
 
-        return _buildTransactionsList(transactions);
+        return _buildTransactionsList(transactionData, isLoadingMore);
       },
     );
   }
 
-  Widget _buildTransactionsList(List<Transaction> transactions) {
+  Widget _buildTransactionsList(TransactionListResponse? transactionData, bool isLoadingMore) {
+    final transactions = transactionData?.data.data ?? [];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -68,16 +83,34 @@ class _TransactionsWidgetState extends State<TransactionsWidget> {
         else
           Container(
             height: 400,
-            child: ListView.builder(
-              itemCount: transactions.length,
-              itemBuilder: (context, index) {
-                return _buildTransactionItem(transactions[index]);
-              },
+            // child: RefreshIndicator(
+            //   color: const Color(0xff1E2E52),
+            //   backgroundColor: Colors.white,
+              // onRefresh: () async {
+              //   context.read<TransactionBloc>().add(FetchTransactionEvent(widget.clientId.toString()));
+              // },
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: transactions.length + (isLoadingMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index < transactions.length) {
+                    return _buildTransactionItem(transactions[index]);
+                  } else {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: CircularProgressIndicator(color: Color(0xff1E2E52)),
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
-          ),
+          // ),
       ],
     );
   }
+
    Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),

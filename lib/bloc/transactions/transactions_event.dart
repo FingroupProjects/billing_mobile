@@ -1,15 +1,13 @@
-import 'package:equatable/equatable.dart';
-
-abstract class TransactionEvent extends Equatable {
-  const TransactionEvent();
-
-  @override
-  List<Object> get props => [];
-}
+abstract class TransactionEvent {}
 
 class FetchTransactionEvent extends TransactionEvent {
   final String clientId;
 
-  const FetchTransactionEvent(this.clientId);
+  FetchTransactionEvent(this.clientId);
 }
 
+class FetchMoreTransactionsEvent extends TransactionEvent {
+  final String clientId;
+
+  FetchMoreTransactionsEvent(this.clientId);
+}

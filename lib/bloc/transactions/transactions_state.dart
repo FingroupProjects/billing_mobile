@@ -13,17 +13,20 @@ class TransactionInitialState extends TransactionState {}
 class TransactionLoading extends TransactionState {}
 
 class TransactionLoaded extends TransactionState {
-  final List<Transaction> transactions;
+  final TransactionListResponse transactionData;
+  final bool isLoadingMore;
 
-  const TransactionLoaded(this.transactions);
+  const TransactionLoaded(this.transactionData, {this.isLoadingMore = false});
 
   @override
-  List<Object> get props => [transactions];
+  List<Object> get props => [transactionData, isLoadingMore];
 }
-
 
 class TransactionError extends TransactionState {
   final String message;
 
-const TransactionError(this.message);
+  const TransactionError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

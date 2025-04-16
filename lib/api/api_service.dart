@@ -388,20 +388,23 @@ Future<Map<String, dynamic>> createOrganizations({
   //_________________________________ START____API_SCREEN__TRANSACTION____________________________________________//
 
 
-  Future<List<Transaction>> getClientByIdTransactions(String clientId) async {
-  try {
-    final response = await _getRequest('/clients/getTransactions/$clientId');
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      final List<dynamic> transactionsJson = jsonData['result']['data'];
-      return transactionsJson.map((trnsJson) => Transaction.fromJson(trnsJson)).toList();
-    } else {
-      throw Exception('Failed to load transactions: ${response.statusCode}');
+Future<TransactionListResponse> getClientByIdTransactions(String clientId, {int page = 1}) async {
+    try {
+      final response = await _getRequest('/clients/getTransactions/$clientId?page=$page');
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final adaptedJson = {
+          'view': '/clients/getTransactions/$clientId',
+          'data': jsonData['result'],
+        };
+        return TransactionListResponse.fromJson(adaptedJson);
+      } else {
+        throw Exception('Ошибка загрузки транзакций: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('CATCH ERROR Ошибка загрузки транзакций: $e');
     }
-  } catch (e) {
-    throw Exception('Failed to load transactions: $e');
   }
-}
 
 Future<List<Transaction>> getTransactionsById(String transactionId) async {
   try {
