@@ -3,6 +3,7 @@ import 'package:billing_mobile/bloc/transactions/transactions_event.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_state.dart';
 import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
 import 'package:billing_mobile/models/transactions_model.dart';
+import 'package:billing_mobile/screens/clients/client_details/transactions_screen/add_transaction.dart';
 import 'package:billing_mobile/screens/clients/client_details/transactions_screen/transaction_details_screen.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
@@ -140,7 +141,7 @@ class _TransactionsWidgetState extends State<TransactionsWidget> {
   }
 
  Widget _buildTransactionItem(Transaction transaction) {
-  final createdAt = DateFormat('dd.MM.yyyy HH:mm').format(transaction.createdAt);
+  final createdAt = DateFormat('dd.MM.yyyy HH:mm').format(transaction.createdAt.toLocal());
   final isIncome = transaction.type == "Пополнение";
   final typeText = isIncome ? "Пополнение" : "Снятие";
   final typeColor = isIncome ? Colors.green : Colors.red;
@@ -254,45 +255,45 @@ class _TransactionsWidgetState extends State<TransactionsWidget> {
             color: Color(0xff1E2E52),
           ),
         ),
-          // TextButton(
-          //   onPressed: _showAddOrganizationScreen,
-          //   style: TextButton.styleFrom(
-          //     foregroundColor: Colors.white,
-          //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          //     backgroundColor: Color(0xff1E2E52),
-          //     shape: RoundedRectangleBorder(
-          //       borderRadius: BorderRadius.circular(8),
-          //     ),
-          //   ),
-          //   child: const Text(
-          //     'Добавить',
-          //     style: TextStyle(
-          //       fontSize: 16,
-          //       fontFamily: 'Gilroy',
-          //       fontWeight: FontWeight.w500,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          // ),
+          TextButton(
+            onPressed: _showAddOrganizationScreen,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              backgroundColor: Color(0xff1E2E52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Пополнить баланс',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Gilroy',
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ),
       ],
     );
   }
 
 
-// void _showAddOrganizationScreen() async {
-//   final result = await Navigator.push<bool>(
-//     context,
-//     MaterialPageRoute(
-//       builder: (context) => CreateOrganizationScreen(clientId: widget.clientId),
-//     ),
-//   );
+void _showAddOrganizationScreen() async {
+  final result = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (context) => CreateTransactionScreen(clientId: widget.clientId),
+    ),
+  );
 
-//   if (result == true) {
-//     context.read<OrganizationBloc>().add(
-//       FetchOrganizationEvent(widget.clientId.toString()),
-//     );
-//   }
-// }
+  if (result == true) {
+    context.read<TransactionBloc>().add(
+      FetchTransactionEvent(widget.clientId.toString()),
+    );
+  }
+}
 
 
 void _showDetailsTransactionScreen(Transaction transaction) {

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_event.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_state.dart';
@@ -14,6 +13,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   TransactionBloc({required this.apiService}) : super(TransactionInitialState()) {
     on<FetchTransactionEvent>(_onFetchTransactions);
     on<FetchMoreTransactionsEvent>(_onFetchMoreTransactions);
+    on<CreateTransactions>(_createTransactions);
   }
 
   Future<bool> _checkInternetConnection() async {
@@ -73,6 +73,30 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       } finally {
         _isFetchingMore = false;
       }
+    }
+  }
+
+  Future<void> _createTransactions(CreateTransactions event, Emitter<TransactionState> emit) async {
+    emit(TransactionLoading());
+
+    if (await _checkInternetConnection()) {
+      try {
+        final result = await apiService.createTransactions(
+          clientId: event.clientId,
+          date: event.date,
+          sum: event.sum,
+        );
+
+        if (result['success']) {
+          emit(TransactionCreated('Транзакция успешно создана!'));
+        } else {
+          emit(TransactionCreateError(result['message'] ?? 'Ошибка при создании транзакции'));
+        }
+      } catch (e) {
+        emit(TransactionCreateError('Ошибка создания транзакции: $e'));
+      }
+    } else {
+      emit(TransactionCreateError('Нет подключения к интернету'));
     }
   }
 }

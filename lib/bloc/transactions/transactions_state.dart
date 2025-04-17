@@ -30,3 +30,16 @@ class TransactionError extends TransactionState {
   @override
   List<Object> get props => [message];
 }
+
+class TransactionCreated extends TransactionState {
+  final String message;
+
+const TransactionCreated(this.message);
+
+}
+
+class TransactionCreateError extends TransactionState {
+  final String message;
+
+const TransactionCreateError(this.message);
+}

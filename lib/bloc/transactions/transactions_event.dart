@@ -11,3 +11,15 @@ class FetchMoreTransactionsEvent extends TransactionEvent {
 
   FetchMoreTransactionsEvent(this.clientId);
 }
+
+class CreateTransactions extends TransactionEvent {
+  final int clientId;
+  final String date;
+  final String sum;
+
+  CreateTransactions({
+    required this.clientId,
+    required this.date,
+    required this.sum,
+  });
+}

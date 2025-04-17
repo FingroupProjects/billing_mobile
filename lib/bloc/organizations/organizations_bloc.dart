@@ -50,6 +50,7 @@ Future<void> _fetchOrganization( FetchOrganizationEvent event, Emitter<Organizat
     if (await _checkInternetConnection()) {
       try {
         final result = await apiService.createOrganizations(
+          clientId: event.clientId,
           name: event.name,
           phone: event.phone,
           inn: event.inn,

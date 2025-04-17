@@ -201,7 +201,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
               ),
             ),
             child: const Text(
-              'Добавить',
+              'Создать',
               style: TextStyle(
                 fontSize: 16,
                 fontFamily: 'Gilroy',

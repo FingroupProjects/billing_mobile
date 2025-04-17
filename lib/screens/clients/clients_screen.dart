@@ -86,6 +86,7 @@ void _onScroll() {
                 if (state is ClientLoading) {
                   return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
                 } else if (state is ClientError) {
+                  print(state.message);
                   return Center(child: Text('Ошибка: ${state.message}'));
                 } else if (state is ClientLoaded) {
                   return RefreshIndicator(

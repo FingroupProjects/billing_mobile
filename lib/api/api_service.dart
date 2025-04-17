@@ -17,7 +17,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 final String baseUrl = 'https://billing.sham360.com/api';
 
 class ApiService {
-  // Общая обработка ответа от сервера 401
   Future<http.Response> _handleResponse(http.Response response) async {
     if (response.statusCode == 401) {
       _redirectToLogin();
@@ -307,6 +306,18 @@ Future<List<History>> getClientHistory(int clientId) async {
     }
   }
 
+  
+  Future<void> ClientActiveDeactivate(int clientId, String rejectCause) async {
+    final response = await _postRequest('/clients/activation/$clientId',
+        {
+          'reject_cause': rejectCause
+        });
+
+    if (response.statusCode != 200) {
+      throw Exception('Статус клиента успешно изменен!');
+    }
+  }
+
   //_________________________________ END____API_SCREEN__CLIENTS____________________________________________//
 
 
@@ -364,13 +375,14 @@ Future<List<Organization>> getOrganizationsById(String organizationId) async {
 
 
 Future<Map<String, dynamic>> createOrganizations({
+  required int clientId,
   required String name,
   required String phone,
   required String inn,
   required String businessTypeId,
   required String address,
 }) async {
-  final response = await _postRequest('/organizations/store',
+  final response = await _postRequest('/organizations/$clientId',
     {
       'name': name,
       'phone': phone,
@@ -442,6 +454,31 @@ Future<List<Transaction>> getTransactionsById(String transactionId) async {
     throw Exception('Failed to load TransactionById: $e');
   }
 }
+
+Future<Map<String, dynamic>> createTransactions({
+  required int clientId,
+  required String date,
+  required String sum,
+}) async {
+  final response = await _postRequest('/clients/create-transaction/$clientId',
+    {
+      'date': date,
+      'sum': sum,
+    },
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    return {'success': true, 'message': 'Транзакция успешно создана!'};
+  } else if (response.statusCode >= 500) {
+    return {'success': false, 'message': 'Ошибка сервера. Попробуйте позже.'};
+  } else {
+    return {
+      'success': false,
+      'message': 'Ошибка создания Транзакции! Код: ${response.statusCode}'
+    };
+  }
+}
+
 
   //_________________________________ END____API_SCREEN__TRANSACTION____________________________________________//
 

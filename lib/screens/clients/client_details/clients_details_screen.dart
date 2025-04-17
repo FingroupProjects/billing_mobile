@@ -1,15 +1,21 @@
+import 'dart:convert';
+
+import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_state.dart';
+import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_history.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_transactions.dart';
-import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_delete.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_organizations.dart';
 import 'package:billing_mobile/screens/clients/clients_edit_screen.dart';
+import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+
 
 class ClientDetailsScreen extends StatefulWidget {
   final int clientId;
@@ -27,6 +33,9 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   ClientById? currentClient;
   late ScrollController _scrollController;
   List<Map<String, String>> details = [];
+  bool? isActive;
+  final ApiService apiService = ApiService();
+
 
   @override
   void initState() {
@@ -56,6 +65,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
 
   setState(() {
     currentClient = client;
+    isActive=client.isActive;
     details = [
       {'label': 'ФИО:', 'value': client.name},
       {'label': 'Телефон:', 'value': client.phone},
@@ -108,8 +118,6 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
                   OrganizationsWidget( clientId: widget.clientId),
                     const SizedBox(height: 8),
                   TransactionsWidget( clientId: widget.clientId),
-
-
                   ],
                 ),
               );
@@ -155,6 +163,19 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
         ),
       ),
       actions: [
+    if (currentClient != null)
+        IconButton(
+          icon: Image.asset(
+            isActive == false 
+              ? 'assets/icons/power_off.png' 
+              : 'assets/icons/power_on.png',
+            width: 36,
+            height: 36,
+          ),
+          onPressed: () => _navigateToActDeactScreen(),
+        ),
+
+        SizedBox(width: 10,)
         // IconButton(
         //   icon: Image.asset( 'assets/icons/edit.png', width: 24, height: 24 ),
         //   onPressed: () => _navigateToEditScreen(),
@@ -171,6 +192,23 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
       ],
     );
   }
+  void _navigateToActDeactScreen() {
+    if (currentClient == null) return;
+
+    if (isActive == true) {
+      showDialog(
+        context: context,
+        builder: (context) => _buildDeactivationDialog(),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => _buildActivationDialog(),
+      );
+    }
+  }
+
+
 
 Widget _buildDetailsList() {
   return Column(
@@ -309,34 +347,35 @@ Widget _buildSectionWithTitle({
     // }
   }
 
-  void _navigateToEditScreen() {
-    if (currentClient == null) return;
+ 
+  // void _navigateToEditScreen() {
+  //   if (currentClient == null) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ClientEditScreen(
-         clientId: currentClient!.id.toString(),
-         fio: currentClient!.name,
-         phone: currentClient!.phone,
-         email: currentClient!.email.toString(),
-         subDomain: currentClient!.subDomain,
-         clientType: currentClient!.clientType,
-         tariffId: currentClient!.tariffId,
-         contactPerson: currentClient!.contactPerson,
-         partnerId: currentClient!.partnerId,
-         countryId: currentClient!.countryId,
-         saleId: currentClient!.saleId,
-         isDemo: currentClient!.isDemo,
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => ClientEditScreen(
+  //        clientId: currentClient!.id.toString(),
+  //        fio: currentClient!.name,
+  //        phone: currentClient!.phone,
+  //        email: currentClient!.email.toString(),
+  //        subDomain: currentClient!.subDomain,
+  //        clientType: currentClient!.clientType,
+  //        tariffId: currentClient!.tariffId,
+  //        contactPerson: currentClient!.contactPerson,
+  //        partnerId: currentClient!.partnerId,
+  //        countryId: currentClient!.countryId,
+  //        saleId: currentClient!.saleId,
+  //        isDemo: currentClient!.isDemo,
 
-        ),
-      ),
-    ).then((shouldRefresh) {
-      if (shouldRefresh == true) {
-        // context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId));
-      }
-    });
-  }
+  //       ),
+  //     ),
+  //   ).then((shouldRefresh) {
+  //     if (shouldRefresh == true) {
+  //       // context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId));
+  //     }
+  //   });
+  // }
 
   void _showDeleteDialog() {
     showDialog(
@@ -380,4 +419,233 @@ Widget _buildSectionWithTitle({
     super.dispose();
   }
 }
+
+  Widget _buildActivationDialog() {
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Center(
+          child: Text(
+            'Активация клиента',
+            style: TextStyle(
+              fontSize: 20,
+              fontFamily: 'Gilroy',
+              fontWeight: FontWeight.w600,
+              color: Color(0xff1E2E52),
+            ),
+          ),
+        ),
+        content: const Text(
+         'Вы уверены, что хотите активировать этого клиента?',
+          style: TextStyle(
+            fontSize: 16,
+            fontFamily: 'Gilroy',
+            fontWeight: FontWeight.w500,
+            color: Color(0xff1E2E52),
+          ),
+        ),
+      actions: [
+        Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+          Expanded(
+            child: CustomButton(
+              buttonText: 'Отмена',
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              buttonColor: Color(0xff1E2E52),
+              textColor: Colors.white,
+            ),
+          ),
+          SizedBox(width: 10,),
+                Expanded(
+            child: CustomButton(
+              buttonText: 'Активировать',
+              onPressed: () {
+                Navigator.of(context).pop();
+                _activateClient();
+              },
+              buttonColor: Colors.green,
+              textColor: Colors.white,
+            ),
+          ),
+         ],
+       )
+      ],
+    );
+  }
+  Widget _buildDeactivationDialog() {
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Center(
+          child: Text(
+            'Деактивация клиента',
+            style: TextStyle(
+              fontSize: 20,
+              fontFamily: 'Gilroy',
+              fontWeight: FontWeight.w600,
+              color: Color(0xff1E2E52),
+            ),
+          ),
+        ),
+        content: const Text(
+         'Вы уверены, что хотите деактивировать этого клиента?',
+          style: TextStyle(
+            fontSize: 16,
+            fontFamily: 'Gilroy',
+            fontWeight: FontWeight.w500,
+            color: Color(0xff1E2E52),
+          ),
+        ),
+      actions: [
+        Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+          Expanded(
+            child: CustomButton(
+              buttonText: 'Отмена',
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              buttonColor: Color(0xff1E2E52),
+              textColor: Colors.white,
+            ),
+          ),
+          SizedBox(width: 10,),
+                Expanded(
+            child: CustomButton(
+              buttonText: 'Деактивировать',
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showDeactivationReasonDialog();
+              },
+              buttonColor: Colors.red,
+              textColor: Colors.white,
+            ),
+          ),
+         ],
+       )
+      ],
+    );
+  }
+
+  void _showDeactivationReasonDialog() {
+    final TextEditingController reasonController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: const Center(
+          child: Text(
+            'Причина отклонения',
+            style: TextStyle(
+              fontSize: 20,
+              fontFamily: 'Gilroy',
+              fontWeight: FontWeight.w600,
+              color: Color(0xff1E2E52),
+            ),
+          ),
+        ),
+        content: TextField(
+        controller: reasonController,
+        maxLines: 5,
+        decoration: InputDecoration(
+          hintText: 'Почему вы отклоняете этот запрос?', 
+          hintStyle: TextStyle(
+            color: Color(0xff1E2E52)!.withOpacity(0.4),  
+            fontSize: 16,
+            fontFamily: 'Gilroy',
+            fontWeight: FontWeight.w500,
+          ),
+          filled: true, 
+          fillColor: Color(0xffF4F7FD), 
+          border: OutlineInputBorder( 
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsets.all(12),  
+        ),
+        style: TextStyle(
+          color: Colors.black, 
+          fontSize: 16.0,
+        ),
+      ),
+        actions: [
+            Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+          Expanded(
+            child: CustomButton(
+              buttonText: 'Отмена',
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              buttonColor: Color(0xff1E2E52),
+              textColor: Colors.white,
+            ),
+          ),
+          SizedBox(width: 10),
+           Expanded(
+            child: CustomButton(
+              buttonText: 'Отправить',
+              buttonColor: Colors.green,
+              textColor: Colors.white,
+              onPressed: () {
+               Navigator.pop(context);
+              if (reasonController.text.isNotEmpty) {
+                _deactivateClient(reasonController.text);
+              } else {
+                showCustomSnackBar(
+                  context: context,
+                  message:'Укажите причину деактивации!',
+                  isSuccess: false,
+                );
+              }
+              },
+
+            ),
+          ),
+         ],
+       )
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deactivateClient(String rejectCause) async {
+    try {
+      await apiService.ClientActiveDeactivate(currentClient!.id, rejectCause);
+        showCustomSnackBar(
+          context: context,
+          message:'Клиент успешно деактивирован!',
+          isSuccess: true,
+        );
+      context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
+    } catch (e) {
+        showCustomSnackBar(
+          context: context,
+          message:'Ошибка при деактивации!',
+          isSuccess: false,
+        );
+    }
+  }
+
+  Future<void> _activateClient() async {
+    try {
+      await apiService.ClientActiveDeactivate(currentClient!.id, '');
+        showCustomSnackBar(
+          context: context,
+          message:'Клиент успешно активирован!',
+          isSuccess: true,
+        );
+      context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
+    } catch (e) {
+        showCustomSnackBar(
+          context: context,
+          message:'Ошибка при активации!',
+          isSuccess: false,
+        );
+    }
+  }
 }

@@ -43,13 +43,11 @@ class _CustomAppBarState extends State<CustomAppBar>
   bool _isSearching = false;
   late TextEditingController _searchController;
   late FocusNode focusNode;
-  String _userImage = '';
-  String _lastLoadedImage = '';
-  static String _cachedUserImage = '';
   Color _iconColor = Colors.red;
   late Timer _timer;
 
   @override
+
   void initState() {
     super.initState();
 

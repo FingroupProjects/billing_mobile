@@ -19,6 +19,7 @@ class FetchOrganizationEvent extends OrganizationEvent {
 class ResetOrganizationEvent extends OrganizationEvent {}
 
 class CreateOrganizations extends OrganizationEvent {
+  final int clientId;
   final String name;
   final String phone;
   final String inn;
@@ -26,6 +27,7 @@ class CreateOrganizations extends OrganizationEvent {
   final String address;   
 
   CreateOrganizations({
+    required this.clientId,
     required this.name,
     required this.phone,
     required this.inn,

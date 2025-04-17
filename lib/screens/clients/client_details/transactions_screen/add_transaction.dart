@@ -1,37 +1,31 @@
-import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
-import 'package:billing_mobile/bloc/organizations/organizations_event.dart';
-import 'package:billing_mobile/bloc/organizations/organizations_state.dart';
+
+import 'package:billing_mobile/bloc/transactions/transactions_bloc.dart';
+import 'package:billing_mobile/bloc/transactions/transactions_event.dart';
+import 'package:billing_mobile/bloc/transactions/transactions_state.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
-import 'package:billing_mobile/custom_widget/custom_phone_number_input.dart';
 import 'package:billing_mobile/custom_widget/custom_textfield.dart';
-import 'package:billing_mobile/screens/clients/client_details/organizations_screen/businessType_list.dart';
+import 'package:billing_mobile/custom_widget/custom_textfield_deadline.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CreateOrganizationScreen extends StatefulWidget {
+class CreateTransactionScreen extends StatefulWidget {
   final int clientId;
 
-  const CreateOrganizationScreen({required this.clientId});
+  const CreateTransactionScreen({required this.clientId});
 
   @override
-  _CreateOrganizationScreenState createState() => _CreateOrganizationScreenState();
+  _CreateTransactionScreenState createState() => _CreateTransactionScreenState();
 }
 
-class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
+class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController innController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
-
-  String? selectedDialCode = '';
-  String? selectedTypeBuisness;
+  final TextEditingController dateController = TextEditingController();
+  final TextEditingController sumController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    context.read<OrganizationBloc>().add(ResetOrganizationEvent());
   }
 
   @override
@@ -42,7 +36,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
         title: Transform.translate(
           offset: const Offset(-10, 0),
           child: const Text(
-            'Создать организацию',
+            'Пополнить баланс',
             style: TextStyle(
               fontSize: 20,
               fontFamily: 'Gilroy',
@@ -63,7 +57,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                 height: 24,
               ),
               onPressed: () {
-                Navigator.pop(context,true);
+                Navigator.pop(context);
               },
             ),
           ),
@@ -74,21 +68,21 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
       body: Column(
         children: [
           Expanded(
-            child: BlocListener<OrganizationBloc, OrganizationState>(
+            child: BlocListener<TransactionBloc, TransactionState>(
               listener: (context, state) {
-                if (state is OrganizationCreateError) {
+                if (state is TransactionCreateError) {
                   showCustomSnackBar(
                     context: context,
                     message: state.message,
                     isSuccess: false,
                   );
-                } else if (state is OrganizationCreated) {
+                } else if (state is TransactionCreated) {
                   showCustomSnackBar(
                     context: context,
-                    message: 'Организация успешно создана!',
+                    message: 'Транзакция успешно создана!',
                     isSuccess: true,
                   );
-                  Navigator.pop(context,true);
+                  Navigator.pop(context, true);
                 }
               },
               child: GestureDetector(
@@ -99,40 +93,19 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        CustomTextField(
-                          controller: nameController,
-                          hintText: 'Введите название',
-                          label:'Наименование',
-                          validator: (value) { if (value == null || value.isEmpty) { return 'Поле обязательно для заполнения'; } return null; },
-                        ),
-                        SizedBox(height: 8),
-                        CustomPhoneNumberInput(
-                          controller: phoneController,
-                          onInputChanged: (String number) { setState(() { selectedDialCode = number; }); },
-                          validator: (value) { if (value == null || value.isEmpty) { return 'Поле обязательно для заполнения!'; } return null;},
-                          label: 'Телефон',
-                        ),
-                        SizedBox(height: 8),
-                        CustomTextField(
-                          controller: innController,
-                          hintText: 'Введите ИНН',
-                          label:'ИНН',
-                          keyboardType: TextInputType.number,
-                          validator: (value) { if (value == null || value.isEmpty) { return 'Поле обязательно для заполнения'; } return null; },
-                        ),
-                        SizedBox(height: 8),
-                        BusinessTypeList(
-                          selectedBusinessType: selectedTypeBuisness.toString(),
-                          onChanged: (value) {
-                            selectedTypeBuisness = value;
-                          },
+                        const SizedBox(height: 8),
+                        CustomTextFieldDate(
+                          controller: dateController,
+                          label: 'Дата',
+                          withTime: false,
+                          useCurrentDateAsDefault: true,
                         ),
                         const SizedBox(height: 8),
                         CustomTextField(
-                          controller: addressController,
-                          hintText: 'Введите адрес',
-                          label:'Адрес',
-                          maxLines: 5,
+                          controller: sumController,
+                          hintText: 'Введите сумму',
+                          label:'Сумма',
+                          keyboardType: TextInputType.number,
                           validator: (value) { if (value == null || value.isEmpty) { return 'Поле обязательно для заполнения'; } return null; },
                         ),
                         SizedBox(height: 8),
@@ -153,15 +126,15 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                     buttonColor: Color(0xffF4F7FD),
                     textColor: Colors.black,
                     onPressed: () {
-                     Navigator.pop(context,true);
+                     Navigator.pop(context);
                     },
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: BlocBuilder<OrganizationBloc, OrganizationState>(
+                  child: BlocBuilder<TransactionBloc, TransactionState>(
                     builder: (context, state) {
-                      if (state is OrganizationLoading) {
+                      if (state is TransactionLoading) {
                         return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
                       } else {
                         return CustomButton(
@@ -184,13 +157,10 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      context.read<OrganizationBloc>().add(CreateOrganizations(
+      context.read<TransactionBloc>().add(CreateTransactions(
         clientId: widget.clientId,
-        name: nameController.text,
-        phone: selectedDialCode.toString(),
-        inn: innController.text,
-        businessTypeId: selectedTypeBuisness.toString(),
-        address: addressController.text,
+        date: dateController.text,
+        sum: sumController.text,
       ));    
     } else {
       showCustomSnackBar(
