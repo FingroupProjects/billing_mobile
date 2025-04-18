@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:billing_mobile/custom_widget/filter/filter_client_app_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -14,14 +13,13 @@ class CustomAppBar extends StatefulWidget {
   final bool showSearchIcon;
   final bool showFilterIcon;
   final bool showFilterOrderIcon;
-
-  final Function(Map)? onFilterClientsSelected;
-  final VoidCallback? onClientsResetFilters;
+  final VoidCallback? onFilterTap;
 
   CustomAppBar({
     super.key,
     required this.title,
     required this.onClickProfileAvatar,
+     this.onFilterTap,
     required this.onChangedSearchInput,
     required this.textEditingController,
     required this.focusNode,
@@ -30,8 +28,6 @@ class CustomAppBar extends StatefulWidget {
     this.showSearchIcon = true,
     this.showFilterIcon = true,
     this.showFilterOrderIcon = true,
-    this.onFilterClientsSelected,
-    this.onClientsResetFilters,
   });
 
   @override
@@ -50,17 +46,13 @@ class _CustomAppBarState extends State<CustomAppBar>
 
   void initState() {
     super.initState();
-
     _searchController = widget.textEditingController;
     focusNode = widget.focusNode;
-
-   
   }
 
   
   @override
   void dispose() {
-
     super.dispose();
   }
 
@@ -104,8 +96,9 @@ class _CustomAppBarState extends State<CustomAppBar>
                 controller: _searchController,
                 focusNode: focusNode,
                 onChanged: widget.onChangedSearchInput,
-                decoration: InputDecoration(
-                  hintText:'Поиск аппбар',
+                decoration: const InputDecoration(
+                  hintText:'Поиск',
+                  hintStyle: TextStyle(fontFamily: 'Gilroy', color: Color(0xff99A4BA), fontSize: 16),
                   border: InputBorder.none,
                 ),
                 style: TextStyle(fontSize: 16),
@@ -176,25 +169,12 @@ class _CustomAppBarState extends State<CustomAppBar>
               ),
             ),
             onPressed: () {
-              navigateToLeadManagerFilterScreen(context);
+              widget.onFilterTap!();
             },
           ),
        
       ]),
     );
   }
-
-  void navigateToLeadManagerFilterScreen(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FilterClientScreen(
-          onFilterSelected: widget.onFilterClientsSelected,
-          onResetFilters: widget.onClientsResetFilters,
-        ),
-      ),
-    );
-  }
-
   
 }

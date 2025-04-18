@@ -157,9 +157,27 @@ Future<LoginResponse> login(LoginModel loginModel) async {
 
   // //_________________________________ START_____API_SCREEN__CLIENTS____________________________________________//
 
-Future<ClientListResponse> getClients({int page = 1}) async {
+Future<ClientListResponse> getClients({
+  int page = 1,
+  String? search,
+  int? demo,
+  int? status,
+  int? tariff,
+  int? partner,
+}) async {
   try {
-    final response = await _getRequest('/clients?page=$page');
+    final queryParameters = {
+      'page': page.toString(),
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (demo != null) 'demo': demo.toString(),
+      if (status != null) 'status': status.toString(),
+      if (tariff != null) 'tariff': tariff.toString(),
+      if (partner != null) 'partner': partner.toString(),
+    };
+    
+    final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
+    final response = await _getRequest(uri.toString());
+    
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       if (jsonData['clients'] != null) {

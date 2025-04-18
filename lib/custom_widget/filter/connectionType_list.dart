@@ -50,7 +50,7 @@ class _ConnectionTypeListState extends State<ConnectionTypeList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text( 'Статус',
+        const Text( 'Тип подключения',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,

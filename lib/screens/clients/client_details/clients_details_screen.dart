@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:billing_mobile/api/api_service.dart';
+import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
+import 'package:billing_mobile/bloc/clients/clients_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_state.dart';
@@ -206,6 +208,8 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
         builder: (context) => _buildActivationDialog(),
       );
     }
+        context.read<ClientBloc>().add(FetchClients());
+
   }
 
 
