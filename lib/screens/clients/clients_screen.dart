@@ -2,6 +2,7 @@ import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
 import 'package:billing_mobile/bloc/clients/clients_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
+import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_client_app_bar.dart';
 import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
 import 'package:billing_mobile/screens/clients/clients_card.dart';
@@ -131,6 +132,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
           showSearchIcon: true,
           showFilterOrderIcon: false,
           showFilterIcon: true,
+          isFilterActive: _currentFilters.isNotEmpty, 
           onChangedSearchInput: (String value) {},
           onFilterTap: () {
             Navigator.push(
@@ -170,7 +172,32 @@ class _ClientsScreenState extends State<ClientsScreen> {
                     child: CircularProgressIndicator(color: Color(0xff1E2E52)),
                   );
                 } else if (state is ClientError) {
-                  return Center(child: Text('Ошибка: ${state.message}'));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                  Text('${state.message}'),
+                  const SizedBox(height: 16),
+                  Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                            child: CustomButton(
+                            buttonText: 'Обновить',
+                            buttonColor: Color(0xff4759FF),
+                            textColor: Colors.white,
+                            onPressed: () { context.read<ClientBloc>().add(FetchClients());},
+                            child: const Text('Повторить попытку', style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
+                            ),
+                                 ),
+                             ),
+                           ],
+                         ),
+                       )
+                      ],
+                    ),
+                  );
                 } else if (state is ClientLoaded) {
                   return RefreshIndicator(
                     color: const Color(0xff1E2E52),

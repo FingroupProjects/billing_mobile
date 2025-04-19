@@ -33,7 +33,7 @@ Future<void> _fetchOrganization( FetchOrganizationEvent event, Emitter<Organizat
       emit(OrganizationLoaded(organizations));
     }
   } catch (e) {
-    emit(OrganizationError('Failed to load organizations: $e'));
+    emit(OrganizationError('Ошибка загрузки организации!'));
   }
 }
 

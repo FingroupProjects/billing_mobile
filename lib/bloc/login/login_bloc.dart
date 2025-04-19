@@ -14,11 +14,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginLoading());
       if (await _checkInternetConnection()) {
         try {
-          final loginModel = LoginModel(email: event.email, password: event.password);  // Изменено login на email
+          final loginModel = LoginModel(email: event.email, password: event.password);  
           final loginResponse = await apiService.login(loginModel);
           emit(LoginLoaded(loginResponse.token, loginResponse.user)); 
         } catch (e) {
-          emit(LoginError(e.toString()));  // Более информативное сообщение об ошибке
+          emit(LoginError(e.toString()));  
         }
       } else {
         emit(LoginError('Нет подключения к интернету'));

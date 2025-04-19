@@ -37,8 +37,7 @@ class _MyNavBarState extends State<MyNavBar> {
     super.initState();
   }
 
-  BottomNavyBarItem _buildNavBarItem(
-      int index, String title, String activeIconPath, String inactiveIconPath) {
+  BottomNavyBarItem _buildNavBarItem( int index, String title, String activeIconPath, String inactiveIconPath) {
     return BottomNavyBarItem(
       icon: SizedBox(
         width: _iconSize,
@@ -55,9 +54,10 @@ class _MyNavBarState extends State<MyNavBar> {
 
   @override
   Widget build(BuildContext context) {
+    
     bool allItemsAvailable = widget.navBarTitles.length == widget.activeIcons.length &&
         widget.navBarTitles.length == widget.inactiveIcons.length;
-
+        
     return BottomNavyBar(
       backgroundColor: Color(0xffF4F7FD),
       selectedIndex: currentIndex,
@@ -77,7 +77,7 @@ class _MyNavBarState extends State<MyNavBar> {
         ),
       ),
       iconSize: _iconSize,
-      containerHeight: 60,
+      containerHeight: 56,
       curve: Curves.ease,
       mainAxisAlignment: allItemsAvailable
           ? MainAxisAlignment.spaceAround

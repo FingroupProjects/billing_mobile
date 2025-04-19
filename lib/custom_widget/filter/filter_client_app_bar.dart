@@ -89,14 +89,21 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
           const SizedBox(width: 10),
           TextButton(
             onPressed: () {
-              final filterData = {
-                'demo': _selectedConnectionType,
-                'status': _selectedStatus,
-                'tariff': _selectedTariff,
-                'partner': _selectedPartner,
-              };
-              widget.onFilterSelected?.call(filterData);
-              Navigator.pop(context);
+              if (_selectedConnectionType == null &&
+                  _selectedStatus == null &&
+                  _selectedTariff == null &&
+                  _selectedPartner == null) {
+                Navigator.pop(context);
+              } else {
+                final filterData = {
+                  'demo': _selectedConnectionType,
+                  'status': _selectedStatus,
+                  'tariff': _selectedTariff,
+                  'partner': _selectedPartner,
+                };
+                widget.onFilterSelected?.call(filterData);
+                Navigator.pop(context);
+              }
             },
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -127,7 +134,7 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                     Card(
+                    Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       color: Colors.white,
                       child: Padding(
@@ -159,7 +166,6 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-
                     Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       color: Colors.white,

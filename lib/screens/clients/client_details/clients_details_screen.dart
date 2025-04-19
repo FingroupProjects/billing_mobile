@@ -208,7 +208,6 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
         builder: (context) => _buildActivationDialog(),
       );
     }
-        context.read<ClientBloc>().add(FetchClients());
 
   }
 
@@ -596,9 +595,10 @@ Widget _buildSectionWithTitle({
               buttonColor: Colors.green,
               textColor: Colors.white,
               onPressed: () {
-               Navigator.pop(context);
               if (reasonController.text.isNotEmpty) {
                 _deactivateClient(reasonController.text);
+               Navigator.pop(context);
+
               } else {
                 showCustomSnackBar(
                   context: context,
@@ -626,6 +626,7 @@ Widget _buildSectionWithTitle({
           isSuccess: true,
         );
       context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
+      context.read<ClientBloc>().add(FetchClients());
     } catch (e) {
         showCustomSnackBar(
           context: context,
@@ -644,6 +645,7 @@ Widget _buildSectionWithTitle({
           isSuccess: true,
         );
       context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
+      context.read<ClientBloc>().add(FetchClients());
     } catch (e) {
         showCustomSnackBar(
           context: context,

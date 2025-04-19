@@ -30,26 +30,37 @@ class ClientBloc extends Bloc<ClientEvent, ClientState> {
   }
 
   Future<void> _onFetchClients(FetchClients event, Emitter<ClientState> emit) async {
-    emit(ClientLoading());
-    try {
-      _currentPage = 1;
-      final clientData = await apiService.getClients(
-        page: _currentPage,
-        search: _currentSearchQuery,
-        demo: _currentFilters['demo'],
-        status: _currentFilters['status'],
-        tariff: _currentFilters['tariff'],
-        partner: _currentFilters['partner'],
-      );
-      emit(ClientLoaded(clientData, isLoadingMore: false));
-    } catch (e) {
-      emit(ClientError(e.toString()));
-    }
+  emit(ClientLoading());
+  if (!await _checkInternetConnection()) {
+    emit(ClientError('Нет подключения к интернету'));
+    return;
   }
+  
+  try {
+    _currentPage = 1;
+    final clientData = await apiService.getClients(
+      page: _currentPage,
+      search: _currentSearchQuery,
+      demo: _currentFilters['demo'],
+      status: _currentFilters['status'],
+      tariff: _currentFilters['tariff'],
+      partner: _currentFilters['partner'],
+    );
+    emit(ClientLoaded(clientData, isLoadingMore: false));
+  } catch (e) {
+    emit(ClientError(e.toString()));
+  }
+}
 
-   Future<void> _onFetchMoreClients(FetchMoreClients event, Emitter<ClientState> emit) async {
+Future<void> _onFetchMoreClients(FetchMoreClients event, Emitter<ClientState> emit) async {
   if (_isFetchingMore) return;
   _isFetchingMore = true;
+
+  if (!await _checkInternetConnection()) {
+    emit(ClientError('Нет подключения к интернету'));
+    _isFetchingMore = false;
+    return;
+  }
 
   if (state is ClientLoaded) {
     final currentState = state as ClientLoaded;
@@ -125,7 +136,7 @@ class ClientBloc extends Bloc<ClientEvent, ClientState> {
 
         if (result['success']) {
           emit(ClientSuccess('Клиент успешно создан!'));
-          add(FetchClients());
+          // add(FetchClients());
         } else {
           emit(ClientError(result['message']));
           add(FetchClients());

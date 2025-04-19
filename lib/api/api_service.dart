@@ -178,25 +178,45 @@ Future<ClientListResponse> getClients({
     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
     final response = await _getRequest(uri.toString());
     
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      if (jsonData['clients'] != null) {
-        final adaptedJson = {
-          'view': '/clients',
-          'data': {
-            'clients': jsonData['clients'],
-            'partners': jsonData['partners'] ?? [],
-            'tariffs': jsonData['tariffs'] ?? [],
-          }
-        };
-        return ClientListResponse.fromJson(adaptedJson);
-      }
-      return ClientListResponse.fromJson(jsonData);
-    } else {
-      throw Exception('Ошибка загрузки клиентов: ${response.statusCode}');
+    switch (response.statusCode) {
+      case 200:
+        final jsonData = json.decode(response.body);
+        if (jsonData['clients'] != null) {
+          final adaptedJson = {
+            'view': '/clients',
+            'data': {
+              'clients': jsonData['clients'],
+              'partners': jsonData['partners'] ?? [],
+              'tariffs': jsonData['tariffs'] ?? [],
+            }
+          };
+          return ClientListResponse.fromJson(adaptedJson);
+        }
+        return ClientListResponse.fromJson(jsonData);
+      
+      case 400:
+        throw ('Некорректный запрос: ${response.body}');
+      
+      case 401:
+        throw ('Не авторизован: требуется аутентификация');
+      
+      case 403:
+        throw ('Доступ запрещен');
+      
+      case 404:
+        throw ('Ресурс не найден');
+      
+      case 429:
+        throw ('Слишком много запросов. Пожалуйста, попробуйте позже');
+      
+      case 500:
+        throw ('Внутренняя ошибка сервера. Пожалуйста, попробуйте позже');
+      
+      default:
+        throw ('Ошибка загрузки клиентов!');
     }
   } catch (e) {
-    throw Exception('CATCH ERROR Ошибка загрузки клиентов: $e');
+    throw ('Ошибка загрузки клиентов!');
   }
 }
 

@@ -14,12 +14,13 @@ class CustomAppBar extends StatefulWidget {
   final bool showFilterIcon;
   final bool showFilterOrderIcon;
   final VoidCallback? onFilterTap;
+  final bool isFilterActive; 
 
   CustomAppBar({
     super.key,
     required this.title,
     required this.onClickProfileAvatar,
-     this.onFilterTap,
+    this.onFilterTap,
     required this.onChangedSearchInput,
     required this.textEditingController,
     required this.focusNode,
@@ -28,31 +29,56 @@ class CustomAppBar extends StatefulWidget {
     this.showSearchIcon = true,
     this.showFilterIcon = true,
     this.showFilterOrderIcon = true,
+    this.isFilterActive = false, 
   });
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
 }
 
-class _CustomAppBarState extends State<CustomAppBar>
-    with SingleTickerProviderStateMixin {
+class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderStateMixin {
   bool _isSearching = false;
   late TextEditingController _searchController;
   late FocusNode focusNode;
-  Color _iconColor = Colors.red;
-  late Timer _timer;
+  late AnimationController _animationController;
+  late Animation<Color?> _colorAnimation;
 
   @override
-
   void initState() {
     super.initState();
     _searchController = widget.textEditingController;
     focusNode = widget.focusNode;
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _colorAnimation = ColorTween(
+      begin: Colors.blue,
+      end: Colors.white,
+    ).animate(_animationController);
+
+    if (widget.isFilterActive) {
+      _animationController.repeat(reverse: true);
+    }
   }
 
-  
+  @override
+  void didUpdateWidget(CustomAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isFilterActive != oldWidget.isFilterActive) {
+      if (widget.isFilterActive) {
+        _animationController.repeat(reverse: true);
+      } else {
+        _animationController.stop();
+        _animationController.reset();
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -65,11 +91,11 @@ class _CustomAppBarState extends State<CustomAppBar>
       padding: EdgeInsets.zero,
       child: Row(children: [
         Container(
-          width: 40,
-          height: 40,
+          width: 50,
+          height: 50,
           child: IconButton(
             padding: EdgeInsets.zero,
-            icon: Image.asset('assets/icons/avatar2.png'),
+            icon: Image.asset('assets/icons/AppBar/Avatar.png'),
             onPressed: widget.onClickProfileAvatar,
           ),
         ),
@@ -82,7 +108,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                 fontSize: 20,
                 fontFamily: 'Gilroy',
                 fontWeight: FontWeight.w600,
-                color: Color(0xfff1E2E52),
+                color: Color(0xff1E2E52), 
               ),
             ),
           ),
@@ -97,7 +123,7 @@ class _CustomAppBarState extends State<CustomAppBar>
                 focusNode: focusNode,
                 onChanged: widget.onChangedSearchInput,
                 decoration: const InputDecoration(
-                  hintText:'Поиск',
+                  hintText: 'Поиск',
                   hintStyle: TextStyle(fontFamily: 'Gilroy', color: Color(0xff99A4BA), fontSize: 16),
                   border: InputBorder.none,
                 ),
@@ -161,20 +187,23 @@ class _CustomAppBarState extends State<CustomAppBar>
           IconButton(
             icon: Padding(
               padding: const EdgeInsets.only(left: 12),
-              child: Image.asset(
-                'assets/icons/AppBar/filter.png',
-                width: 24,
-                height: 24,
-                // color: _iconColor,
+              child: AnimatedBuilder(
+                animation: _colorAnimation,
+                builder: (context, child) {
+                  return Image.asset(
+                    'assets/icons/AppBar/filter.png',
+                    width: 24,
+                    height: 24,
+                    color: widget.isFilterActive ? _colorAnimation.value : null,
+                  );
+                },
               ),
             ),
             onPressed: () {
               widget.onFilterTap!();
             },
           ),
-       
       ]),
     );
   }
-  
 }
