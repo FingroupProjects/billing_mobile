@@ -14,7 +14,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-final String baseUrl = 'https://billing.sham360.com/api';
+const String baseUrl = 'https://billing.sham360.com/api';
 
 class ApiService {
   Future<http.Response> _handleResponse(http.Response response) async {
@@ -62,8 +62,8 @@ Future<void> clearToken() async {
       },
     );
 
-    print('Статус ответа! ${response.statusCode}');
-    print('Тело ответа!${response.body}');
+    // print('Статус ответа! ${response.statusCode}');
+    // print('Тело ответа!${response.body}');
 
     return _handleResponse(response);
   }
@@ -85,8 +85,8 @@ Future<void> clearToken() async {
       body: json.encode(body),
     );
 
-    print('Статус ответа! ${response.statusCode}');
-    print('Тело ответа!${response.body}');
+    // print('Статус ответа! ${response.statusCode}');
+    // print('Тело ответа!${response.body}');
 
     return _handleResponse(response);
   }
@@ -108,8 +108,8 @@ Future<void> clearToken() async {
       body: json.encode(body),
     );
 
-    print('Статус ответа! ${response.statusCode}');
-    print('Тело ответа!${response.body}');
+    // print('Статус ответа! ${response.statusCode}');
+    // print('Тело ответа!${response.body}');
 
     return _handleResponse(response);
   }
@@ -128,8 +128,8 @@ Future<void> clearToken() async {
       },
     );
 
-    print('Статус ответа! ${response.statusCode}');
-    print('Тело ответа!${response.body}');
+    // print('Статус ответа! ${response.statusCode}');
+    // print('Тело ответа!${response.body}');
 
     return _handleResponse(response);
   }

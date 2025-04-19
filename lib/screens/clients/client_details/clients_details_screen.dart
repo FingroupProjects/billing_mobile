@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
@@ -16,8 +14,6 @@ import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-
 
 class ClientDetailsScreen extends StatefulWidget {
   final int clientId;
@@ -176,7 +172,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
           onPressed: () => _navigateToActDeactScreen(),
         ),
 
-        SizedBox(width: 10,)
+        SizedBox(width: 10),
         // IconButton(
         //   icon: Image.asset( 'assets/icons/edit.png', width: 24, height: 24 ),
         //   onPressed: () => _navigateToEditScreen(),
@@ -350,34 +346,34 @@ Widget _buildSectionWithTitle({
   }
 
  
-  // void _navigateToEditScreen() {
-  //   if (currentClient == null) return;
+  void _navigateToEditScreen() {
+    if (currentClient == null) return;
 
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => ClientEditScreen(
-  //        clientId: currentClient!.id.toString(),
-  //        fio: currentClient!.name,
-  //        phone: currentClient!.phone,
-  //        email: currentClient!.email.toString(),
-  //        subDomain: currentClient!.subDomain,
-  //        clientType: currentClient!.clientType,
-  //        tariffId: currentClient!.tariffId,
-  //        contactPerson: currentClient!.contactPerson,
-  //        partnerId: currentClient!.partnerId,
-  //        countryId: currentClient!.countryId,
-  //        saleId: currentClient!.saleId,
-  //        isDemo: currentClient!.isDemo,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClientEditScreen(
+         clientId: currentClient!.id.toString(),
+         fio: currentClient!.name,
+         phone: currentClient!.phone,
+         email: currentClient!.email.toString(),
+         subDomain: currentClient!.subDomain,
+         clientType: currentClient!.clientType,
+         tariffId: currentClient!.tariffId,
+         contactPerson: currentClient!.contactPerson,
+         partnerId: currentClient!.partnerId,
+         countryId: currentClient!.countryId,
+         saleId: currentClient!.saleId,
+         isDemo: currentClient!.isDemo,
 
-  //       ),
-  //     ),
-  //   ).then((shouldRefresh) {
-  //     if (shouldRefresh == true) {
-  //       // context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId));
-  //     }
-  //   });
-  // }
+        ),
+      ),
+    ).then((shouldRefresh) {
+      if (shouldRefresh == true) {
+        // context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId));
+      }
+    });
+  }
 
   void _showDeleteDialog() {
     showDialog(
