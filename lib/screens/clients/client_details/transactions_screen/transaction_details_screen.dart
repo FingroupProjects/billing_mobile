@@ -3,6 +3,7 @@ import 'package:billing_mobile/bloc/transactionsById/transactionsById_event.dart
 import 'package:billing_mobile/bloc/transactionsById/transactionsById_state.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/models/transactions_model.dart';
+import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -40,8 +41,10 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
             if (state is TransactionByIdLoaded) {
               _updateDetails(state.transactions);
             } else if (state is TransactionByIdError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
+              showCustomSnackBar(
+                context: context,
+                message: state.message,
+                isSuccess: true,
               );
             }
           },

@@ -95,12 +95,11 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
           if (state is ClientByIdLoaded) {
          _updateDetails(state.client, state.sales,state.expirationDate); 
           } else if (state is ClientByIdError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+           showCustomSnackBar(
+             context: context,
+             message: state.message,
+             isSuccess: false,
+           );
           }
         },
         child: BlocBuilder<ClientByIdBloc, ClientByIdState>(

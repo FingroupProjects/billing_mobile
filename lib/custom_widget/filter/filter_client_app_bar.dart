@@ -61,7 +61,24 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
         ),
         backgroundColor: Colors.white,
         forceMaterialTransparency: true,
-        elevation: 1,
+        elevation: 0,
+        centerTitle: false,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 0),
+          child: Transform.translate(
+            offset: const Offset(0, -2),
+            child: IconButton(
+              icon: Image.asset(
+                'assets/icons/arrow-left.png',
+                width: 24,
+                height: 24,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () {

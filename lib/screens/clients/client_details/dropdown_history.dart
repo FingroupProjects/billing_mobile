@@ -30,6 +30,8 @@ class _ClientHistoryWidgetState extends State<ClientHistoryWidget> {
     'country': 'Страна',
     'client_type': 'Тип клиента',
     'contact_person': 'Контактное лицо',
+    'is_active': 'Активность',
+    'reject_cause': 'Причина отказа',
   };
 
   @override

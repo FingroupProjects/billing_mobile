@@ -3,6 +3,7 @@ import 'package:billing_mobile/bloc/organizationsById/organizationsById_event.da
 import 'package:billing_mobile/bloc/organizationsById/organizationsById_state.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/models/organizations_model.dart';
+import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -40,8 +41,10 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
             if (state is OrganizationByIdLoaded) {
               _updateDetails(state.organizations);
             } else if (state is OrganizationByIdError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
+              showCustomSnackBar(
+                context: context,
+                message: state.message,
+                isSuccess: false,
               );
             }
           },
