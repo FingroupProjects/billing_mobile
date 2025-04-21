@@ -70,18 +70,24 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
   void _updateDetails(List<Organization> organizations) {
     if (organizations.isNotEmpty) {
       final org = organizations.first;
+      final detailsList = [
+        {'label': 'Название:', 'value': org.name},
+        {'label': 'ИНН:', 'value': org.INN.toString()},
+        {'label': 'Телефон:', 'value': org.phone},
+        {'label': 'Адрес:', 'value': org.address},
+        {'label': 'Доступ:', 'value': org.hasAccess == 1 ? 'Есть' : 'Нет'},
+        {'label': 'Создано:', 'value': DateFormat('dd.MM.yyyy').format(org.createdAt)},
+        {'label': 'Обновлено:', 'value': DateFormat('dd.MM.yyyy').format(org.updatedAt)},
+        {'label': 'Тип бизнеса:', 'value': org.businessTypeName.toString()},
+      ];
+      
+      // Добавляем причину отказа только если она не пустая
+      if (org.rejectCause != null && org.rejectCause!.isNotEmpty) {
+        detailsList.add({'label': 'Причина отказа:', 'value': org.rejectCause!});
+      }
+
       setState(() {
-        details = [
-          {'label': 'Название:', 'value': org.name},
-          {'label': 'ИНН:', 'value': org.INN.toString()},
-          {'label': 'Телефон:', 'value': org.phone},
-          {'label': 'Адрес:', 'value': org.address},
-          {'label': 'Доступ:', 'value': org.hasAccess == 1 ? 'Есть' : 'Нет'},
-          {'label': 'Создано:', 'value': DateFormat('dd.MM.yyyy').format(org.createdAt)},
-          {'label': 'Обновлено:', 'value': DateFormat('dd.MM.yyyy').format(org.updatedAt)},
-          {'label': 'Тип бизнеса:', 'value': org.businessTypeName.toString()},
-          {'label': 'Причина отказа:', 'value': org.rejectCause ?? '' },
-        ];
+        details = detailsList;
       });
     }
   }
