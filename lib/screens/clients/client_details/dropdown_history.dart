@@ -141,7 +141,7 @@ class _ClientHistoryWidgetState extends State<ClientHistoryWidget> {
   Widget _buildActionItem(History entry) {
     final formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(entry.createdAt.toLocal());
     final status = entry.status;
-    final userName = entry.user.name;
+    final userName = entry.user?.name ?? '';
 
     List<String> additionalDetails = [];
     for (var change in entry.changes) {

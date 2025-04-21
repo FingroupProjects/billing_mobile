@@ -14,7 +14,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginLoading());
       if (await _checkInternetConnection()) {
         try {
-          final loginModel = LoginModel(email: event.email, password: event.password);  
+          final loginModel = LoginModel(login: event.login, password: event.password);  
           final loginResponse = await apiService.login(loginModel);
           emit(LoginLoaded(loginResponse.token, loginResponse.user)); 
         } catch (e) {

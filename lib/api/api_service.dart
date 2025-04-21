@@ -14,7 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-const String baseUrl = 'https://billing.sham360.com/api';
+// const String baseUrl = 'https://billing.sham360.com/api';
+const String baseUrl = 'https://billing-back.shamcrm.com/api';
 
 class ApiService {
   Future<http.Response> _handleResponse(http.Response response) async {
@@ -145,10 +146,12 @@ Future<LoginResponse> login(LoginModel loginModel) async {
     final loginResponse = LoginResponse.fromJson(data);
     await _saveToken(loginResponse.token);
     return loginResponse;
+  } else if (response.statusCode == 401) {
+    throw ('Неправильный логин или пароль!');
   } else {
     final errorData = json.decode(response.body);
-    final errorMessage = errorData['message'] ?? 'Неправильный email или пароль!';
-    throw Exception(errorMessage);
+    final errorMessage = errorData['message'] ?? 'Неправильный логин или пароль!';
+    throw (errorMessage);
   }
 }
 

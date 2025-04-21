@@ -1,25 +1,24 @@
-
 class History {
   final int id;
-  final int userId;
+  final int? userId; // Может быть null
   final String status;
   final int modelId;
   final String modelType;
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<HistoryChange> changes;
-  final HistoryUser user;
+  final HistoryUser? user; // Может быть null
 
   History({
     required this.id,
-    required this.userId,
+    this.userId,
     required this.status,
     required this.modelId,
     required this.modelType,
     required this.createdAt,
     required this.updatedAt,
     required this.changes,
-    required this.user,
+    this.user,
   });
 
   factory History.fromJson(Map<String, dynamic> json) {
@@ -34,7 +33,7 @@ class History {
       changes: (json['changes'] as List)
           .map((e) => HistoryChange.fromJson(e))
           .toList(),
-      user: HistoryUser.fromJson(json['user']),
+      user: json['user'] != null ? HistoryUser.fromJson(json['user']) : null,
     );
   }
 }

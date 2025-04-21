@@ -11,13 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController = TextEditingController();  
+    final TextEditingController loginController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
@@ -26,11 +22,11 @@ class LoginScreen extends StatelessWidget {
         child: BlocListener<LoginBloc, LoginState>(
           listener: (context, state) {
             if (state is LoginError) {
-                showCustomSnackBar(
-                  context: context,
-                  message: state.message,
-                  isSuccess: false,
-                );
+              showCustomSnackBar(
+                context: context,
+                message: state.message,
+                isSuccess: false,
+              );
             } else if (state is LoginLoaded) {
               Navigator.pushReplacement(
                 context,
@@ -54,7 +50,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Введите email и пароль для входа',
+                  'Введите логин и пароль для входа',
                   style: TextStyle(
                     fontSize: 14,
                     color: Color(0xff99A4BA),
@@ -64,10 +60,10 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
-                  controller: emailController, 
-                  hintText: 'Введите email',
-                  label: 'Email',
-                  keyboardType: TextInputType.emailAddress,
+                  controller: loginController,
+                  hintText: 'Введите логин',
+                  label: 'Логин',
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
@@ -87,28 +83,19 @@ class LoginScreen extends StatelessWidget {
                       buttonColor: const Color(0xff4F40EC),
                       textColor: Colors.white,
                       onPressed: () {
-                        final email = emailController.text.trim();  
+                        final login = loginController.text.trim();
                         final password = passwordController.text.trim();
 
-                        if (email.isEmpty || password.isEmpty) {
+                        if (login.isEmpty || password.isEmpty) {
                           showCustomSnackBar(
                             context: context,
-                            message:'Поля не должны быть пустыми!',
+                            message: 'Поля не должны быть пустыми!',
                             isSuccess: false,
                           );
                           return;
                         }
 
-                        if (!_isValidEmail(email)) {
-                          showCustomSnackBar(
-                            context: context,
-                            message:'Введите корректный email адрес!',
-                            isSuccess: false,
-                          );
-                          return;
-                        }
-
-                        context.read<LoginBloc>().add(CheckLogin(email, password));
+                        context.read<LoginBloc>().add(CheckLogin(login, password));
                       },
                     );
                   },

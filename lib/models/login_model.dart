@@ -1,14 +1,14 @@
 import 'package:billing_mobile/models/user.dart';
 
 class LoginModel {
-  final String email;  // Изменено с login на email
+  final String login;  // Изменено с login на email
   final String password;
 
-  LoginModel({required this.email, required this.password});
+  LoginModel({required this.login, required this.password});
 
   Map<String, dynamic> toJson() {
     return {
-      'email': email,  // Изменено с login на email
+      'login': login,  
       'password': password,
     };
   }

@@ -6,11 +6,11 @@ abstract class LoginEvent extends Equatable {
 }
 
 class CheckLogin extends LoginEvent {
-  final String email;
+  final String login;
   final String password;
 
-  CheckLogin(this.email, this.password);
+  CheckLogin(this.login, this.password);
 
   @override
-  List<Object> get props => [email, password];
+  List<Object> get props => [login, password];
 }
