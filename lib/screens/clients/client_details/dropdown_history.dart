@@ -49,13 +49,13 @@ class _ClientHistoryWidgetState extends State<ClientHistoryWidget> {
         } else if (state is ClientHistoryLoaded) {
           actionHistory = state.clientHistory;
         } else if (state is ClientHistoryError) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showCustomSnackBar(
-              context: context,
-              message: state.message,
-              isSuccess: false,
-            );
-          });
+          // WidgetsBinding.instance.addPostFrameCallback((_) {
+          //   showCustomSnackBar(
+          //     context: context,
+          //     message: state.message,
+          //     isSuccess: false,
+          //   );
+          // });
         }
         return _buildExpandableActionContainer(
           'История действий',

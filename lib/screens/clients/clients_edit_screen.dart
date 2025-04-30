@@ -407,11 +407,11 @@ class _ClientEditScreenState extends State<ClientEditScreen> {
   }
 
   void _updateClient() {
-    final String fio = fioController.text;
-    final String phone = selectedDialCode;
-    final String email = emailController.text;
-    final String? contactPerson = contactPersonLoginController.text.isEmpty ? null : contactPersonLoginController.text;
-    final String subDomain = subdomainController.text;
+    // final String fio = fioController.text;
+    // final String phone = selectedDialCode;
+    // final String email = emailController.text;
+    // final String? contactPerson = contactPersonLoginController.text.isEmpty ? null : contactPersonLoginController.text;
+    // final String subDomain = subdomainController.text;
 
     // context.read<ClientBloc>().add(UpdateClient(
     //   id: widget.client.id,

@@ -1,4 +1,6 @@
 
+import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
+import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_bloc.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_event.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_state.dart';
@@ -82,6 +84,7 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
                     message: 'Транзакция успешно создана!',
                     isSuccess: true,
                   );
+                  context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
                   Navigator.pop(context, true);
                 }
               },

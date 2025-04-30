@@ -1,9 +1,13 @@
 import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
+import 'package:billing_mobile/bloc/clients_InActive/InActive_clients_bloc.dart';
+import 'package:billing_mobile/bloc/clients_InActive/InActive_clients_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_event.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_state.dart';
+import 'package:billing_mobile/bloc/clients_demo/demo_clients_bloc.dart';
+import 'package:billing_mobile/bloc/clients_demo/demo_clients_event.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
 import 'package:billing_mobile/screens/clients/client_details/dropdown_history.dart';
@@ -622,12 +626,14 @@ Widget _buildSectionWithTitle({
         );
       context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
       context.read<ClientBloc>().add(FetchClients());
+      context.read<DemoBloc>().add(FetchDemo());
+      context.read<InActiveBloc>().add(FetchInActive());
     } catch (e) {
-        showCustomSnackBar(
-          context: context,
-          message:'Ошибка при деактивации!',
-          isSuccess: false,
-        );
+        // showCustomSnackBar(
+        //   context: context,
+        //   message:'Ошибка при деактивации!',
+        //   isSuccess: false,
+        // );
     }
   }
 
@@ -641,12 +647,14 @@ Widget _buildSectionWithTitle({
         );
       context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
       context.read<ClientBloc>().add(FetchClients());
+      context.read<DemoBloc>().add(FetchDemo());
+      context.read<InActiveBloc>().add(FetchInActive());
     } catch (e) {
-        showCustomSnackBar(
-          context: context,
-          message:'Ошибка при активации!',
-          isSuccess: false,
-        );
+        // showCustomSnackBar(
+        //   context: context,
+        //   message:'Ошибка при активации!',
+        //   isSuccess: false,
+        // );
     }
   }
 }

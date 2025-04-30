@@ -21,6 +21,7 @@ class TransactionsWidget extends StatefulWidget {
 
 class _TransactionsWidgetState extends State<TransactionsWidget> {
   late ScrollController _scrollController;
+  String _filterType = 'All';
 
   @override
   void initState() {
@@ -38,11 +39,22 @@ class _TransactionsWidgetState extends State<TransactionsWidget> {
 
   void _onScroll() {
     final state = context.read<TransactionBloc>().state;
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        (state is TransactionLoaded && !state.isLoadingMore)) {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+      (state is TransactionLoaded && !state.isLoadingMore)) {
       context.read<TransactionBloc>().add(FetchMoreTransactionsEvent(widget.clientId.toString()));
     }
+  }
+
+  void _toggleFilter() {
+    setState(() {
+      if (_filterType == 'All') {
+        _filterType = 'Income';
+      } else if (_filterType == 'Income') {
+        _filterType = 'Withdrawal';
+      } else {
+        _filterType = 'All';
+      }
+    });
   }
 
   @override
@@ -72,42 +84,43 @@ class _TransactionsWidgetState extends State<TransactionsWidget> {
     );
   }
 
-  Widget _buildTransactionsList(TransactionListResponse? transactionData, bool isLoadingMore) {
+Widget _buildTransactionsList(TransactionListResponse? transactionData, bool isLoadingMore) {
     final transactions = transactionData?.data.data ?? [];
+ 
+     final filteredTransactions = transactions.where((transaction) {
+      if (_filterType == 'All') return true;
+      if (_filterType == 'Income') return transaction.type == "Пополнение";
+      if (_filterType == 'Withdrawal') return transaction.type == "Снятие";
+      return true;
+    }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildTitleRow('Транзакции'),
         const SizedBox(height: 4),
-        if (transactions.isEmpty)
+        if (filteredTransactions.isEmpty)
           _buildEmptyState()
         else
           Container(
             height: 400,
-            // child: RefreshIndicator(
-            //   color: const Color(0xff1E2E52),
-            //   backgroundColor: Colors.white,
-              // onRefresh: () async {
-              //   context.read<TransactionBloc>().add(FetchTransactionEvent(widget.clientId.toString()));
-              // },
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: transactions.length + (isLoadingMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index < transactions.length) {
-                    return _buildTransactionItem(transactions[index]);
-                  } else {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: CircularProgressIndicator(color: Color(0xff1E2E52)),
-                      ),
-                    );
-                  }
-                },
-              ),
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: filteredTransactions.length + (isLoadingMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index < filteredTransactions.length) {
+                  return _buildTransactionItem(filteredTransactions[index]);
+                } else {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(color: Color(0xff1E2E52)),
+                    ),
+                  );
+                }
+              },
             ),
-          // ),
+          ),
       ],
     );
   }
@@ -242,39 +255,57 @@ class _TransactionsWidgetState extends State<TransactionsWidget> {
   );
 }
 
-  Row _buildTitleRow(String title) {
+Row _buildTitleRow(String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontFamily: 'Gilroy',
-            fontWeight: FontWeight.w600,
-            color: Color(0xff1E2E52),
+        Row(
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontFamily: 'Gilroy',
+                fontWeight: FontWeight.w600,
+                color: Color(0xff1E2E52),
+              ),
+            ),
+            const SizedBox(width: 12),
+            IconButton(
+              icon: Icon(
+                _filterType == 'All'
+                    ? Icons.filter_list
+                    : _filterType == 'Income'
+                        ? Icons.arrow_upward
+                        : Icons.arrow_downward,
+                color: Color(0xff1E2E52),
+                size: 30,
+              ),
+              onPressed: _toggleFilter,
+              tooltip: 'Фильтр транзакций',
+            ),
+          ],
+        ),
+        TextButton(
+          onPressed: _showAddOrganizationScreen,
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            backgroundColor: Color(0xff1E2E52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: const Text(
+            'Пополнить баланс',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Gilroy',
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
           ),
         ),
-          TextButton(
-            onPressed: _showAddOrganizationScreen,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              backgroundColor: Color(0xff1E2E52),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Пополнить баланс',
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Gilroy',
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ),
       ],
     );
   }

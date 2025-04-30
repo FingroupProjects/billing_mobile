@@ -1,4 +1,6 @@
 import 'package:billing_mobile/MyNavBar.dart';
+import 'package:billing_mobile/screens/demo/demo_clients_screen.dart';
+import 'package:billing_mobile/screens/inActive/inactive_clients_screen.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
 import 'package:billing_mobile/screens/clients/clients_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +40,18 @@ class _HomeScreenState extends State<HomeScreen> {
     navBarTitleKeys.add('Клиенты');
     activeIcons.add('assets/icons/MyNavBar/clients_ON.png');
     inactiveIcons.add('assets/icons/MyNavBar/clients_OFF.png');
+
+    widgets.add(DemoClientsScreen());
+    titleKeys.add('Аппбар демо');
+    navBarTitleKeys.add('Демо');
+    activeIcons.add('assets/icons/MyNavBar/demo_ON.png');
+    inactiveIcons.add('assets/icons/MyNavBar/demo_OFF.png');
+    
+    widgets.add(InActiveClientsScreen());
+    titleKeys.add('Аппбар Неактивный');
+    navBarTitleKeys.add('Неактивный');
+    activeIcons.add('assets/icons/MyNavBar/inactive_ON.png');
+    inactiveIcons.add('assets/icons/MyNavBar/inactive_OFF.png');
 
 
   if (mounted) {

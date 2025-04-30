@@ -2,11 +2,11 @@ import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
 import 'package:billing_mobile/models/clients_model.dart';
 import 'package:flutter/material.dart';
 
-class ClientCard extends StatelessWidget {
+class InActiveClientCard extends StatelessWidget {
   final Client client;
   final VoidCallback? onTap;
 
-  const ClientCard({
+  const InActiveClientCard({
     Key? key,
     required this.client,
     this.onTap,

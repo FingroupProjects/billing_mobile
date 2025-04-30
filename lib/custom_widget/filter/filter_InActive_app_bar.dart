@@ -1,22 +1,24 @@
+import 'package:billing_mobile/custom_widget/filter/connectionType_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/partner_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:flutter/material.dart';
 
-class FilterClientScreen extends StatefulWidget {
+class FilterInActiveScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onFilterSelected;
   final Map<String, dynamic>? initialFilters;
 
-  FilterClientScreen({
+  FilterInActiveScreen({
     Key? key,
     this.onFilterSelected,
     this.initialFilters,
   }) : super(key: key);
 
   @override
-  _FilterClientScreenState createState() => _FilterClientScreenState();
+  _FilterInActiveScreenState createState() => _FilterInActiveScreenState();
 }
 
-class _FilterClientScreenState extends State<FilterClientScreen> {
+class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
+  int? _selectedConnectionType;
   int? _selectedTariff;
   int? _selectedPartner;
 
@@ -24,6 +26,7 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
   void initState() {
     super.initState();
     if (widget.initialFilters != null) {
+      _selectedConnectionType = widget.initialFilters!['demo'];
       _selectedTariff = widget.initialFilters!['tariff'];
       _selectedPartner = widget.initialFilters!['partner'];
     }
@@ -31,6 +34,7 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
 
   void _resetFilters() {
     setState(() {
+      _selectedConnectionType = null;
       _selectedTariff = null;
       _selectedPartner = null;
     });
@@ -98,11 +102,13 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
           const SizedBox(width: 10),
           TextButton(
             onPressed: () {
-              if (_selectedTariff == null &&
+              if (_selectedConnectionType == null &&
+                  _selectedTariff == null &&
                   _selectedPartner == null) {
                 Navigator.pop(context);
               } else {
                 final filterData = {
+                  'demo': _selectedConnectionType,
                   'tariff': _selectedTariff,
                   'partner': _selectedPartner,
                 };
@@ -139,6 +145,22 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: ConnectionTypeList(
+                          selectedstatus: _selectedConnectionType?.toString(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedConnectionType = newValue != null ? int.parse(newValue) : null;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       color: Colors.white,

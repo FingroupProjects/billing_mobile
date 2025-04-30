@@ -29,7 +29,7 @@ class _MyNavBarState extends State<MyNavBar> {
     color: Colors.white,
     fontFamily: 'Golos',
     fontWeight: FontWeight.w500,
-    fontSize: 14,
+    fontSize: 12,
   );
 
   @override

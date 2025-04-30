@@ -12,7 +12,6 @@ class CustomAppBar extends StatefulWidget {
   Function(bool) clearButtonClickFiltr;
   final bool showSearchIcon;
   final bool showFilterIcon;
-  final bool showFilterOrderIcon;
   final VoidCallback? onFilterTap;
   final bool isFilterActive; 
 
@@ -27,8 +26,7 @@ class CustomAppBar extends StatefulWidget {
     required this.clearButtonClick,
     required this.clearButtonClickFiltr,
     this.showSearchIcon = true,
-    this.showFilterIcon = true,
-    this.showFilterOrderIcon = true,
+    this.showFilterIcon = false,
     this.isFilterActive = false, 
   });
 

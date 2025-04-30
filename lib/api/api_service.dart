@@ -14,8 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-// const String baseUrl = 'https://billing.sham360.com/api';
-const String baseUrl = 'https://billing-back.shamcrm.com/api';
+const String baseUrl = 'https://billing.sham360.com/api';
+// const String baseUrl = 'https://billing-back.shamcrm.com/api';
 
 class ApiService {
   Future<http.Response> _handleResponse(http.Response response) async {
@@ -160,6 +160,68 @@ Future<LoginResponse> login(LoginModel loginModel) async {
 
   // //_________________________________ START_____API_SCREEN__CLIENTS____________________________________________//
 
+// Future<ClientListResponse> getClients({
+//   int page = 1,
+//   String? search,
+//   int? demo,
+//   int? status,
+//   int? tariff,
+//   int? partner,
+// }) async {
+//   try {
+//     final queryParameters = {
+//       'page': page.toString(),
+//       if (search != null && search.isNotEmpty) 'search': search,
+//       if (demo != null) 'demo': demo.toString(),
+//       if (status != null) 'status': status.toString(),
+//       if (tariff != null) 'tariff': tariff.toString(),
+//       if (partner != null) 'partner': partner.toString(),
+//     };
+    
+//     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
+//     final response = await _getRequest(uri.toString());
+    
+//     switch (response.statusCode) {
+//       case 200:
+//         final jsonData = json.decode(response.body);
+//         if (jsonData['clients'] != null) {
+//           final adaptedJson = {
+//             'view': '/clients',
+//             'data': {
+//               'clients': jsonData['clients'],
+//               'partners': jsonData['partners'] ?? [],
+//               'tariffs': jsonData['tariffs'] ?? [],
+//             }
+//           };
+//           return ClientListResponse.fromJson(adaptedJson);
+//         }
+//         return ClientListResponse.fromJson(jsonData);
+      
+//       case 400:
+//         throw ('Некорректный запрос: ${response.body}');
+      
+//       case 401:
+//         throw ('Не авторизован: требуется аутентификация');
+      
+//       case 403:
+//         throw ('Доступ запрещен');
+      
+//       case 404:
+//         throw ('Ресурс не найден');
+      
+//       case 429:
+//         throw ('Слишком много запросов. Пожалуйста, попробуйте позже');
+      
+//       case 500:
+//         throw ('Внутренняя ошибка сервера. Пожалуйста, попробуйте позже');
+      
+//       default:
+//         throw ('Ошибка загрузки клиентов!');
+//     }
+//   } catch (e) {
+//     throw ('Ошибка загрузки клиентов!');
+//   }
+// }
 Future<ClientListResponse> getClients({
   int page = 1,
   String? search,
@@ -172,8 +234,134 @@ Future<ClientListResponse> getClients({
     final queryParameters = {
       'page': page.toString(),
       if (search != null && search.isNotEmpty) 'search': search,
+      'demo': (demo ?? 0).toString(),  
+      'status': (status ?? 1).toString(),  
+      if (tariff != null) 'tariff': tariff.toString(),
+      if (partner != null) 'partner': partner.toString(),
+    };
+    
+    final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
+    final response = await _getRequest(uri.toString());
+    
+    switch (response.statusCode) {
+      case 200:
+        final jsonData = json.decode(response.body);
+        if (jsonData['clients'] != null) {
+          final adaptedJson = {
+            'view': '/clients',
+            'data': {
+              'clients': jsonData['clients'],
+              'partners': jsonData['partners'] ?? [],
+              'tariffs': jsonData['tariffs'] ?? [],
+            }
+          };
+          return ClientListResponse.fromJson(adaptedJson);
+        }
+        return ClientListResponse.fromJson(jsonData);
+      
+      case 400:
+        throw ('Некорректный запрос: ${response.body}');
+      
+      case 401:
+        throw ('Не авторизован: требуется аутентификация');
+      
+      case 403:
+        throw ('Доступ запрещен');
+      
+      case 404:
+        throw ('Ресурс не найден');
+      
+      case 429:
+        throw ('Слишком много запросов. Пожалуйста, попробуйте позже');
+      
+      case 500:
+        throw ('Внутренняя ошибка сервера. Пожалуйста, попробуйте позже');
+      
+      default:
+        throw ('Ошибка загрузки клиентов!');
+    }
+  } catch (e) {
+    throw ('Ошибка загрузки клиентов!');
+  }
+}
+
+
+Future<ClientListResponse> getDemoClients({
+  int page = 1,
+  String? search,
+  int? demo,
+  int? status,
+  int? tariff,
+  int? partner,
+}) async {
+  try {
+    final queryParameters = {
+      'page': page.toString(),
+      if (search != null && search.isNotEmpty) 'search': search,
+      'demo': (demo ?? 1).toString(),  
+      'status': (status ?? 1).toString(),  
+      if (tariff != null) 'tariff': tariff.toString(),
+      if (partner != null) 'partner': partner.toString(),
+    };
+    
+    final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
+    final response = await _getRequest(uri.toString());
+    
+    switch (response.statusCode) {
+      case 200:
+        final jsonData = json.decode(response.body);
+        if (jsonData['clients'] != null) {
+          final adaptedJson = {
+            'view': '/clients',
+            'data': {
+              'clients': jsonData['clients'],
+              'partners': jsonData['partners'] ?? [],
+              'tariffs': jsonData['tariffs'] ?? [],
+            }
+          };
+          return ClientListResponse.fromJson(adaptedJson);
+        }
+        return ClientListResponse.fromJson(jsonData);
+      
+      case 400:
+        throw ('Некорректный запрос: ${response.body}');
+      
+      case 401:
+        throw ('Не авторизован: требуется аутентификация');
+      
+      case 403:
+        throw ('Доступ запрещен');
+      
+      case 404:
+        throw ('Ресурс не найден');
+      
+      case 429:
+        throw ('Слишком много запросов. Пожалуйста, попробуйте позже');
+      
+      case 500:
+        throw ('Внутренняя ошибка сервера. Пожалуйста, попробуйте позже');
+      
+      default:
+        throw ('Ошибка загрузки клиентов!');
+    }
+  } catch (e) {
+    throw ('Ошибка загрузки клиентов!');
+  }
+}
+Future<ClientListResponse> getInActiveClients({
+  int page = 1,
+  String? search,
+  int? demo,
+  int? status,
+  int? tariff,
+  int? partner,
+}) async {
+  try {
+    final queryParameters = {
+      'page': page.toString(),
+      if (search != null && search.isNotEmpty) 'search': search,
       if (demo != null) 'demo': demo.toString(),
-      if (status != null) 'status': status.toString(),
+      'status': (status ?? 0).toString(),  
       if (tariff != null) 'tariff': tariff.toString(),
       if (partner != null) 'partner': partner.toString(),
     };

@@ -2,6 +2,8 @@
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
 import 'package:billing_mobile/bloc/clients/clients_state.dart';
+import 'package:billing_mobile/bloc/clients_demo/demo_clients_bloc.dart';
+import 'package:billing_mobile/bloc/clients_demo/demo_clients_event.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/custom_phone_number_input.dart';
 import 'package:billing_mobile/custom_widget/custom_textfield.dart';
@@ -98,6 +100,7 @@ class _ClientAddScreenState extends State<ClientAddScreen> {
              );
             Navigator.pop(context);
             context.read<ClientBloc>().add(FetchClients());
+            context.read<DemoBloc>().add(FetchDemo());
           }
         },
         child: Form(

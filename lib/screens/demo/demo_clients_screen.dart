@@ -1,22 +1,22 @@
-import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
-import 'package:billing_mobile/bloc/clients/clients_event.dart';
-import 'package:billing_mobile/bloc/clients/clients_state.dart';
+import 'package:billing_mobile/bloc/clients_demo/demo_clients_bloc.dart';
+import 'package:billing_mobile/bloc/clients_demo/demo_clients_event.dart';
+import 'package:billing_mobile/bloc/clients_demo/demo_clients_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
-import 'package:billing_mobile/custom_widget/filter/filter_client_app_bar.dart';
+import 'package:billing_mobile/custom_widget/filter/filter_demo_app_bar.dart';
 import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
-import 'package:billing_mobile/screens/clients/clients_card.dart';
 import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
+import 'package:billing_mobile/screens/demo/demo_clients_card.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ClientsScreen extends StatefulWidget {
+class DemoClientsScreen extends StatefulWidget {
   @override
-  _ClientsScreenState createState() => _ClientsScreenState();
+  _DemoClientsScreenState createState() => _DemoClientsScreenState();
 }
 
-class _ClientsScreenState extends State<ClientsScreen> {
+class _DemoClientsScreenState extends State<DemoClientsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
@@ -29,7 +29,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    context.read<ClientBloc>().add(FetchClients());
+    context.read<DemoBloc>().add(FetchDemo());
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -37,13 +37,15 @@ class _ClientsScreenState extends State<ClientsScreen> {
     setState(() {
       _isSearching = _searchController.text.isNotEmpty;
     });
-    context.read<ClientBloc>().add(SearchClients(_searchController.text));
+    context.read<DemoBloc>().add(SearchDemo(_searchController.text));
   }
 
   void _onScroll() {
-    final state = context.read<ClientBloc>().state;
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && (state is ClientLoaded && !state.isLoadingMore)) {
-    context.read<ClientBloc>().add(FetchMoreClients());
+    final state = context.read<DemoBloc>().state;
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        (state is DemoLoaded && !state.isLoadingMore)) {
+      context.read<DemoBloc>().add(FetchMoreDemo());
     }
   }
 
@@ -56,7 +58,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     super.dispose();
   }
 
-  Widget _buildClientsList(ClientLoaded state) {
+  Widget _buildClientsList(DemoLoaded state) {
     final clients = state.clientData.data.clients.data;
     
     if (_isSearching && clients.isEmpty) {
@@ -91,7 +93,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
       itemBuilder: (context, index) {
         if (index < clients.length) {
           final client = clients[index];
-          return ClientCard(
+          return DemoClientCard(
             client: client,
             onTap: () {
               Navigator.push(
@@ -105,7 +107,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
         } else {
           return const Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16),
               child: CircularProgressIndicator(color: Color(0xff1E2E52)),
             ),
           );
@@ -120,7 +122,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
       appBar: AppBar(
         forceMaterialTransparency: true,
         title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Клиенты',
+          title: isClickAvatarIcon ? 'Настройка' : 'Демо',
           onClickProfileAvatar: () {
             setState(() {
               isClickAvatarIcon = !isClickAvatarIcon;
@@ -135,12 +137,12 @@ class _ClientsScreenState extends State<ClientsScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => FilterClientScreen(
+                builder: (context) => FilterDemoScreen(
                   onFilterSelected: (filters) {
                     setState(() {
                       _currentFilters = filters;
                     });
-                    context.read<ClientBloc>().add(ApplyFilters(filters));
+                    context.read<DemoBloc>().add(DemoApplyFilters(filters));
                   },
                   initialFilters: _currentFilters,
                 ),
@@ -155,20 +157,20 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 _isSearching = false;
                 _searchController.clear();
               });
-              context.read<ClientBloc>().add(SearchClients(''));
+              context.read<DemoBloc>().add(SearchDemo(''));
             }
           },
         ),
       ),
       body: isClickAvatarIcon
           ? const ProfileScreen()
-          : BlocBuilder<ClientBloc, ClientState>(
+          : BlocBuilder<DemoBloc, DemoState>(
               builder: (context, state) {
-                if (state is ClientLoading) {
+                if (state is DemoLoading) {
                   return const Center(
                     child: CircularProgressIndicator(color: Color(0xff1E2E52)),
                   );
-                } else if (state is ClientError) {
+                } else if (state is DemoError) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -184,7 +186,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                             buttonText: 'Обновить',
                             buttonColor: Color(0xff4759FF),
                             textColor: Colors.white,
-                            onPressed: () { context.read<ClientBloc>().add(FetchClients());},
+                            onPressed: () { context.read<DemoBloc>().add(FetchDemo());},
                             child: const Text('Повторить попытку', style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
                             ),
                                  ),
@@ -195,12 +197,12 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       ],
                     ),
                   );
-                } else if (state is ClientLoaded) {
+                } else if (state is DemoLoaded) {
                   return RefreshIndicator(
                     color: const Color(0xff1E2E52),
                     backgroundColor: Colors.white,
                     onRefresh: () async {
-                      context.read<ClientBloc>().add(FetchClients());
+                      context.read<DemoBloc>().add(FetchDemo());
                     },
                     child: _buildClientsList(state),
                   );
@@ -215,7 +217,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
             MaterialPageRoute(builder: (context) => ClientAddScreen()),
           );
           if (result == true) {
-            context.read<ClientBloc>().add(FetchClients());
+            context.read<DemoBloc>().add(FetchDemo());
           }
         },
         backgroundColor: const Color(0xff1E2E52),

@@ -2,21 +2,21 @@ import 'package:billing_mobile/screens/clients/client_details/partner_list.dart'
 import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:flutter/material.dart';
 
-class FilterClientScreen extends StatefulWidget {
+class FilterDemoScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onFilterSelected;
   final Map<String, dynamic>? initialFilters;
 
-  FilterClientScreen({
+  FilterDemoScreen({
     Key? key,
     this.onFilterSelected,
     this.initialFilters,
   }) : super(key: key);
 
   @override
-  _FilterClientScreenState createState() => _FilterClientScreenState();
+  _FilterDemoScreenState createState() => _FilterDemoScreenState();
 }
 
-class _FilterClientScreenState extends State<FilterClientScreen> {
+class _FilterDemoScreenState extends State<FilterDemoScreen> {
   int? _selectedTariff;
   int? _selectedPartner;
 
@@ -139,6 +139,7 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    const SizedBox(height: 8),
                     Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       color: Colors.white,
