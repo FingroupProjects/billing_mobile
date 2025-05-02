@@ -55,16 +55,15 @@ class InActiveClientCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text(
-                  client.isDemo ? 'Демо' : '',
-                  style: const TextStyle(
-                    fontSize: 16, 
-                    fontFamily: 'Gilroy',
-                    fontWeight: FontWeight.w500, 
-                    color: Colors.green,
-                    // color: Color(0xff1E2E52),
-                  ),
+                 Text(
+                client.isDemo ? 'Демо' : (client.nfr == 1 ? 'НФР' : ''),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Gilroy',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.green,
                 ),
+              )
               ],
             ),
             const SizedBox(height: 8),

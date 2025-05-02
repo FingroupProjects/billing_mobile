@@ -33,6 +33,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     _searchController.addListener(_onSearchChanged);
   }
 
+
   void _onSearchChanged() {
     setState(() {
       _isSearching = _searchController.text.isNotEmpty;

@@ -61,6 +61,7 @@ class Client {
   final String clientType;
   final DateTime? lastActivity;
   final Tariff tariff;
+  final int nfr;
 
   Client({
     required this.id,
@@ -74,6 +75,7 @@ class Client {
     this.clientType = '',
     this.lastActivity,
     required this.tariff,
+    required this.nfr,
   });
 
   factory Client.fromJson(Map<String, dynamic> json) {
@@ -93,6 +95,9 @@ class Client {
               id: 0,
               name: 'Unknown',
             ),
+      nfr: json['nfr'],
+
+      
     );
   }
 }
