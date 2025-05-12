@@ -53,8 +53,6 @@ Future<void> _fetchOrganization( FetchOrganizationEvent event, Emitter<Organizat
           clientId: event.clientId,
           name: event.name,
           phone: event.phone,
-          inn: event.inn,
-          businessTypeId: event.businessTypeId,
           address: event.address,
         );
 

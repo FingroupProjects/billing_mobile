@@ -22,11 +22,9 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
-  final TextEditingController innController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
 
   String? selectedDialCode = '';
-  String? selectedTypeBuisness;
 
   @override
   void initState() {
@@ -112,21 +110,6 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                           validator: (value) { if (value == null || value.isEmpty) { return 'Поле обязательно для заполнения!'; } return null;},
                           label: 'Телефон',
                         ),
-                        SizedBox(height: 8),
-                        CustomTextField(
-                          controller: innController,
-                          hintText: 'Введите ИНН',
-                          label:'ИНН',
-                          keyboardType: TextInputType.number,
-                          validator: (value) { if (value == null || value.isEmpty) { return 'Поле обязательно для заполнения'; } return null; },
-                        ),
-                        SizedBox(height: 8),
-                        BusinessTypeList(
-                          selectedBusinessType: selectedTypeBuisness.toString(),
-                          onChanged: (value) {
-                            selectedTypeBuisness = value;
-                          },
-                        ),
                         const SizedBox(height: 8),
                         CustomTextField(
                           controller: addressController,
@@ -188,8 +171,6 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
         clientId: widget.clientId,
         name: nameController.text,
         phone: selectedDialCode.toString(),
-        inn: innController.text,
-        businessTypeId: selectedTypeBuisness.toString(),
         address: addressController.text,
       ));    
     } else {

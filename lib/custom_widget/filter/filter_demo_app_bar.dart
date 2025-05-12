@@ -1,4 +1,3 @@
-import 'package:billing_mobile/screens/clients/client_details/partner_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:flutter/material.dart';
 
@@ -18,21 +17,18 @@ class FilterDemoScreen extends StatefulWidget {
 
 class _FilterDemoScreenState extends State<FilterDemoScreen> {
   int? _selectedTariff;
-  int? _selectedPartner;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialFilters != null) {
       _selectedTariff = widget.initialFilters!['tariff'];
-      _selectedPartner = widget.initialFilters!['partner'];
     }
   }
 
   void _resetFilters() {
     setState(() {
       _selectedTariff = null;
-      _selectedPartner = null;
     });
   }
 
@@ -98,13 +94,11 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
           const SizedBox(width: 10),
           TextButton(
             onPressed: () {
-              if (_selectedTariff == null &&
-                  _selectedPartner == null) {
+              if (_selectedTariff == null ) {
                 Navigator.pop(context);
               } else {
                 final filterData = {
                   'tariff': _selectedTariff,
-                  'partner': _selectedPartner,
                 };
                 widget.onFilterSelected?.call(filterData);
                 Navigator.pop(context);
@@ -150,22 +144,6 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
                           onChanged: (String? newValue) {
                             setState(() {
                               _selectedTariff = newValue != null ? int.parse(newValue) : null;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      color: Colors.white,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: PartnerList(
-                          selectedPartner: _selectedPartner?.toString(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedPartner = value != null ? int.parse(value.toString()) : null;
                             });
                           },
                         ),
