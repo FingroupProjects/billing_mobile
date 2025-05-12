@@ -56,7 +56,7 @@ class ClientCard extends StatelessWidget {
                   ),
                 ),
                Text(
-                client.isDemo ? 'Демо' : (client.nfr == 1 ? 'НФР' : ''),
+                client.isDemo ? 'Демо' : (client.nfr == 1 ? 'NFR' : ''),
                 style: const TextStyle(
                   fontSize: 16,
                   fontFamily: 'Gilroy',

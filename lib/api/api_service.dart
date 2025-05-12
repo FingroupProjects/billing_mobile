@@ -14,8 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-// const String baseUrl = 'https://billing.sham360.com/api';
-const String baseUrl = 'https://billing-back.shamcrm.com/api';
+const String baseUrl = 'https://billing.sham360.com/api';
+// const String baseUrl = 'https://billing-back.shamcrm.com/api';
 
 class ApiService {
   Future<http.Response> _handleResponse(http.Response response) async {
@@ -544,6 +544,16 @@ Future<List<History>> getClientHistory(int clientId) async {
 
     if (response.statusCode != 200) {
       throw Exception('Статус клиента успешно изменен!');
+    }
+  }
+
+  Future<void> OrganizationActiveDeactivate(int organizationId) async {
+    final response = await _postRequest('/organizations/access/$organizationId',
+        {
+        });
+
+    if (response.statusCode != 200) {
+      throw Exception('Статус организации успешно изменен!');
     }
   }
 

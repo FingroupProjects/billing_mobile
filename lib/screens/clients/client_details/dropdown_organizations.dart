@@ -2,6 +2,7 @@ import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
 import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/add_organization.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/edit_organization.dart';
+import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_activate_deactivate.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_details_screen.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
@@ -165,6 +166,16 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
                   ],
                 ),
               ),
+              IconButton(
+          icon: Image.asset(
+            isActive == false 
+              ? 'assets/icons/power_off.png' 
+              : 'assets/icons/power_on.png',
+            width: 28,
+            height: 28,
+          ),
+          onPressed: () => _showActivateDeactivateOrganizationDialog(organization),
+        ),
               // IconButton(
               //   icon: Icon(Icons.delete, color: Color(0xff1E2E52)),
               //   onPressed: () => _showDeleteOrganizationDialog(organization),
@@ -262,5 +273,17 @@ void _showDetailsOrganizationScreen(Organization organization) {
     //     );
     //   },
     // );
+  }
+
+  void _showActivateDeactivateOrganizationDialog(Organization organization) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ActiveDeactiveOrganizationDialog(
+          organizationId: organization.id,
+          active: organization.hasAccess == 1 ? true : false, 
+        );
+      },
+    );
   }
 }
