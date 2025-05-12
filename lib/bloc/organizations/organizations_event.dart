@@ -22,16 +22,12 @@ class CreateOrganizations extends OrganizationEvent {
   final int clientId;
   final String name;
   final String phone;
-  final String inn;
-  final String businessTypeId;
   final String address;   
 
   CreateOrganizations({
     required this.clientId,
     required this.name,
     required this.phone,
-    required this.inn,
-    required this.businessTypeId,
     required this.address,
   });
 }

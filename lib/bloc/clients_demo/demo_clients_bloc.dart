@@ -41,9 +41,7 @@ class DemoBloc extends Bloc<DemoEvent, DemoState> {
       page: _currentPage,
       search: _currentSearchQuery,
       demo: _currentFilters['demo'],
-      status: _currentFilters['status'],
       tariff: _currentFilters['tariff'],
-      partner: _currentFilters['partner'],
     );
     emit(DemoLoaded(demoData, isLoadingMore: false));
   } catch (e) {
@@ -74,9 +72,7 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
         page: _currentPage + 1,
         search: _currentSearchQuery, 
         demo: _currentFilters['demo'],
-        status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
-        partner: _currentFilters['partner'],
       );
       
       final updatedClients = ClientList(

@@ -292,7 +292,6 @@ Future<ClientListResponse> getDemoClients({
   int? demo,
   int? status,
   int? tariff,
-  int? partner,
 }) async {
   try {
     final queryParameters = {
@@ -301,7 +300,6 @@ Future<ClientListResponse> getDemoClients({
       'demo': (demo ?? 1).toString(),  
       'status': (status ?? 1).toString(),  
       if (tariff != null) 'tariff': tariff.toString(),
-      if (partner != null) 'partner': partner.toString(),
     };
     
     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
@@ -429,13 +427,7 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
     required String fio,
     required String phone,
     required String email,
-    String? contactPerson,
-    required String subDomain,
-    int? partnerId,
-    String? clientType,
     int? tariffId,
-    int? saleId,
-    int? countryId,
     required bool isDemo,
   }) async {
 
@@ -444,13 +436,7 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
           'name': fio,
           'phone': phone,
           'email': email,
-          'contact_person': contactPerson,
-          'sub_domain': subDomain,
-          'partner_id': partnerId,
-          'client_type': clientType,
           'tariff_id': tariffId,
-          'sale_id': saleId,
-          'country_id': countryId,
           'is_demo': isDemo,
         });
 
@@ -617,16 +603,12 @@ Future<Map<String, dynamic>> createOrganizations({
   required int clientId,
   required String name,
   required String phone,
-  required String inn,
-  required String businessTypeId,
   required String address,
 }) async {
   final response = await _postRequest('/organizations/$clientId',
     {
       'name': name,
       'phone': phone,
-      'INN': inn,
-      'business_type_id': businessTypeId,
       'address': address,
     },
   );

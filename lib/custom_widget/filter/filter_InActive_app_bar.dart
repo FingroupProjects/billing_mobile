@@ -1,5 +1,4 @@
 import 'package:billing_mobile/custom_widget/filter/connectionType_list.dart';
-import 'package:billing_mobile/screens/clients/client_details/partner_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +19,6 @@ class FilterInActiveScreen extends StatefulWidget {
 class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
   int? _selectedConnectionType;
   int? _selectedTariff;
-  int? _selectedPartner;
 
   @override
   void initState() {
@@ -28,7 +26,6 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
     if (widget.initialFilters != null) {
       _selectedConnectionType = widget.initialFilters!['demo'];
       _selectedTariff = widget.initialFilters!['tariff'];
-      _selectedPartner = widget.initialFilters!['partner'];
     }
   }
 
@@ -36,7 +33,6 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
     setState(() {
       _selectedConnectionType = null;
       _selectedTariff = null;
-      _selectedPartner = null;
     });
   }
 
@@ -103,14 +99,12 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
           TextButton(
             onPressed: () {
               if (_selectedConnectionType == null &&
-                  _selectedTariff == null &&
-                  _selectedPartner == null) {
+                  _selectedTariff == null) {
                 Navigator.pop(context);
               } else {
                 final filterData = {
                   'demo': _selectedConnectionType,
                   'tariff': _selectedTariff,
-                  'partner': _selectedPartner,
                 };
                 widget.onFilterSelected?.call(filterData);
                 Navigator.pop(context);
@@ -171,22 +165,6 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
                           onChanged: (String? newValue) {
                             setState(() {
                               _selectedTariff = newValue != null ? int.parse(newValue) : null;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      color: Colors.white,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: PartnerList(
-                          selectedPartner: _selectedPartner?.toString(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedPartner = value != null ? int.parse(value.toString()) : null;
                             });
                           },
                         ),

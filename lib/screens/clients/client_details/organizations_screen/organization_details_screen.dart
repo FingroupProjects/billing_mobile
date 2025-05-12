@@ -6,7 +6,6 @@ import 'package:billing_mobile/models/organizations_model.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 class OrganizationDetailsScreen extends StatefulWidget {
   final int organizationId;
@@ -72,20 +71,10 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
       final org = organizations.first;
       final detailsList = [
         {'label': 'Название:', 'value': org.name},
-        {'label': 'ИНН:', 'value': org.INN.toString()},
         {'label': 'Телефон:', 'value': org.phone},
         {'label': 'Адрес:', 'value': org.address},
-        {'label': 'Доступ:', 'value': org.hasAccess == 1 ? 'Есть' : 'Нет'},
-        {'label': 'Создано:', 'value': DateFormat('dd.MM.yyyy').format(org.createdAt)},
-        {'label': 'Обновлено:', 'value': DateFormat('dd.MM.yyyy').format(org.updatedAt)},
-        {'label': 'Тип бизнеса:', 'value': org.businessTypeName.toString()},
       ];
       
-      // Добавляем причину отказа только если она не пустая
-      if (org.rejectCause != null && org.rejectCause!.isNotEmpty) {
-        detailsList.add({'label': 'Причина отказа:', 'value': org.rejectCause!});
-      }
-
       setState(() {
         details = detailsList;
       });

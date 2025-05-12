@@ -7,10 +7,6 @@ import 'package:billing_mobile/bloc/clients_demo/demo_clients_event.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/custom_phone_number_input.dart';
 import 'package:billing_mobile/custom_widget/custom_textfield.dart';
-import 'package:billing_mobile/screens/clients/client_details/client_type_list.dart';
-import 'package:billing_mobile/screens/clients/client_details/country_list.dart';
-import 'package:billing_mobile/screens/clients/client_details/partner_list.dart';
-import 'package:billing_mobile/screens/clients/client_details/sale_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
@@ -28,15 +24,9 @@ class _ClientAddScreenState extends State<ClientAddScreen> {
   final TextEditingController fioController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController contactPersonLoginController = TextEditingController();
-  final TextEditingController subdomainController = TextEditingController();
 
-  int? selectedPartner;
-  String? selectedClientType;
   int? selectedTariff;
   String selectedDialCode = '';
-  int? selectedSaleId;
-  int? selectedCountryId;
   bool isActive = false;
 
   @override
@@ -143,52 +133,11 @@ class _ClientAddScreenState extends State<ClientAddScreen> {
                           validator: (value) { if (value == null || value.isEmpty) { return 'Поле обезательно для заполнения!'; } return null;},
                         ),
                         const SizedBox(height: 8),
-                        CustomTextField(
-                          controller: contactPersonLoginController,
-                          hintText: 'Введите контактного лица',
-                          label: 'Контактное лицо',
-                        ),
-                        const SizedBox(height: 8),
-                        CustomTextField(
-                          controller: subdomainController,
-                          hintText: 'Введите поддомен',
-                          label: 'Поддомен',
-                          validator: (value) { if (value == null || value.isEmpty) { return 'Поле обезательно для заполнения!'; } return null;},
-                        ),
-                        const SizedBox(height: 8),
-                        PartnerList(
-                          selectedPartner: selectedPartner.toString(),
-                          onChanged: (value) {
-                              selectedPartner = int.parse(value.toString());
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        ClientTypeList(
-                          selectedClientType: null, 
-                          onChanged: (String? newValue) {
-                            selectedClientType =  newValue ;
-                          },
-                        ),
-                        const SizedBox(height: 8),
                         TariffList(
                           selectedTariff: null, 
                           onChanged: (String? newValue) {
                             selectedTariff = newValue != null ? int.parse(newValue) : null;
                           },
-                        ),
-                        const SizedBox(height: 8),
-                        SaleList(
-                         selectedSale: selectedSaleId.toString(),
-                         onChanged: (value) {
-                          selectedSaleId = int.parse(value.toString());
-                         },
-                        ),
-                        const SizedBox(height: 8),
-                        CountryList(
-                         selectedCountry: selectedCountryId.toString(),
-                         onChanged: (value) {
-                          selectedCountryId = int.parse(value.toString());
-                         },
                         ),
                         const SizedBox(height: 15),
                         Row(
@@ -304,20 +253,12 @@ class _ClientAddScreenState extends State<ClientAddScreen> {
     final String fio = fioController.text;
     final String phone = selectedDialCode;
     final String email = emailController.text;
-    final String? contactPerson = contactPersonLoginController.text.isEmpty ? null : contactPersonLoginController.text;
-    final String subDomain =  subdomainController.text;
 
     context.read<ClientBloc>().add(CreateClients(
       fio: fio,
       phone: phone,
       email: email,
-      contactPerson: contactPerson,
-      subDomain: subDomain,
-      partnerid: selectedPartner,
-      clientType: selectedClientType.toString(),
       tarrifId: selectedTariff,
-      saleId: selectedSaleId, 
-      countryId: selectedCountryId, 
       isDemo: isActive ,
     ));
   }

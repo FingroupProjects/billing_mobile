@@ -34,6 +34,8 @@ flutter:
     - assets/icons/AppBar/
     - assets/icons/Profile/
     - assets/icons/
+    - assets/
+    
   fonts:
     - family: Gilroy
       fonts:

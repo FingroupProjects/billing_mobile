@@ -42,9 +42,7 @@ class ClientBloc extends Bloc<ClientEvent, ClientState> {
       page: _currentPage,
       search: _currentSearchQuery,
       demo: _currentFilters['demo'],
-      status: _currentFilters['status'],
       tariff: _currentFilters['tariff'],
-      partner: _currentFilters['partner'],
     );
     emit(ClientLoaded(clientData, isLoadingMore: false));
   } catch (e) {
@@ -75,9 +73,7 @@ Future<void> _onFetchMoreClients(FetchMoreClients event, Emitter<ClientState> em
         page: _currentPage + 1,
         search: _currentSearchQuery, 
         demo: _currentFilters['demo'],
-        status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
-        partner: _currentFilters['partner'],
       );
       
       final updatedClients = ClientList(
@@ -124,13 +120,7 @@ Future<void> _onFetchMoreClients(FetchMoreClients event, Emitter<ClientState> em
           fio: event.fio,
           phone: event.phone,
           email: event.email,
-          contactPerson: event.contactPerson,
-          subDomain: event.subDomain,
-          partnerId: event.partnerid,
-          clientType: event.clientType,
           tariffId: event.tarrifId,
-          saleId: event.saleId,
-          countryId: event.countryId,
           isDemo: event.isDemo,
         );
 

@@ -89,11 +89,11 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
       padding: EdgeInsets.zero,
       child: Row(children: [
         Container(
-          width: 50,
-          height: 50,
+          width: 42,
+          height: 42,
           child: IconButton(
             padding: EdgeInsets.zero,
-            icon: Image.asset('assets/icons/AppBar/Avatar.png'),
+            icon: Image.asset('assets/logo.png'),
             onPressed: widget.onClickProfileAvatar,
           ),
         ),
