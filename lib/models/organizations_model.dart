@@ -1,3 +1,10 @@
+int parseInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
 class Organization {
   final int id;
   final String name;
@@ -27,19 +34,19 @@ class Organization {
 
   factory Organization.fromJson(Map<String, dynamic> json) {
     return Organization(
-      id: json['id'] ?? 0,
+      id: parseInt(json['id']),
       name: json['name'] ?? '',
-      INN: json['INN'] ?? 0,
+      INN: parseInt(json['INN']),
       phone: json['phone'] ?? '',
       address: json['address'] ?? '',
-      hasAccess: json['has_access'] ?? 0,
+      hasAccess: parseInt(json['has_access']),
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toString()),
       updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toString()),
-      businessTypeId: json['business_type_id'] ?? 0,
+      businessTypeId: parseInt(json['business_type_id']),
       rejectCause: json['reject_cause'],
       businessTypeName: json['business_type'] != null 
           ? json['business_type']['name'] ?? '' 
-          : '', 
+          : '',
     );
   }
 }

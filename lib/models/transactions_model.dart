@@ -1,6 +1,13 @@
 import 'package:billing_mobile/models/clientsById_model.dart';
 import 'package:billing_mobile/models/organizations_model.dart';
 
+int parseInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
 class TransactionListResponse {
   final String view;
   final TransactionList data;
@@ -30,10 +37,10 @@ class TransactionList {
 
   factory TransactionList.fromJson(Map<String, dynamic> json) {
     return TransactionList(
-      currentPage: json['current_page'] ?? 1,
-      lastPage: json['last_page'] ?? 1,
+      currentPage: parseInt(json['current_page']),
+      lastPage: parseInt(json['last_page']),
       data: (json['data'] as List?)?.map((e) => Transaction.fromJson(e)).toList() ?? [],
-      total: json['total'] ?? 0,
+      total: parseInt(json['total']),
     );
   }
 }
@@ -69,15 +76,15 @@ class Transaction {
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
-      id: json['id'] ?? 0,
-      clientId: json['client_id'] ?? 0,
-      tariffId: json['tariff_id'],
-      saleId: json['sale_id'],
+      id: parseInt(json['id']),
+      clientId: parseInt(json['client_id']),
+      tariffId: json['tariff_id'] != null ? parseInt(json['tariff_id']) : null,
+      saleId: json['sale_id'] != null ? parseInt(json['sale_id']) : null,
       sum: json['sum'] ?? '0.00',
       type: json['type'] ?? '',
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toString()),
       updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toString()),
-      organizationId: json['organization_id'],
+      organizationId: json['organization_id'] != null ? parseInt(json['organization_id']) : null,
       tariff: json['tariff'] != null ? Tariff.fromJson(json['tariff']) : null,
       sale: json['sale'] != null ? Sale.fromJson(json['sale']) : null,
       organization: json['organization'] != null ? Organization.fromJson(json['organization']) : null,
