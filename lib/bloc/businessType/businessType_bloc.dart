@@ -24,7 +24,7 @@ Future<void> _onLoadBusinessType(
       emit(BusinessTypeLoadedState(businessTypes));
     }
   } catch (e) {
-    emit(BusinessTypeErrorState('Failed to load BusinessTypes: $e'));
+    emit(BusinessTypeErrorState('Failed to load BusinessTypes: '));
   }
 }
 

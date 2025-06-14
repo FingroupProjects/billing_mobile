@@ -1,6 +1,7 @@
 import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
 import 'package:billing_mobile/models/clients_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For number formatting
 
 class ClientCard extends StatelessWidget {
   final Client client;
@@ -14,6 +15,21 @@ class ClientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Create number formatter with space as thousands separator using ru_RU locale
+    final NumberFormat formatter = NumberFormat("#,##0", "ru_RU"); // Changed to use ru_RU locale for space separator
+
+    // Split balance string into number and currency parts, with error handling
+    String formattedBalance = '0';
+    try {
+      final balanceParts = client.balance.split(' ');
+      if (balanceParts.isNotEmpty) {
+        final numberPart = double.tryParse(balanceParts[0]) ?? 0.0;
+        formattedBalance = "${formatter.format(numberPart)} ${balanceParts.sublist(1).join(' ')}";
+      }
+    } catch (e) {
+      formattedBalance = 'Invalid balance';
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -29,7 +45,7 @@ class ClientCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start, 
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
@@ -55,15 +71,15 @@ class ClientCard extends StatelessWidget {
                     ),
                   ),
                 ),
-               Text(
-                client.isDemo ? 'Демо' : (client.nfr == 1 ? 'NFR' : ''),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Gilroy',
-                  fontWeight: FontWeight.w500,
-                  color: Colors.green,
-                ),
-              )
+                Text(
+                  client.isDemo ? 'Демо' : (client.nfr == 1 ? 'NFR' : ''),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Gilroy',
+                    fontWeight: FontWeight.w500,
+                    color: Colors.green,
+                  ),
+                )
               ],
             ),
             const SizedBox(height: 8),
@@ -88,12 +104,12 @@ class ClientCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: TaskCardStyles.priorityContainerDecoration.copyWith(
-                    color:  Colors.white,
+                    color: Colors.white,
                   ),
                   child: Text(
-                    "Баланс: ${client.balance}",
+                    formattedBalance, // Use formatted balance with space separator
                     style: TaskCardStyles.priorityStyle.copyWith(
-                      color: const Color(0xff1E2E52), 
+                      color: const Color(0xff1E2E52),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),

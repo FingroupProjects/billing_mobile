@@ -39,99 +39,124 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   final ApiService apiService = ApiService();
 
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-    context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
-  }
+ @override
+void initState() {
+  super.initState();
+  print('Initializing ClientDetailsScreen with clientId: ${widget.clientId}');
+  _scrollController = ScrollController();
+  print('ScrollController initialized');
+  context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
+  print('FetchClientByIdEvent dispatched for clientId: ${widget.clientId}');
+}
 
-  void _updateDetails(ClientById client, List<Sale> sales, String expirationDate) {
-
+void _updateDetails(ClientById client, List<Sale> sales, String expirationDate) {
+  print('Entering _updateDetails with client: $client, sales length: ${sales.length}, expirationDate: xpirationDate');
   Sale? clientSale;
   if (client.saleId != null) {
-    clientSale = sales.firstWhere(
-      (sale) => sale.id == client.saleId,
-    );
+    print('Searching for sale with id: ${client.saleId}');
+    try {
+      clientSale = sales.firstWhere((sale) => sale.id == client.saleId);
+      print('Found sale: $clientSale');
+    } catch (e) {
+      print('Sale not found, error: ');
+      clientSale = null;
+    }
+  } else {
+    print('No saleId found, clientSale is null');
   }
 
-    String formattedExpirationDate = '';
+  String formattedExpirationDate = '';
   if (expirationDate.isNotEmpty) {
+    print('Parsing expirationDate: xpirationDate');
     try {
       final parsedDate = DateTime.parse(expirationDate);
       formattedExpirationDate = DateFormat('dd.MM.yyyy').format(parsedDate);
+      print('Parsed expirationDate successfully: $formattedExpirationDate');
     } catch (e) {
       formattedExpirationDate = 'Неверный формат даты';
+      print('Error parsing expirationDate: ');
     }
+  } else {
+    print('expirationDate is empty');
   }
 
   setState(() {
+    print('Setting state with currentClient: $client, isActive: ${client.isActive}');
     currentClient = client;
-    isActive=client.isActive;
+    isActive = client.isActive;
     details = [
       {'label': 'ФИО:', 'value': client.name},
       {'label': 'Телефон:', 'value': client.phone},
       {'label': 'Почта:', 'value': client.email ?? ''},
       {'label': 'Поддомен:', 'value': client.subDomain},
-      {'label': 'Тип клиента:', 'value': client.clientType},
+      {'label': 'Тип клиента:', 'value': client.clientType ?? ''},
       {'label': 'Тариф:', 'value': client.tariff.name},
       {'label': 'Контактное лицо:', 'value': client.contactPerson ?? ''},
       {'label': 'Партнер:', 'value': client.partnerName ?? ''},
       {'label': 'Страна:', 'value': client.countryName ?? ''},
-      {'label': 'Скидка:', 'value': client.saleId != null  ? '${clientSale?.name}' : '' },
+      {'label': 'Скидка:', 'value': client.saleId != null ? '${clientSale?.name ?? ''}' : ''},
       {'label': 'Дата создания:', 'value': DateFormat('dd.MM.yyyy').format(client.createdAt)},
-      {'label': 'Дата окончания доступа:', 'value': formattedExpirationDate },
+      {'label': 'Дата окончания доступа:', 'value': formattedExpirationDate},
     ];
+    print('Details updated: $details');
   });
 }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(context, 'Детали клиента'),
-      backgroundColor: Colors.white,
-      body: BlocListener<ClientByIdBloc, ClientByIdState>(
-        listener: (context, state) {  
-          if (state is ClientByIdLoaded) {
-         _updateDetails(state.client, state.sales,state.expirationDate); 
+@override
+Widget build(BuildContext context) {
+  print('Building ClientDetailsScreen');
+  return Scaffold(
+    appBar: _buildAppBar(context, 'Детали клиента'),
+    backgroundColor: Colors.white,
+    body: BlocListener<ClientByIdBloc, ClientByIdState>(
+      listener: (context, state) {  
+        print('BlocListener triggered with state: $state');
+        if (state is ClientByIdLoaded) {
+          print('ClientByIdLoaded state received: client=${state.client}, sales length=${state.sales.length}, expirationDate=${state.expirationDate}');
+          _updateDetails(state.client, state.sales, state.expirationDate); 
+        } else if (state is ClientByIdError) {
+          print('ClientByIdError state received: message=${state.message}');
+          showCustomSnackBar(
+            context: context,
+            message: state.message,
+            isSuccess: false,
+          );
+        }
+      },
+      child: BlocBuilder<ClientByIdBloc, ClientByIdState>(
+        builder: (context, state) {
+          print('BlocBuilder triggered with state: $state');
+          if (state is ClientByIdLoading) {
+            print('State is ClientByIdLoading');
+            return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
+          } else if (state is ClientByIdLoaded) {
+            print('State is ClientByIdLoaded, building UI');
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: ListView(
+                controller: _scrollController,
+                children: [
+                  _buildDetailsList(),
+                  const SizedBox(height: 8),
+                  ClientHistoryWidget(clientId: widget.clientId),
+                  const SizedBox(height: 8),
+                  OrganizationsWidget(clientId: widget.clientId),
+                  const SizedBox(height: 8),
+                  TransactionsWidget(clientId: widget.clientId),
+                ],
+              ),
+            );
           } else if (state is ClientByIdError) {
-           showCustomSnackBar(
-             context: context,
-             message: state.message,
-             isSuccess: false,
-           );
+            print('State is ClientByIdError, showing error: ${state.message}');
+            return Center(child: Text(state.message));
           }
+          print('Default state, showing loading text');
+          return const Center(child: Text('Загрузка данных...'));
         },
-        child: BlocBuilder<ClientByIdBloc, ClientByIdState>(
-          builder: (context, state) {
-            if (state is ClientByIdLoading) {
-              return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
-            } else if (state is ClientByIdLoaded) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: ListView(
-                  controller: _scrollController,
-                  children: [
-                    _buildDetailsList(),
-                    const SizedBox(height: 8),
-                   ClientHistoryWidget(clientId: widget.clientId),
-                    const SizedBox(height: 8),
-                  OrganizationsWidget( clientId: widget.clientId),
-                    const SizedBox(height: 8),
-                  TransactionsWidget( clientId: widget.clientId),
-                  ],
-                ),
-              );
-            } else if (state is ClientByIdError) {
-              return Center(child: Text(state.message));
-            }
-            return const Center(child: Text('Загрузка данных...'));
-          },
-        ),
       ),
-    );
-  }
-
+    ),
+  );
+}
   AppBar _buildAppBar(BuildContext context, String title) {
     return AppBar(
       backgroundColor: Colors.white,
@@ -344,7 +369,7 @@ Widget _buildSectionWithTitle({
     //   }
     // } catch (e) {
     //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Ошибка при звонке: $e')),
+    //     SnackBar(content: Text('Ошибка при звонке: ')),
     //   );
     // }
   }
@@ -410,7 +435,7 @@ Widget _buildSectionWithTitle({
   //     Navigator.pop(context, true);
   //   } catch (e) {
   //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Ошибка при удалении: $e')),
+  //       SnackBar(content: Text('Ошибка при удалении: ')),
   //     );
   //   }
   // }

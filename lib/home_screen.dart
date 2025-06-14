@@ -1,4 +1,5 @@
 import 'package:billing_mobile/MyNavBar.dart';
+import 'package:billing_mobile/screens/clients/NfrClientsScreen.dart';
 import 'package:billing_mobile/screens/demo/demo_clients_screen.dart';
 import 'package:billing_mobile/screens/inActive/inactive_clients_screen.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
@@ -47,6 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
     activeIcons.add('assets/icons/MyNavBar/demo_ON.png');
     inactiveIcons.add('assets/icons/MyNavBar/demo_OFF.png');
     
+    widgets.add(NfrClientsScreen());
+    titleKeys.add('Аппбар клиент');
+    navBarTitleKeys.add('NFR');
+    activeIcons.add('assets/icons/MyNavBar/nfrOFF.png');
+    inactiveIcons.add('assets/icons/MyNavBar/nfrON.png');
+
     widgets.add(InActiveClientsScreen());
     titleKeys.add('Аппбар Неактивный');
     navBarTitleKeys.add('Неактивный');

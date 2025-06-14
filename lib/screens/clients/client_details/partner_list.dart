@@ -127,7 +127,7 @@ class _PartnerListState extends State<PartnerList> {
           child: DropdownButtonFormField<String>(
             value: null,
             hint: Text(
-              'Ошибка: $errorMessage',
+              'Ошибка: rrorMessage',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

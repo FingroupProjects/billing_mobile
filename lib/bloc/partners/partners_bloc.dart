@@ -24,7 +24,7 @@ Future<void> _onLoadPartner(
       emit(PartnerLoadedState(partners));
     }
   } catch (e) {
-    emit(PartnerErrorState('Failed to load Partners: $e'));
+    emit(PartnerErrorState('Failed to load Partners: '));
   }
 }
 

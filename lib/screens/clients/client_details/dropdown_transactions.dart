@@ -155,7 +155,7 @@ Widget _buildTransactionsList(TransactionListResponse? transactionData, bool isL
 
  Widget _buildTransactionItem(Transaction transaction) {
   final createdAt = DateFormat('dd.MM.yyyy HH:mm').format(transaction.createdAt.toLocal());
-  final isIncome = transaction.type == "Пополнение";
+  final isIncome = transaction.type == "credit";
   final typeText = isIncome ? "Пополнение" : "Снятие";
   final typeColor = isIncome ? Colors.green : Colors.red;
 

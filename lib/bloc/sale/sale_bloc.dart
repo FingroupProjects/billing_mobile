@@ -10,18 +10,13 @@ class SaleBloc extends Bloc<SaleEvent, SaleState> {
     on<LoadSaleEvent>(_onLoadSale);
   }
 
-Future<void> _onLoadSale( LoadSaleEvent event, Emitter<SaleState> emit ) async {
-  emit(SaleLoadingState());
-  try {
-    final sales = await apiService.getSales();
-    if (sales.isEmpty) {
-      // emit(SaleErrorState('No Sales found'));
-    } else {
+  Future<void> _onLoadSale(LoadSaleEvent event, Emitter<SaleState> emit) async {
+    emit(SaleLoadingState());
+    try {
+      final sales = await apiService.getSales();
       emit(SaleLoadedState(sales));
+    } catch (e) {
+      emit(SaleErrorState('Не удалось загрузить скидки: '));
     }
-  } catch (e) {
-    emit(SaleErrorState('Failed to load Sales: $e'));
   }
-}
-
 }

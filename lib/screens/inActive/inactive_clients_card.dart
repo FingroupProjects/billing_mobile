@@ -1,6 +1,7 @@
 import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
 import 'package:billing_mobile/models/clients_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For number formatting
 
 class InActiveClientCard extends StatelessWidget {
   final Client client;
@@ -14,6 +15,14 @@ class InActiveClientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Create number formatter for adding commas
+    final NumberFormat formatter = NumberFormat("#,##0", "en_US");
+    
+    // Split balance string into number and currency parts
+    final balanceParts = client.balance.split(' ');
+    final numberPart = double.parse(balanceParts[0]);
+    final formattedBalance = "${formatter.format(numberPart)} ${balanceParts.sublist(1).join(' ')}";
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -55,15 +64,15 @@ class InActiveClientCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                 Text(
-                client.isDemo ? 'Демо' : (client.nfr == 1 ? 'NFR' : ''),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Gilroy',
-                  fontWeight: FontWeight.w500,
-                  color: Colors.green,
-                ),
-              )
+                Text(
+                  client.isDemo ? 'Демо' : (client.nfr == 1 ? 'NFR' : ''),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Gilroy',
+                    fontWeight: FontWeight.w500,
+                    color: Colors.green,
+                  ),
+                )
               ],
             ),
             const SizedBox(height: 8),
@@ -88,10 +97,10 @@ class InActiveClientCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: TaskCardStyles.priorityContainerDecoration.copyWith(
-                    color:  Colors.white,
+                    color: Colors.white,
                   ),
                   child: Text(
-                    "Баланс: ${client.balance}",
+                    formattedBalance, // Use formatted balance with original currency
                     style: TaskCardStyles.priorityStyle.copyWith(
                       color: const Color(0xff1E2E52), 
                       fontSize: 14,

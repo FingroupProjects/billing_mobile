@@ -1,7 +1,13 @@
 import 'package:billing_mobile/custom_widget/filter/connectionType_list.dart';
+import 'package:billing_mobile/screens/clients/client_details/country_list.dart';
+import 'package:billing_mobile/screens/clients/client_details/currency_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/partner_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:flutter/material.dart';
+import 'package:billing_mobile/bloc/tariff/tariff_bloc.dart';
+import 'package:billing_mobile/bloc/tariff/tariff_event.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:billing_mobile/api/api_service.dart';
 
 class FilterInActiveScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onFilterSelected;
@@ -21,6 +27,10 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
   int? _selectedConnectionType;
   int? _selectedTariff;
   int? _selectedPartner;
+  int? _selectedCountryId;
+  int? _selectedCurrencyId;
+
+
 
   @override
   void initState() {
@@ -29,6 +39,8 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
       _selectedConnectionType = widget.initialFilters!['demo'];
       _selectedTariff = widget.initialFilters!['tariff'];
       _selectedPartner = widget.initialFilters!['partner'];
+      _selectedCountryId = widget.initialFilters!['country_id'];
+      _selectedCurrencyId = widget.initialFilters!['currency_id'];
     }
   }
 
@@ -37,13 +49,17 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
       _selectedConnectionType = null;
       _selectedTariff = null;
       _selectedPartner = null;
+        _selectedCountryId = null;
+      _selectedCurrencyId = null;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xffF4F7FD),
+   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => TariffBloc(apiService: ApiService())..add(const LoadTariffEvent('992')),
+      child: Scaffold(
+        backgroundColor: Color(0xffF4F7FD),
       appBar: AppBar(
         titleSpacing: 0,
         title: const Text(
@@ -104,13 +120,17 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
             onPressed: () {
               if (_selectedConnectionType == null &&
                   _selectedTariff == null &&
-                  _selectedPartner == null) {
+                  _selectedPartner == null&&
+                  _selectedCountryId == null&&
+                  _selectedCurrencyId == null) {
                 Navigator.pop(context);
               } else {
                 final filterData = {
                   'demo': _selectedConnectionType,
                   'tariff': _selectedTariff,
                   'partner': _selectedPartner,
+                  'country_id': _selectedCountryId,
+                  'currency_id': _selectedCurrencyId,
                 };
                 widget.onFilterSelected?.call(filterData);
                 Navigator.pop(context);
@@ -192,6 +212,38 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
                         ),
                       ),
                     ),
+                     const SizedBox(height: 8),
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: CountryList(
+                          selectedCountry: _selectedCountryId?.toString(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCountryId = value != null ? int.parse(value.toString()) : null;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                      const SizedBox(height: 8),
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: CurrencyList(
+                          selectedCurrency: _selectedCurrencyId?.toString(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCurrencyId = value != null ? int.parse(value.toString()) : null;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -199,6 +251,7 @@ class _FilterInActiveScreenState extends State<FilterInActiveScreen> {
             ),
           ],
         ),
+       ),
       ),
     );
   }

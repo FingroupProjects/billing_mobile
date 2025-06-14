@@ -6,7 +6,6 @@ import 'package:billing_mobile/models/organizations_model.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 class OrganizationDetailsScreen extends StatefulWidget {
   final int organizationId;
@@ -71,20 +70,14 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
     if (organizations.isNotEmpty) {
       final org = organizations.first;
       final detailsList = [
-        {'label': 'Название:', 'value': org.name},
-        {'label': 'ИНН:', 'value': org.INN.toString()},
-        {'label': 'Телефон:', 'value': org.phone},
-        {'label': 'Адрес:', 'value': org.address},
-        {'label': 'Доступ:', 'value': org.hasAccess == 1 ? 'Есть' : 'Нет'},
-        {'label': 'Создано:', 'value': DateFormat('dd.MM.yyyy').format(org.createdAt)},
-        {'label': 'Обновлено:', 'value': DateFormat('dd.MM.yyyy').format(org.updatedAt)},
-        {'label': 'Тип бизнеса:', 'value': org.businessTypeName.toString()},
+        {'label': 'Название:', 'value': org.name.isNotEmpty ? org.name : 'Не указано'},
+        {'label': 'Баланс:', 'value': org.balance != null ? org.balance!.toStringAsFixed(2) : '0.00'},
+        {'label': 'Телефон:', 'value': org.phone.isNotEmpty ? org.phone : 'Не указан'},
+        {'label': 'Адрес:', 'value': org.address ?? 'Не указан'},
+        {'label': 'ИНН:', 'value': org.INN?.toString() ?? 'Не указан'},
+        {'label': 'Тип бизнеса:', 'value': org.businessTypeName.isNotEmpty ? org.businessTypeName : 'Не указан'},
+        {'label': 'Причина отказа:', 'value': org.rejectCause ?? 'Не указана'},
       ];
-      
-      // Добавляем причину отказа только если она не пустая
-      if (org.rejectCause != null && org.rejectCause!.isNotEmpty) {
-        detailsList.add({'label': 'Причина отказа:', 'value': org.rejectCause!});
-      }
 
       setState(() {
         details = detailsList;
@@ -182,7 +175,19 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
   }
 
   Widget _buildValue(String value, String label, {int? maxLines}) {
-    if (value.isEmpty) return Container();
+    if (value.isEmpty || value == 'Не указан') {
+      return Text(
+        value,
+        style: const TextStyle(
+          fontSize: 16,
+          fontFamily: 'Gilroy',
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF1E2E52),
+        ),
+        maxLines: maxLines,
+        overflow: maxLines != null ? TextOverflow.ellipsis : TextOverflow.visible,
+      );
+    }
     return Text(
       value,
       style: TextStyle(

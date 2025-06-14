@@ -54,7 +54,7 @@ class Client {
   final String name;
   final String phone;
   final String subDomain;
-  final String balance;
+  final  balance;
   final bool isActive;
   final bool isDemo;
   final String? email;
@@ -89,8 +89,8 @@ class Client {
       isDemo: json['is_demo'] ?? false,
       email: json['email'],
       clientType: json['client_type'] ?? '',
-      tariff: json['tariff'] != null
-          ? Tariff.fromJson(json['tariff'])
+      tariff: json['tariff_price']?['tariff'] != null
+          ? Tariff.fromJson(json['tariff_price']['tariff'])
           : Tariff(
               id: 0,
               name: 'Unknown',

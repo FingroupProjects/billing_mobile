@@ -44,6 +44,8 @@ class DemoBloc extends Bloc<DemoEvent, DemoState> {
       status: _currentFilters['status'],
       tariff: _currentFilters['tariff'],
       partner: _currentFilters['partner'],
+        countryId: _currentFilters['country_id'], // Added country_id filter
+          currencyId: _currentFilters['currency_id'], // Added currency_id filter 
     );
     emit(DemoLoaded(demoData, isLoadingMore: false));
   } catch (e) {
@@ -77,6 +79,8 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
         status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
         partner: _currentFilters['partner'],
+         countryId: _currentFilters['country_id'], // Added country_id filter
+        currencyId: _currentFilters['currency_id'], // Added currency_id filter
       );
       
       final updatedClients = ClientList(
