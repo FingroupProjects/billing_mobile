@@ -1,3 +1,4 @@
+import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
 import 'package:billing_mobile/bloc/clients/clients_state.dart';
@@ -23,6 +24,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
   bool isClickAvatarIcon = false;
   late ScrollController _scrollController;
   Map<String, dynamic> _currentFilters = {};
+  final ApiService _apiService = ApiService(); // Добавляем ApiService
 
   @override
   void initState() {
@@ -33,7 +35,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
     _searchController.addListener(_onSearchChanged);
   }
 
-
   void _onSearchChanged() {
     setState(() {
       _isSearching = _searchController.text.isNotEmpty;
@@ -43,8 +44,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
   void _onScroll() {
     final state = context.read<ClientBloc>().state;
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && (state is ClientLoaded && !state.isLoadingMore)) {
-    context.read<ClientBloc>().add(FetchMoreClients());
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        (state is ClientLoaded && !state.isLoadingMore)) {
+      context.read<ClientBloc>().add(FetchMoreClients());
     }
   }
 
@@ -59,7 +62,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
   Widget _buildClientsList(ClientLoaded state) {
     final clients = state.clientData.data.clients.data;
-    
+
     if (_isSearching && clients.isEmpty) {
       return const Center(
         child: Text(
@@ -76,7 +79,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
       return const Center(
         child: Text(
           'Нет клиентов',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontFamily: 'Gilroy',
             fontWeight: FontWeight.w500,
@@ -130,7 +133,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
           clearButtonClickFiltr: (isSearching) {},
           showSearchIcon: true,
           showFilterIcon: true,
-          isFilterActive: _currentFilters.isNotEmpty, 
+          isFilterActive: _currentFilters.isNotEmpty,
           onChangedSearchInput: (String value) {},
           onFilterTap: () {
             Navigator.push(
@@ -140,7 +143,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   onFilterSelected: (filters) {
                     setState(() {
                       _currentFilters = filters;
-                      print('Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
+                      print('Applied filters: $_currentFilters');
                     });
                     context.read<ClientBloc>().add(ApplyFilters(filters));
                   },
@@ -175,25 +178,33 @@ class _ClientsScreenState extends State<ClientsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                  Text('${state.message}'),
-                  const SizedBox(height: 16),
-                  Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                            child: CustomButton(
-                            buttonText: 'Обновить',
-                            buttonColor: Color(0xff4759FF),
-                            textColor: Colors.white,
-                            onPressed: () { context.read<ClientBloc>().add(FetchClients());},
-                            child: const Text('Повторить попытку', style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
-                            ),
-                                 ),
-                             ),
-                           ],
-                         ),
-                       )
+                        Text('${state.message}'),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: CustomButton(
+                                  buttonText: 'Обновить',
+                                  buttonColor: Color(0xff4759FF),
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    context
+                                        .read<ClientBloc>()
+                                        .add(FetchClients());
+                                  },
+                                  child: const Text(
+                                    'Повторить попытку',
+                                    style: TextStyle(
+                                        color: Colors.white, fontFamily: 'Gilroy'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   );
@@ -210,19 +221,19 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 return const Center(child: Text('Нет данных'));
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ClientAddScreen()),
-          );
-          if (result == true) {
-            context.read<ClientBloc>().add(FetchClients());
-          }
-        },
-        backgroundColor: const Color(0xff1E2E52),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+     floatingActionButton: FloatingActionButton(
+  onPressed: () async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ClientAddScreen()),
+    );
+    if (result == true) {
+      context.read<ClientBloc>().add(FetchClients());
+    }
+  },
+  backgroundColor: const Color(0xff1E2E52),
+  child: const Icon(Icons.add, color: Colors.white),
+),
     );
   }
 }

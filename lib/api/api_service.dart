@@ -35,7 +35,21 @@ class ApiService {
       (route) => false,
     );
   }
-
+// Сохранение роли
+  Future<void> _saveRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('role', role);
+  }
+  // Получение роли
+  Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role');
+  }
+  // Очистка роли
+  Future<void> clearRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('role');
+  }
 Future<void> _saveToken(String token) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('token', token);
@@ -46,10 +60,18 @@ Future<String?> getToken() async {
   return prefs.getString('token');
 }
 
-Future<void> clearToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('token');
-}
+// Обновляем clearToken для очистки роли
+  Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await clearRole(); // Очищаем роль при выходе
+  }
+
+  // Метод для проверки, является ли пользователь админом
+  Future<bool> isAdmin() async {
+    final role = await getRole();
+    return role == 'admin';
+  }
 
   //_________________________________ START___API__METHOD__GET__POST__PATCH__DELETE____________________________________________//
 
@@ -142,21 +164,21 @@ Future<void> clearToken() async {
   //_________________________________ START___API__LOGIN____________________________________________//
 
 Future<LoginResponse> login(LoginModel loginModel) async {
-  final response = await _postRequest('/login', loginModel.toJson());
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    final loginResponse = LoginResponse.fromJson(data);
-    await _saveToken(loginResponse.token);
-    return loginResponse;
-  } else if (response.statusCode == 401) {
-    throw ('Неправильный логин или пароль!');
-  } else {
-    final errorData = json.decode(response.body);
-    final errorMessage = errorData['message'] ?? 'Неправильный логин или пароль!';
-    throw (errorMessage);
+    final response = await _postRequest('/login', loginModel.toJson());
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final loginResponse = LoginResponse.fromJson(data);
+      await _saveToken(loginResponse.token);
+      await _saveRole(loginResponse.role); // Сохраняем роль
+      return loginResponse;
+    } else if (response.statusCode == 401) {
+      throw ('Неправильный логин или пароль!');
+    } else {
+      final errorData = json.decode(response.body);
+      final errorMessage = errorData['message'] ?? 'Неправильный логин или пароль!';
+      throw (errorMessage);
+    }
   }
-}
-
    
   // //_________________________________ START_____API__SCREEN__LEAD____________________________________________//
 

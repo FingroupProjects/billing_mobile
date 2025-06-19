@@ -1,3 +1,4 @@
+import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_bloc.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_event.dart';
 import 'package:billing_mobile/bloc/transactions/transactions_state.dart';
@@ -22,6 +23,7 @@ class TransactionsWidget extends StatefulWidget {
 class _TransactionsWidgetState extends State<TransactionsWidget> {
   late ScrollController _scrollController;
   String _filterType = 'All';
+  final ApiService _apiService = ApiService(); // Добавляем ApiService
 
   @override
   void initState() {
@@ -286,25 +288,36 @@ Row _buildTitleRow(String title) {
             ),
           ],
         ),
-        TextButton(
-          onPressed: _showAddOrganizationScreen,
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            backgroundColor: Color(0xff1E2E52),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: const Text(
-            'Пополнить баланс',
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: 'Gilroy',
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-            ),
-          ),
+        FutureBuilder<bool>(
+          future: _apiService.isAdmin(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox.shrink();
+            }
+            final isAdmin = snapshot.data ?? false;
+            return isAdmin
+                ? TextButton(
+                    onPressed: _showAddOrganizationScreen,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      backgroundColor: Color(0xff1E2E52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Пополнить баланс',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Gilroy',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink();
+          },
         ),
       ],
     );

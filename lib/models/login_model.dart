@@ -17,16 +17,19 @@ class LoginModel {
 class LoginResponse {
   final String token;
   final User user;
+  final String role; // Добавляем поле role
 
   LoginResponse({
     required this.token,
     required this.user,
+    required this.role,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
       token: json['token'],
       user: User.fromMap(json['user']),
+      role: json['user']['role'], // Извлекаем role из user
     );
   }
 
@@ -34,6 +37,7 @@ class LoginResponse {
     return {
       'token': token,
       'user': user.toMap(),
+      'role': role,
     };
   }
 }

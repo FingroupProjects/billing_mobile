@@ -1,7 +1,7 @@
+import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
 import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/add_organization.dart';
-import 'package:billing_mobile/screens/clients/client_details/organizations_screen/edit_organization.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_activate_deactivate.dart';
 import 'package:billing_mobile/screens/clients/client_details/organizations_screen/organization_details_screen.dart';
 import 'package:billing_mobile/widgets/snackbar_widget.dart';
@@ -12,7 +12,7 @@ import 'package:billing_mobile/bloc/organizations/organizations_event.dart';
 import 'package:billing_mobile/bloc/organizations/organizations_state.dart';
 import 'package:billing_mobile/models/organizations_model.dart';
 
-class OrganizationsWidget extends StatefulWidget {
+class    OrganizationsWidget extends StatefulWidget {
   final int clientId;
 
   OrganizationsWidget({Key? key, required this.clientId}) : super(key: key);
@@ -22,6 +22,8 @@ class OrganizationsWidget extends StatefulWidget {
 }
 
 class _OrganizationsWidgetState extends State<OrganizationsWidget> {
+  final ApiService _apiService = ApiService(); // Добавляем ApiService
+
   @override
   void initState() {
     super.initState();
@@ -178,13 +180,24 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: Image.asset(
-                    isActive ? 'assets/icons/power_on.png' : 'assets/icons/power_off.png',
-                    width: 28,
-                    height: 28,
-                  ),
-                  onPressed: () => _showActivateDeactivateOrganizationDialog(organization),
+                FutureBuilder<bool>(
+                  future: _apiService.isAdmin(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox.shrink();
+                    }
+                    final isAdmin = snapshot.data ?? false;
+                    return isAdmin
+                        ? IconButton(
+                            icon: Image.asset(
+                              isActive ? 'assets/icons/power_on.png' : 'assets/icons/power_off.png',
+                              width: 28,
+                              height: 28,
+                            ),
+                            onPressed: () => _showActivateDeactivateOrganizationDialog(organization),
+                          )
+                        : const SizedBox.shrink();
+                  },
                 ),
               ],
             ),
@@ -207,25 +220,36 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
             color: Color(0xff1E2E52),
           ),
         ),
-        TextButton(
-          onPressed: _showAddOrganizationScreen,
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            backgroundColor: const Color(0xff1E2E52),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: const Text(
-            'Создать',
-            style: TextStyle(
-              fontSize: 16,
-              fontFamily: 'Gilroy',
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-            ),
-          ),
+        FutureBuilder<bool>(
+          future: _apiService.isAdmin(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox.shrink();
+            }
+            final isAdmin = snapshot.data ?? false;
+            return isAdmin
+                ? TextButton(
+                    onPressed: _showAddOrganizationScreen,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      backgroundColor: const Color(0xff1E2E52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Создать',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Gilroy',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink();
+          },
         ),
       ],
     );

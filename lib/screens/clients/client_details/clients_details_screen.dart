@@ -38,132 +38,132 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   bool? isActive;
   final ApiService apiService = ApiService();
 
-
- @override
-void initState() {
-  super.initState();
-  print('Initializing ClientDetailsScreen with clientId: ${widget.clientId}');
-  _scrollController = ScrollController();
-  print('ScrollController initialized');
-  context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
-  print('FetchClientByIdEvent dispatched for clientId: ${widget.clientId}');
-}
-
-void _updateDetails(ClientById client, List<Sale> sales, String expirationDate) {
-  print('Entering _updateDetails with client: $client, sales length: ${sales.length}, expirationDate: xpirationDate');
-  Sale? clientSale;
-  if (client.saleId != null) {
-    print('Searching for sale with id: ${client.saleId}');
-    try {
-      clientSale = sales.firstWhere((sale) => sale.id == client.saleId);
-      print('Found sale: $clientSale');
-    } catch (e) {
-      print('Sale not found, error: ');
-      clientSale = null;
-    }
-  } else {
-    print('No saleId found, clientSale is null');
+  @override
+  void initState() {
+    super.initState();
+    print('Initializing ClientDetailsScreen with clientId: ${widget.clientId}');
+    _scrollController = ScrollController();
+    print('ScrollController initialized');
+    context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
+    print('FetchClientByIdEvent dispatched for clientId: ${widget.clientId}');
   }
 
-  String formattedExpirationDate = '';
-  if (expirationDate.isNotEmpty) {
-    print('Parsing expirationDate: xpirationDate');
-    try {
-      final parsedDate = DateTime.parse(expirationDate);
-      formattedExpirationDate = DateFormat('dd.MM.yyyy').format(parsedDate);
-      print('Parsed expirationDate successfully: $formattedExpirationDate');
-    } catch (e) {
-      formattedExpirationDate = 'Неверный формат даты';
-      print('Error parsing expirationDate: ');
+  void _updateDetails(ClientById client, List<Sale> sales, String expirationDate) {
+    print('Entering _updateDetails with client: $client, sales length: ${sales.length}, expirationDate: $expirationDate');
+    Sale? clientSale;
+    if (client.saleId != null) {
+      print('Searching for sale with id: ${client.saleId}');
+      try {
+        clientSale = sales.firstWhere((sale) => sale.id == client.saleId);
+        print('Found sale: $clientSale');
+      } catch (e) {
+        print('Sale not found, error: $e');
+        clientSale = null;
+      }
+    } else {
+      print('No saleId found, clientSale is null');
     }
-  } else {
-    print('expirationDate is empty');
+
+    String formattedExpirationDate = '';
+    if (expirationDate.isNotEmpty) {
+      print('Parsing expirationDate: $expirationDate');
+      try {
+        final parsedDate = DateTime.parse(expirationDate);
+        formattedExpirationDate = DateFormat('dd.MM.yyyy').format(parsedDate);
+        print('Parsed expirationDate successfully: $formattedExpirationDate');
+      } catch (e) {
+        formattedExpirationDate = 'Неверный формат даты';
+        print('Error parsing expirationDate: $e');
+      }
+    } else {
+      print('expirationDate is empty');
+    }
+
+    setState(() {
+      print('Setting state with currentClient: $client, isActive: ${client.isActive}');
+      currentClient = client;
+      isActive = client.isActive;
+      details = [
+        {'label': 'ФИО:', 'value': client.name},
+        {'label': 'Телефон:', 'value': client.phone},
+        {'label': 'Почта:', 'value': client.email ?? ''},
+        {'label': 'Поддомен:', 'value': client.subDomain},
+        {'label': 'Тип клиента:', 'value': client.clientType ?? ''},
+        {'label': 'Тариф:', 'value': client.tariff.name},
+        {'label': 'Контактное лицо:', 'value': client.contactPerson ?? ''},
+        {'label': 'Партнер:', 'value': client.partnerName ?? ''},
+        {'label': 'Страна:', 'value': client.countryName ?? ''},
+        {'label': 'Скидка:', 'value': client.saleId != null ? '${clientSale?.name ?? ''}' : ''},
+        {'label': 'Дата создания:', 'value': DateFormat('dd.MM.yyyy').format(client.createdAt)},
+        {'label': 'Дата окончания доступа:', 'value': formattedExpirationDate},
+      ];
+      print('Details updated: $details');
+    });
   }
 
-  setState(() {
-    print('Setting state with currentClient: $client, isActive: ${client.isActive}');
-    currentClient = client;
-    isActive = client.isActive;
-    details = [
-      {'label': 'ФИО:', 'value': client.name},
-      {'label': 'Телефон:', 'value': client.phone},
-      {'label': 'Почта:', 'value': client.email ?? ''},
-      {'label': 'Поддомен:', 'value': client.subDomain},
-      {'label': 'Тип клиента:', 'value': client.clientType ?? ''},
-      {'label': 'Тариф:', 'value': client.tariff.name},
-      {'label': 'Контактное лицо:', 'value': client.contactPerson ?? ''},
-      {'label': 'Партнер:', 'value': client.partnerName ?? ''},
-      {'label': 'Страна:', 'value': client.countryName ?? ''},
-      {'label': 'Скидка:', 'value': client.saleId != null ? '${clientSale?.name ?? ''}' : ''},
-      {'label': 'Дата создания:', 'value': DateFormat('dd.MM.yyyy').format(client.createdAt)},
-      {'label': 'Дата окончания доступа:', 'value': formattedExpirationDate},
-    ];
-    print('Details updated: $details');
-  });
-}
-
-@override
-Widget build(BuildContext context) {
-  print('Building ClientDetailsScreen');
-  return Scaffold(
-    appBar: _buildAppBar(context, 'Детали клиента'),
-    backgroundColor: Colors.white,
-    body: BlocListener<ClientByIdBloc, ClientByIdState>(
-      listener: (context, state) {  
-        print('BlocListener triggered with state: $state');
-        if (state is ClientByIdLoaded) {
-          print('ClientByIdLoaded state received: client=${state.client}, sales length=${state.sales.length}, expirationDate=${state.expirationDate}');
-          _updateDetails(state.client, state.sales, state.expirationDate); 
-        } else if (state is ClientByIdError) {
-          print('ClientByIdError state received: message=${state.message}');
-          showCustomSnackBar(
-            context: context,
-            message: state.message,
-            isSuccess: false,
-          );
-        }
-      },
-      child: BlocBuilder<ClientByIdBloc, ClientByIdState>(
-        builder: (context, state) {
-          print('BlocBuilder triggered with state: $state');
-          if (state is ClientByIdLoading) {
-            print('State is ClientByIdLoading');
-            return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
-          } else if (state is ClientByIdLoaded) {
-            print('State is ClientByIdLoaded, building UI');
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: ListView(
-                controller: _scrollController,
-                children: [
-                  _buildDetailsList(),
-                  const SizedBox(height: 8),
-                  ClientHistoryWidget(clientId: widget.clientId),
-                  const SizedBox(height: 8),
-                  OrganizationsWidget(clientId: widget.clientId),
-                  const SizedBox(height: 8),
-                  TransactionsWidget(clientId: widget.clientId),
-                ],
-              ),
-            );
+  @override
+  Widget build(BuildContext context) {
+    print('Building ClientDetailsScreen');
+    return Scaffold(
+      appBar: _buildAppBar(context, 'Детали клиента'),
+      backgroundColor: Colors.white,
+      body: BlocListener<ClientByIdBloc, ClientByIdState>(
+        listener: (context, state) {
+          print('BlocListener triggered with state: $state');
+          if (state is ClientByIdLoaded) {
+            print('ClientByIdLoaded state received: client=${state.client}, sales length=${state.sales.length}, expirationDate=${state.expirationDate}');
+            _updateDetails(state.client, state.sales, state.expirationDate);
           } else if (state is ClientByIdError) {
-            print('State is ClientByIdError, showing error: ${state.message}');
-            return Center(child: Text(state.message));
+            print('ClientByIdError state received: message=${state.message}');
+            showCustomSnackBar(
+              context: context,
+              message: state.message,
+              isSuccess: false,
+            );
           }
-          print('Default state, showing loading text');
-          return const Center(child: Text('Загрузка данных...'));
         },
+        child: BlocBuilder<ClientByIdBloc, ClientByIdState>(
+          builder: (context, state) {
+            print('BlocBuilder triggered with state: $state');
+            if (state is ClientByIdLoading) {
+              print('State is ClientByIdLoading');
+              return const Center(child: CircularProgressIndicator(color: Color(0xff1E2E52)));
+            } else if (state is ClientByIdLoaded) {
+              print('State is ClientByIdLoaded, building UI');
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: ListView(
+                  controller: _scrollController,
+                  children: [
+                    _buildDetailsList(),
+                    const SizedBox(height: 8),
+                    ClientHistoryWidget(clientId: widget.clientId),
+                    const SizedBox(height: 8),
+                    OrganizationsWidget(clientId: widget.clientId),
+                    const SizedBox(height: 8),
+                    TransactionsWidget(clientId: widget.clientId),
+                  ],
+                ),
+              );
+            } else if (state is ClientByIdError) {
+              print('State is ClientByIdError, showing error: ${state.message}');
+              return Center(child: Text(state.message));
+            }
+            print('Default state, showing loading text');
+            return const Center(child: Text('Загрузка данных...'));
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
+
   AppBar _buildAppBar(BuildContext context, String title) {
     return AppBar(
       backgroundColor: Colors.white,
       forceMaterialTransparency: true,
       centerTitle: false,
       leadingWidth: 40,
-     leading: Padding(
+      leading: Padding(
         padding: const EdgeInsets.only(left: 0),
         child: Transform.translate(
           offset: const Offset(0, -2),
@@ -174,7 +174,7 @@ Widget build(BuildContext context) {
               height: 24,
             ),
             onPressed: () async {
-              Navigator.pop(context,);
+              Navigator.pop(context);
             },
           ),
         ),
@@ -189,35 +189,46 @@ Widget build(BuildContext context) {
         ),
       ),
       actions: [
-    if (currentClient != null)
-        IconButton(
-          icon: Image.asset(
-            isActive == false 
-              ? 'assets/icons/power_off.png' 
-              : 'assets/icons/power_on.png',
-            width: 36,
-            height: 36,
+        if (currentClient != null)
+          FutureBuilder<bool>(
+            future: apiService.isAdmin(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox.shrink();
+              }
+              final isAdmin = snapshot.data ?? false;
+              return isAdmin
+                  ? IconButton(
+                      icon: Image.asset(
+                        isActive == false
+                            ? 'assets/icons/power_off.png'
+                            : 'assets/icons/power_on.png',
+                        width: 36,
+                        height: 36,
+                      ),
+                      onPressed: () => _navigateToActDeactScreen(),
+                    )
+                  : const SizedBox.shrink();
+            },
           ),
-          onPressed: () => _navigateToActDeactScreen(),
-        ),
-
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         // IconButton(
         //   icon: Image.asset( 'assets/icons/edit.png', width: 24, height: 24 ),
         //   onPressed: () => _navigateToEditScreen(),
         // ),
         // IconButton(
-        //   icon: Image.asset( 'assets/icons/delete.png', width: 24, height: 24),          
+        //   icon: Image.asset( 'assets/icons/delete.png', width: 24, height: 24),
         //   onPressed: () {
         //    showDialog(
         //      context: context,
         //      builder: (context) => DeleteClientDialog(clientId: currentClient!.id),
         //    );
-        //  },        
+        //  },
         // ),
       ],
     );
   }
+
   void _navigateToActDeactScreen() {
     if (currentClient == null) return;
 
@@ -232,80 +243,73 @@ Widget build(BuildContext context) {
         builder: (context) => _buildActivationDialog(),
       );
     }
-
   }
 
-
-
-Widget _buildDetailsList() {
-  return Column(
-    children: [
-      _buildSectionWithTitle(
-        title: "Личные данные",
-        items: details.take(3).toList(),
-      ),
-      const Divider(height: 5, thickness: 1, indent: 16, endIndent: 16, color: Color(0xff1E2E52)),
-      SizedBox(height: 5),
-      
-      _buildSectionWithTitle(
-        title: "Аккаунт",
-        items: details.skip(3).take(11).toList(),
-      ),
-      const Divider(height: 5, thickness: 1, indent: 16, endIndent: 16, color: Color(0xff1E2E52)),
-    
-    ],
-  );
-}
-
-Widget _buildSectionWithTitle({
-  required String title,
-  required List<Map<String, String>> items,
-}) {
-  return Stack(
-    children: [
-      Padding(
-        padding: const EdgeInsets.only(top: 18, left: 16, right: 16, bottom: 8), 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: items.map((item) =>
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: _buildDetailItem(item['label']!, item['value']!),
-            )
-          ).toList(),
+  Widget _buildDetailsList() {
+    return Column(
+      children: [
+        _buildSectionWithTitle(
+          title: "Личные данные",
+          items: details.take(3).toList(),
         ),
-      ),
-      Positioned(
-        top: 0,
-        right: 16,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-             color: Color(0xffF4F7FD),
-            borderRadius: BorderRadius.circular(12),
+        const Divider(height: 5, thickness: 1, indent: 16, endIndent: 16, color: Color(0xff1E2E52)),
+        const SizedBox(height: 5),
+        _buildSectionWithTitle(
+          title: "Аккаунт",
+          items: details.skip(3).take(11).toList(),
+        ),
+        const Divider(height: 5, thickness: 1, indent: 16, endIndent: 16, color: Color(0xff1E2E52)),
+      ],
+    );
+  }
+
+  Widget _buildSectionWithTitle({
+    required String title,
+    required List<Map<String, String>> items,
+  }) {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 18, left: 16, right: 16, bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: items
+                .map((item) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: _buildDetailItem(item['label']!, item['value']!),
+                    ))
+                .toList(),
           ),
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'Gilroy',
-              fontWeight: FontWeight.w600,
-              color: Color(0xff1E2E52),
+        ),
+        Positioned(
+          top: 0,
+          right: 16,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xffF4F7FD),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontFamily: 'Gilroy',
+                fontWeight: FontWeight.w600,
+                color: Color(0xff1E2E52),
+              ),
             ),
           ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
   Widget _buildDetailItem(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          // width: 175,
           child: Text(
             label,
             style: const TextStyle(
@@ -374,7 +378,6 @@ Widget _buildSectionWithTitle({
     // }
   }
 
- 
   void _navigateToEditScreen() {
     if (currentClient == null) return;
 
@@ -382,19 +385,18 @@ Widget _buildSectionWithTitle({
       context,
       MaterialPageRoute(
         builder: (context) => ClientEditScreen(
-         clientId: currentClient!.id.toString(),
-         fio: currentClient!.name,
-         phone: currentClient!.phone,
-         email: currentClient!.email.toString(),
-         subDomain: currentClient!.subDomain,
-         clientType: currentClient!.clientType,
-         tariffId: currentClient!.tariffId,
-         contactPerson: currentClient!.contactPerson,
-         partnerId: currentClient!.partnerId,
-         countryId: currentClient!.countryId,
-         saleId: currentClient!.saleId,
-         isDemo: currentClient!.isDemo,
-
+          clientId: currentClient!.id.toString(),
+          fio: currentClient!.name,
+          phone: currentClient!.phone,
+          email: currentClient!.email.toString(),
+          subDomain: currentClient!.subDomain,
+          clientType: currentClient!.clientType,
+          tariffId: currentClient!.tariffId,
+          contactPerson: currentClient!.contactPerson,
+          partnerId: currentClient!.partnerId,
+          countryId: currentClient!.countryId,
+          saleId: currentClient!.saleId,
+          isDemo: currentClient!.isDemo,
         ),
       ),
     ).then((shouldRefresh) {
@@ -430,128 +432,128 @@ Widget _buildSectionWithTitle({
   void _deleteClient() async {
     if (currentClient == null) return;
 
-  //   try {
-  //     await _apiService.deleteClient(currentClient!.id.toString());
-  //     Navigator.pop(context, true);
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Ошибка при удалении: ')),
-  //     );
-  //   }
-  // }
+    // try {
+    //   await apiService.deleteClient(currentClient!.id.toString());
+    //   Navigator.pop(context, true);
+    // } catch (e) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Ошибка при удалении: ')),
+    //   );
+    // }
+  }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
-}
 
   Widget _buildActivationDialog() {
     return AlertDialog(
       backgroundColor: Colors.white,
       title: const Center(
-          child: Text(
-            'Активация клиента',
-            style: TextStyle(
-              fontSize: 20,
-              fontFamily: 'Gilroy',
-              fontWeight: FontWeight.w600,
-              color: Color(0xff1E2E52),
-            ),
-          ),
-        ),
-        content: const Text(
-         'Вы уверены, что хотите активировать этого клиента?',
+        child: Text(
+          'Активация клиента',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 20,
             fontFamily: 'Gilroy',
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             color: Color(0xff1E2E52),
           ),
         ),
+      ),
+      content: const Text(
+        'Вы уверены, что хотите активировать этого клиента?',
+        style: TextStyle(
+          fontSize: 16,
+          fontFamily: 'Gilroy',
+          fontWeight: FontWeight.w500,
+          color: Color(0xff1E2E52),
+        ),
+      ),
       actions: [
         Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-          Expanded(
-            child: CustomButton(
-              buttonText: 'Отмена',
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              buttonColor: Color(0xff1E2E52),
-              textColor: Colors.white,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded(
+              child: CustomButton(
+                buttonText: 'Отмена',
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                buttonColor: const Color(0xff1E2E52),
+                textColor: Colors.white,
+              ),
             ),
-          ),
-          SizedBox(width: 10,),
-                Expanded(
-            child: CustomButton(
-              buttonText: 'Активировать',
-              onPressed: () {
-                Navigator.of(context).pop();
-                _activateClient();
-              },
-              buttonColor: Colors.green,
-              textColor: Colors.white,
+            const SizedBox(width: 10),
+            Expanded(
+              child: CustomButton(
+                buttonText: 'Активировать',
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _activateClient();
+                },
+                buttonColor: Colors.green,
+                textColor: Colors.white,
+              ),
             ),
-          ),
-         ],
-       )
+          ],
+        ),
       ],
     );
   }
+
   Widget _buildDeactivationDialog() {
     return AlertDialog(
       backgroundColor: Colors.white,
       title: const Center(
-          child: Text(
-            'Деактивация клиента',
-            style: TextStyle(
-              fontSize: 20,
-              fontFamily: 'Gilroy',
-              fontWeight: FontWeight.w600,
-              color: Color(0xff1E2E52),
-            ),
-          ),
-        ),
-        content: const Text(
-         'Вы уверены, что хотите деактивировать этого клиента?',
+        child: Text(
+          'Деактивация клиента',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 20,
             fontFamily: 'Gilroy',
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             color: Color(0xff1E2E52),
           ),
         ),
+      ),
+      content: const Text(
+        'Вы уверены, что хотите деактивировать этого клиента?',
+        style: TextStyle(
+          fontSize: 16,
+          fontFamily: 'Gilroy',
+          fontWeight: FontWeight.w500,
+          color: Color(0xff1E2E52),
+        ),
+      ),
       actions: [
         Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-          Expanded(
-            child: CustomButton(
-              buttonText: 'Отмена',
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              buttonColor: Color(0xff1E2E52),
-              textColor: Colors.white,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded(
+              child: CustomButton(
+                buttonText: 'Отмена',
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                buttonColor: const Color(0xff1E2E52),
+                textColor: Colors.white,
+              ),
             ),
-          ),
-          SizedBox(width: 10,),
-                Expanded(
-            child: CustomButton(
-              buttonText: 'Деактивировать',
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showDeactivationReasonDialog();
-              },
-              buttonColor: Colors.red,
-              textColor: Colors.white,
+            const SizedBox(width: 10),
+            Expanded(
+              child: CustomButton(
+                buttonText: 'Деактивировать',
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _showDeactivationReasonDialog();
+                },
+                buttonColor: Colors.red,
+                textColor: Colors.white,
+              ),
             ),
-          ),
-         ],
-       )
+          ],
+        ),
       ],
     );
   }
@@ -575,67 +577,65 @@ Widget _buildSectionWithTitle({
           ),
         ),
         content: TextField(
-        controller: reasonController,
-        maxLines: 5,
-        decoration: InputDecoration(
-          hintText: 'Почему вы отклоняете этот запрос?', 
-          hintStyle: TextStyle(
-            color: Color(0xff1E2E52)!.withOpacity(0.4),  
+          controller: reasonController,
+          maxLines: 5,
+          decoration: InputDecoration(
+            hintText: 'Почему вы отклоняете этот запрос?',
+            hintStyle: TextStyle(
+              color: const Color(0xff1E2E52).withOpacity(0.4),
+              fontSize: 16,
+              fontFamily: 'Gilroy',
+              fontWeight: FontWeight.w500,
+            ),
+            filled: true,
+            fillColor: const Color(0xffF4F7FD),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(12),
+          ),
+          style: const TextStyle(
+            color: Colors.black,
             fontSize: 16,
-            fontFamily: 'Gilroy',
-            fontWeight: FontWeight.w500,
           ),
-          filled: true, 
-          fillColor: Color(0xffF4F7FD), 
-          border: OutlineInputBorder( 
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: EdgeInsets.all(12),  
         ),
-        style: TextStyle(
-          color: Colors.black, 
-          fontSize: 16.0,
-        ),
-      ),
         actions: [
-            Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-          Expanded(
-            child: CustomButton(
-              buttonText: 'Отмена',
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              buttonColor: Color(0xff1E2E52),
-              textColor: Colors.white,
-            ),
+              Expanded(
+                child: CustomButton(
+                  buttonText: 'Отмена',
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  buttonColor: const Color(0xff1E2E52),
+                  textColor: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CustomButton(
+                  buttonText: 'Отправить',
+                  buttonColor: Colors.green,
+                  textColor: Colors.white,
+                  onPressed: () {
+                    if (reasonController.text.isNotEmpty) {
+                      _deactivateClient(reasonController.text);
+                      Navigator.pop(context);
+                    } else {
+                      showCustomSnackBar(
+                        context: context,
+                        message: 'Укажите причину деактивации!',
+                        isSuccess: false,
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: 10),
-           Expanded(
-            child: CustomButton(
-              buttonText: 'Отправить',
-              buttonColor: Colors.green,
-              textColor: Colors.white,
-              onPressed: () {
-              if (reasonController.text.isNotEmpty) {
-                _deactivateClient(reasonController.text);
-               Navigator.pop(context);
-
-              } else {
-                showCustomSnackBar(
-                  context: context,
-                  message:'Укажите причину деактивации!',
-                  isSuccess: false,
-                );
-              }
-              },
-
-            ),
-          ),
-         ],
-       )
         ],
       ),
     );
@@ -644,42 +644,42 @@ Widget _buildSectionWithTitle({
   Future<void> _deactivateClient(String rejectCause) async {
     try {
       await apiService.ClientActiveDeactivate(currentClient!.id, rejectCause);
-        showCustomSnackBar(
-          context: context,
-          message:'Клиент успешно деактивирован!',
-          isSuccess: true,
-        );
+      showCustomSnackBar(
+        context: context,
+        message: 'Клиент успешно деактивирован!',
+        isSuccess: true,
+      );
       context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
       context.read<ClientBloc>().add(FetchClients());
       context.read<DemoBloc>().add(FetchDemo());
       context.read<InActiveBloc>().add(FetchInActive());
     } catch (e) {
-        // showCustomSnackBar(
-        //   context: context,
-        //   message:'Ошибка при деактивации!',
-        //   isSuccess: false,
-        // );
+      // showCustomSnackBar(
+      //   context: context,
+      //   message: 'Ошибка при деактивации!',
+      //   isSuccess: false,
+      // );
     }
   }
 
   Future<void> _activateClient() async {
     try {
       await apiService.ClientActiveDeactivate(currentClient!.id, '');
-        showCustomSnackBar(
-          context: context,
-          message:'Клиент успешно активирован!',
-          isSuccess: true,
-        );
+      showCustomSnackBar(
+        context: context,
+        message: 'Клиент успешно активирован!',
+        isSuccess: true,
+      );
       context.read<ClientByIdBloc>().add(FetchClientByIdEvent(clientId: widget.clientId.toString()));
       context.read<ClientBloc>().add(FetchClients());
       context.read<DemoBloc>().add(FetchDemo());
       context.read<InActiveBloc>().add(FetchInActive());
     } catch (e) {
-        // showCustomSnackBar(
-        //   context: context,
-        //   message:'Ошибка при активации!',
-        //   isSuccess: false,
-        // );
+      // showCustomSnackBar(
+      //   context: context,
+      //   message: 'Ошибка при активации!',
+      //   isSuccess: false,
+      // );
     }
   }
 }
