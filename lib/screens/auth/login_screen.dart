@@ -61,8 +61,8 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 CustomTextField(
                   controller: loginController,
-                  hintText: 'Введите логин',
-                  label: 'Логин',
+                  hintText: 'Введите email',
+                  label: 'Email',
                   keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 16),

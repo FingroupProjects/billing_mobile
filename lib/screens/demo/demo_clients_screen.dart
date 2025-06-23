@@ -141,6 +141,8 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
                   onFilterSelected: (filters) {
                     setState(() {
                       _currentFilters = filters;
+                                            print('Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
+
                     });
                     context.read<DemoBloc>().add(DemoApplyFilters(filters));
                   },

@@ -4,24 +4,26 @@ import 'package:billing_mobile/models/businessType_model.dart';
 import 'package:billing_mobile/models/client_history_model.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
 import 'package:billing_mobile/models/clients_model.dart';
+import 'package:billing_mobile/models/currency_model.dart';
 import 'package:billing_mobile/models/login_model.dart';
 import 'package:billing_mobile/models/organizations_model.dart';
 import 'package:billing_mobile/models/partner_model.dart';
 import 'package:billing_mobile/models/sale_model.dart';
+import 'package:billing_mobile/models/tariff_model.dart';
 import 'package:billing_mobile/models/transactions_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-const String baseUrl = 'https://billing.sham360.com/api';
-// const String baseUrl = 'https://billing-back.shamcrm.com/api';
-
+// const String baseUrl = 'https://billing-back.sham360.com/api';
+const String baseUrl = 'https://billing-back.shamcrm.com/api';
+// 
 class ApiService {
   Future<http.Response> _handleResponse(http.Response response) async {
     if (response.statusCode == 401) {
       _redirectToLogin();
-      throw Exception('Неавторизованный доступ!');
+      throw ('Неавторизованный доступ!');
     }
     return response;
   }
@@ -33,7 +35,21 @@ class ApiService {
       (route) => false,
     );
   }
-
+// Сохранение роли
+  Future<void> _saveRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('role', role);
+  }
+  // Получение роли
+  Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role');
+  }
+  // Очистка роли
+  Future<void> clearRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('role');
+  }
 Future<void> _saveToken(String token) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('token', token);
@@ -44,10 +60,18 @@ Future<String?> getToken() async {
   return prefs.getString('token');
 }
 
-Future<void> clearToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('token');
-}
+// Обновляем clearToken для очистки роли
+  Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await clearRole(); // Очищаем роль при выходе
+  }
+
+  // Метод для проверки, является ли пользователь админом
+  Future<bool> isAdmin() async {
+    final role = await getRole();
+    return role == 'admin';
+  }
 
   //_________________________________ START___API__METHOD__GET__POST__PATCH__DELETE____________________________________________//
 
@@ -140,21 +164,21 @@ Future<void> clearToken() async {
   //_________________________________ START___API__LOGIN____________________________________________//
 
 Future<LoginResponse> login(LoginModel loginModel) async {
-  final response = await _postRequest('/login', loginModel.toJson());
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    final loginResponse = LoginResponse.fromJson(data);
-    await _saveToken(loginResponse.token);
-    return loginResponse;
-  } else if (response.statusCode == 401) {
-    throw ('Неправильный логин или пароль!');
-  } else {
-    final errorData = json.decode(response.body);
-    final errorMessage = errorData['message'] ?? 'Неправильный логин или пароль!';
-    throw (errorMessage);
+    final response = await _postRequest('/login', loginModel.toJson());
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final loginResponse = LoginResponse.fromJson(data);
+      await _saveToken(loginResponse.token);
+      await _saveRole(loginResponse.role); // Сохраняем роль
+      return loginResponse;
+    } else if (response.statusCode == 401) {
+      throw ('Неправильный логин или пароль!');
+    } else {
+      final errorData = json.decode(response.body);
+      final errorMessage = errorData['message'] ?? 'Неправильный логин или пароль!';
+      throw (errorMessage);
+    }
   }
-}
-
    
   // //_________________________________ START_____API__SCREEN__LEAD____________________________________________//
 
@@ -229,6 +253,8 @@ Future<ClientListResponse> getClients({
   int? status,
   int? tariff,
   int? partner,
+  int? countryId, // Added countryId parameter
+  int? currencyId, // Added currencyId parameter  
 }) async {
   try {
     final queryParameters = {
@@ -238,6 +264,8 @@ Future<ClientListResponse> getClients({
       'status': (status ?? 1).toString(),  
       if (tariff != null) 'tariff': tariff.toString(),
       if (partner != null) 'partner': partner.toString(),
+      if (countryId != null) 'country_id': countryId.toString(), // Added country_id to query parameters
+      if (currencyId != null) 'currency_id': currencyId.toString(), // Added currency_id to query parameters
     };
     
     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
@@ -285,6 +313,66 @@ Future<ClientListResponse> getClients({
   }
 }
 
+Future<ClientListResponse> getNfrClients({
+  int page = 1,
+  String? search,
+  int? demo,
+  int? status,
+  int? tariff,
+  int? partner,
+  int? countryId, // Added countryId parameter
+  int? currencyId, // Added currencyId parameter  
+}) async {
+  try {
+    final queryParameters = {
+      'page': page.toString(),
+      if (search != null && search.isNotEmpty) 'search': search,
+      'demo': (demo ?? 0).toString(),
+      'status': (status ?? 1).toString(),
+      if (tariff != null) 'tariff': tariff.toString(),
+      if (partner != null) 'partner': partner.toString(),
+       if (countryId != null) 'country_id': countryId.toString(), // Added country_id to query parameters
+      if (currencyId != null) 'currency_id': currencyId.toString(), // Added currency_id to query parameters
+    };
+
+    final uri = Uri.parse('/clients/nfr').replace(queryParameters: queryParameters);
+    final response = await _getRequest(uri.toString());
+
+    switch (response.statusCode) {
+      case 200:
+        final jsonData = json.decode(response.body);
+        if (jsonData['clients'] != null) {
+          final adaptedJson = {
+            'view': '/nfr-clients',
+            'data': {
+              'clients': jsonData['clients'],
+              'partners': jsonData['partners'] ?? [],
+              'tariffs': jsonData['tariffs'] ?? [],
+            }
+          };
+          return ClientListResponse.fromJson(adaptedJson);
+        }
+        return ClientListResponse.fromJson(jsonData);
+
+      case 400:
+        throw ('Некорректный запрос: ${response.body}');
+      case 401:
+        throw ('Не авторизован: требуется аутентификация');
+      case 403:
+        throw ('Доступ запрещен');
+      case 404:
+        throw ('Ресурс не найден');
+      case 429:
+        throw ('Слишком много запросов. Пожалуйста, попробуйте позже');
+      case 500:
+        throw ('Внутренняя ошибка сервера. Пожалуйста, попробуйте позже');
+      default:
+        throw ('Ошибка загрузки NFR клиентов!');
+    }
+  } catch (e) {
+    throw ('Ошибка загрузки NFR клиентов!');
+  }
+}
 
 Future<ClientListResponse> getDemoClients({
   int page = 1,
@@ -292,6 +380,9 @@ Future<ClientListResponse> getDemoClients({
   int? demo,
   int? status,
   int? tariff,
+  int? partner,
+  int? countryId, // Added countryId parameter
+  int? currencyId, // Added currencyId parameter  
 }) async {
   try {
     final queryParameters = {
@@ -300,6 +391,9 @@ Future<ClientListResponse> getDemoClients({
       'demo': (demo ?? 1).toString(),  
       'status': (status ?? 1).toString(),  
       if (tariff != null) 'tariff': tariff.toString(),
+      if (partner != null) 'partner': partner.toString(),
+       if (countryId != null) 'country_id': countryId.toString(), // Added country_id to query parameters
+      if (currencyId != null) 'currency_id': currencyId.toString(), // Added currency_id to query parameters
     };
     
     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
@@ -353,6 +447,8 @@ Future<ClientListResponse> getInActiveClients({
   int? status,
   int? tariff,
   int? partner,
+   int? countryId, // Added countryId parameter
+  int? currencyId, // Added currencyId parameter  
 }) async {
   try {
     final queryParameters = {
@@ -362,6 +458,8 @@ Future<ClientListResponse> getInActiveClients({
       'status': (status ?? 0).toString(),  
       if (tariff != null) 'tariff': tariff.toString(),
       if (partner != null) 'partner': partner.toString(),
+      if (countryId != null) 'country_id': countryId.toString(), // Added country_id to query parameters
+      if (currencyId != null) 'currency_id': currencyId.toString(), // Added currency_id to query parameters
     };
     
     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
@@ -416,10 +514,10 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
       final jsonData = json.decode(response.body);
       return ClientByIdResponse.fromJson(jsonData);
     } else {
-      throw Exception('Failed to load client: ${response.statusCode}');
+      throw  ('Failed to load client: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load client: $e');
+    throw  ('Failed to load client: ');
   }
 }
 
@@ -427,7 +525,13 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
     required String fio,
     required String phone,
     required String email,
+    String? contactPerson,
+    required String subDomain,
+    int? partnerId,
+    String? clientType,
     int? tariffId,
+    int? saleId,
+    int? countryId,
     required bool isDemo,
   }) async {
 
@@ -436,7 +540,13 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
           'name': fio,
           'phone': phone,
           'email': email,
+          'contact_person': contactPerson,
+          'sub_domain': subDomain,
+          'partner_id': partnerId,
+          'client_type': clientType,
           'tariff_id': tariffId,
+          'sale_id': saleId,
+          'country_id': countryId,
           'is_demo': isDemo,
         });
 
@@ -467,10 +577,10 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
       final List<dynamic> partnersJson = jsonData['result']['data'];
       return partnersJson.map((orgJson) => Partner.fromJson(orgJson)).toList();
     } else {
-      throw Exception('Failed to load partners: ${response.statusCode}');
+      throw  ('Failed to load partners: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load partners: $e');
+    throw  ('Failed to load partners: ');
   }
 }
   Future<List<SaleData>> getSales() async {
@@ -481,10 +591,10 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
       final List<dynamic> saleJson = jsonData['result']['data'];
       return saleJson.map((orgJson) => SaleData.fromJson(orgJson)).toList();
     } else {
-      throw Exception('Failed to load sales: ${response.statusCode}');
+      throw  ('Failed to load sales: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load sales: $e');
+    throw  ('Failed to load sales: ');
   }
 }
 
@@ -496,10 +606,58 @@ Future<ClientByIdResponse> getClientById(String clientId) async {
       final List<dynamic> countryJson = jsonData['result']['data'];
       return countryJson.map((orgJson) => CountryData.fromJson(orgJson)).toList();
     } else {
-      throw Exception('Failed to load countries: ${response.statusCode}');
+      throw  ('Failed to load countries: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load countries: $e');
+    throw  ('Failed to load countries: ');
+  }
+}
+
+Future<List<CurrencyData>> getCurrencies() async {
+  try {
+    final response = await _getRequest('/currencies');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<dynamic> currencyJson = jsonData['result']['data'];
+      return currencyJson.map((curJson) => CurrencyData.fromJson(curJson)).toList();
+    } else {
+      throw  ('Failed to load currencies: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw  ('Failed to load currencies: $e');
+  }
+}
+Future<List<TariffData>> getTariffs(String code) async {
+  try {
+    final response = await _getRequest('/t/tariff?code=$code');
+    print('Tariff request sent with code: $code');
+    
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      
+      // Проверяем структуру ответа
+      List<dynamic> tariffJson;
+      
+      if (jsonData is List) {
+        // Если сервер возвращает массив напрямую
+        tariffJson = jsonData;
+      } else if (jsonData is Map && jsonData.containsKey('result')) {
+        // Если сервер возвращает в формате {result: {data: [...]}}
+        tariffJson = jsonData['result']['data'];
+      } else if (jsonData is Map && jsonData.containsKey('data')) {
+        // Если сервер возвращает в формате {data: [...]}
+        tariffJson = jsonData['data'];
+      } else {
+        throw  ('Unexpected response format');
+      }
+      
+      return tariffJson.map((tariffJson) => TariffData.fromJson(tariffJson)).toList();
+    } else {
+      throw  ('Failed to load tariffs: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error in getTariffs: $e'); // Добавим отладочную информацию
+    throw  ('Failed to load tariffs: $e');
   }
 }
 
@@ -513,11 +671,11 @@ Future<List<History>> getClientHistory(int clientId) async {
         return jsonList.map((json) => History.fromJson(json)).toList();
       } else {
         print('Failed to load lead history!');
-        throw Exception('Ошибка загрузки истории client!');
+        throw  ('Ошибка загрузки истории client!');
       }
     } catch (e) {
       print('Error occurred!');
-      throw Exception('Ошибка загрузки истории client!');
+      throw  ('Ошибка загрузки истории client!');
     }
   }
 
@@ -529,7 +687,7 @@ Future<List<History>> getClientHistory(int clientId) async {
         });
 
     if (response.statusCode != 200) {
-      throw Exception('Статус клиента успешно изменен!');
+      throw  ('Статус клиента успешно изменен!');
     }
   }
 
@@ -539,7 +697,7 @@ Future<List<History>> getClientHistory(int clientId) async {
         });
 
     if (response.statusCode != 200) {
-      throw Exception('Статус организации успешно изменен!');
+      throw  ('Статус организации успешно изменен!');
     }
   }
 
@@ -557,10 +715,10 @@ Future<List<History>> getClientHistory(int clientId) async {
       final List<dynamic> businessTypeJson = jsonData['result']['data'];
       return businessTypeJson.map((orgJson) => BusinessTypeData.fromJson(orgJson)).toList();
     } else {
-      throw Exception('Failed to load businessType: ${response.statusCode}');
+      throw  ('Failed to load businessType: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load businessType: $e');
+    throw  ('Failed to load businessType: ');
   }
 }
 
@@ -573,10 +731,10 @@ Future<List<Organization>> getClientByIdOrganizations(String clientId) async {
       final List<dynamic> organizationsJson = jsonData['result']['data'];
       return organizationsJson.map((orgJson) => Organization.fromJson(orgJson)).toList();
     } else {
-      throw Exception('Failed to load organizations: ${response.statusCode}');
+      throw  ('Failed to load organizations: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load organizations: $e');
+    throw  ('Failed to load organizations: ');
   }
 }
 
@@ -591,10 +749,10 @@ Future<List<Organization>> getOrganizationsById(String organizationId) async {
         return []; 
       }
     } else {
-      throw Exception('Failed to load organizationsById: ${response.statusCode}');
+      throw  ('Failed to load organizationsById: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load organizationsById: $e');
+    throw  ('Failed to load organizationsById: ');
   }
 }
 
@@ -603,12 +761,16 @@ Future<Map<String, dynamic>> createOrganizations({
   required int clientId,
   required String name,
   required String phone,
+  required String inn,
+  required String businessTypeId,
   required String address,
 }) async {
   final response = await _postRequest('/organizations/$clientId',
     {
       'name': name,
       'phone': phone,
+      'INN': inn,
+      'business_type_id': businessTypeId,
       'address': address,
     },
   );
@@ -651,10 +813,10 @@ Future<TransactionListResponse> getClientByIdTransactions(String clientId, {int 
         };
         return TransactionListResponse.fromJson(adaptedJson);
       } else {
-        throw Exception('Ошибка загрузки транзакций: ${response.statusCode}');
+        throw  ('Ошибка загрузки транзакций: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('CATCH ERROR Ошибка загрузки транзакций: $e');
+      throw  ('CATCH ERROR Ошибка загрузки транзакций: ');
     }
   }
 
@@ -669,10 +831,10 @@ Future<List<Transaction>> getTransactionsById(String transactionId) async {
         return []; 
       }
     } else {
-      throw Exception('Failed to load TransactionById: ${response.statusCode}');
+      throw  ('Failed to load TransactionById: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Failed to load TransactionById: $e');
+    throw  ('Failed to load TransactionById: ');
   }
 }
 

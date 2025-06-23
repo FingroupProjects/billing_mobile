@@ -70,11 +70,15 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
     if (organizations.isNotEmpty) {
       final org = organizations.first;
       final detailsList = [
-        {'label': 'Название:', 'value': org.name},
-        {'label': 'Телефон:', 'value': org.phone},
-        {'label': 'Адрес:', 'value': org.address},
+        {'label': 'Название:', 'value': org.name.isNotEmpty ? org.name : 'Не указано'},
+        {'label': 'Баланс:', 'value': org.balance != null ? org.balance!.toStringAsFixed(2) : '0.00'},
+        {'label': 'Телефон:', 'value': org.phone.isNotEmpty ? org.phone : 'Не указан'},
+        {'label': 'Адрес:', 'value': org.address ?? 'Не указан'},
+        {'label': 'ИНН:', 'value': org.INN?.toString() ?? 'Не указан'},
+        {'label': 'Тип бизнеса:', 'value': org.businessTypeName.isNotEmpty ? org.businessTypeName : 'Не указан'},
+        {'label': 'Причина отказа:', 'value': org.rejectCause ?? 'Не указана'},
       ];
-      
+
       setState(() {
         details = detailsList;
       });
@@ -171,7 +175,19 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
   }
 
   Widget _buildValue(String value, String label, {int? maxLines}) {
-    if (value.isEmpty) return Container();
+    if (value.isEmpty || value == 'Не указан') {
+      return Text(
+        value,
+        style: const TextStyle(
+          fontSize: 16,
+          fontFamily: 'Gilroy',
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF1E2E52),
+        ),
+        maxLines: maxLines,
+        overflow: maxLines != null ? TextOverflow.ellipsis : TextOverflow.visible,
+      );
+    }
     return Text(
       value,
       style: TextStyle(

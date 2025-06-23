@@ -8,6 +8,7 @@ import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
 import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/inActive/inactive_clients_card.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
+import 'package:billing_mobile/api/api_service.dart'; // Добавляем импорт ApiService
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,6 +24,7 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
   bool isClickAvatarIcon = false;
   late ScrollController _scrollController;
   Map<String, dynamic> _currentFilters = {};
+  final ApiService _apiService = ApiService(); // Добавляем ApiService
 
   @override
   void initState() {
@@ -60,7 +62,7 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
 
   Widget _buildClientsList(InActiveLoaded state) {
     final clients = state.clientData.data.clients.data;
-    
+
     if (_isSearching && clients.isEmpty) {
       return const Center(
         child: Text(
@@ -77,7 +79,7 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
       return const Center(
         child: Text(
           'Нет клиентов',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontFamily: 'Gilroy',
             fontWeight: FontWeight.w500,
@@ -118,111 +120,138 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        forceMaterialTransparency: true,
-        title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Неактивный',
-          onClickProfileAvatar: () {
-            setState(() {
-              isClickAvatarIcon = !isClickAvatarIcon;
-            });
-          },
-          clearButtonClickFiltr: (isSearching) {},
-          showSearchIcon: true,
-          showFilterIcon: true,
-          isFilterActive: _currentFilters.isNotEmpty, 
-          onChangedSearchInput: (String value) {},
-          onFilterTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FilterInActiveScreen(
-                  onFilterSelected: (filters) {
-                    setState(() {
-                      _currentFilters = filters;
-                    });
-                    context.read<InActiveBloc>().add(InActiveApplyFilters(filters));
-                  },
-                  initialFilters: _currentFilters,
-                ),
-              ),
-            );
-          },
-          textEditingController: _searchController,
-          focusNode: _searchFocusNode,
-          clearButtonClick: (value) {
-            if (value == false) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              context.read<InActiveBloc>().add(SearchInActive(''));
-            }
-          },
-        ),
-      ),
-      body: isClickAvatarIcon
-          ? const ProfileScreen()
-          : BlocBuilder<InActiveBloc, InActiveState>(
-              builder: (context, state) {
-                if (state is InActiveLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Color(0xff1E2E52)),
-                  );
-                } else if (state is InActiveError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                  Text('${state.message}'),
-                  const SizedBox(height: 16),
-                  Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                            child: CustomButton(
-                            buttonText: 'Обновить',
-                            buttonColor: Color(0xff4759FF),
-                            textColor: Colors.white,
-                            onPressed: () { context.read<InActiveBloc>().add(FetchInActive());},
-                            child: const Text('Повторить попытку', style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
-                            ),
-                                 ),
-                             ),
-                           ],
-                         ),
-                       )
-                      ],
+    return FutureBuilder<bool>(
+      future: _apiService.isAdmin(), // Проверяем роль асинхронно
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Пока роль загружается, можно показать пустой Scaffold или индикатор
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator(color: Color(0xff1E2E52))),
+          );
+        }
+
+        if (snapshot.hasError) {
+          // В случае ошибки показываем сообщение
+          return const Scaffold(
+            body: Center(child: Text('Ошибка загрузки данных')),
+          );
+        }
+
+        bool isAdmin = snapshot.data ?? false; // Получаем статус админа
+
+        return Scaffold(
+          appBar: AppBar(
+            forceMaterialTransparency: true,
+            title: CustomAppBar(
+              title: isClickAvatarIcon ? 'Настройка' : 'Неактивный',
+              onClickProfileAvatar: () {
+                setState(() {
+                  isClickAvatarIcon = !isClickAvatarIcon;
+                });
+              },
+              clearButtonClickFiltr: (isSearching) {},
+              showSearchIcon: true,
+              showFilterIcon: true,
+              isFilterActive: _currentFilters.isNotEmpty,
+              onChangedSearchInput: (String value) {},
+              onFilterTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilterInActiveScreen(
+                      onFilterSelected: (filters) {
+                        setState(() {
+                          _currentFilters = filters;
+                        });
+                        context.read<InActiveBloc>().add(InActiveApplyFilters(filters));
+                      },
+                      initialFilters: _currentFilters,
                     ),
-                  );
-                } else if (state is InActiveLoaded) {
-                  return RefreshIndicator(
-                    color: const Color(0xff1E2E52),
-                    backgroundColor: Colors.white,
-                    onRefresh: () async {
-                      context.read<InActiveBloc>().add(FetchInActive());
-                    },
-                    child: _buildClientsList(state),
-                  );
+                  ),
+                );
+              },
+              textEditingController: _searchController,
+              focusNode: _searchFocusNode,
+              clearButtonClick: (value) {
+                if (value == false) {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                  context.read<InActiveBloc>().add(SearchInActive(''));
                 }
-                return const Center(child: Text('Нет данных'));
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ClientAddScreen()),
-          );
-          if (result == true) {
-            context.read<InActiveBloc>().add(FetchInActive());
-          }
-        },
-        backgroundColor: const Color(0xff1E2E52),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+          ),
+          body: isClickAvatarIcon
+              ? const ProfileScreen()
+              : BlocBuilder<InActiveBloc, InActiveState>(
+                  builder: (context, state) {
+                    if (state is InActiveLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: Color(0xff1E2E52)),
+                      );
+                    } else if (state is InActiveError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('${state.message}'),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: CustomButton(
+                                      buttonText: 'Обновить',
+                                      buttonColor: Color(0xff4759FF),
+                                      textColor: Colors.white,
+                                      onPressed: () {
+                                        context.read<InActiveBloc>().add(FetchInActive());
+                                      },
+                                      child: const Text(
+                                        'Повторить попытку',
+                                        style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else if (state is InActiveLoaded) {
+                      return RefreshIndicator(
+                        color: const Color(0xff1E2E52),
+                        backgroundColor: Colors.white,
+                        onRefresh: () async {
+                          context.read<InActiveBloc>().add(FetchInActive());
+                        },
+                        child: _buildClientsList(state),
+                      );
+                    }
+                    return const Center(child: Text('Нет данных'));
+                  },
+                ),
+          floatingActionButton: isAdmin // Условное отображение кнопки
+              ? FloatingActionButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ClientAddScreen()),
+                    );
+                    if (result == true) {
+                      context.read<InActiveBloc>().add(FetchInActive());
+                    }
+                  },
+                  backgroundColor: const Color(0xff1E2E52),
+                  child: const Icon(Icons.add, color: Colors.white),
+                )
+              : null, // Если не админ, кнопка не отображается
+        );
+      },
     );
   }
 }

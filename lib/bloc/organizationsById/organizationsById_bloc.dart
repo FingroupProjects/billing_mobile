@@ -37,7 +37,7 @@ Future<void> _fetchOrganizationById( FetchOrganizationByIdEvent event, Emitter<O
       emit(OrganizationByIdLoaded(organizations));
     }
   } catch (e) {
-    emit(OrganizationByIdError('Failed to load organizationsByID: $e'));
+    emit(OrganizationByIdError('Failed to load organizationsByID: '));
   }
 }
 }

@@ -53,6 +53,8 @@ Future<void> _fetchOrganization( FetchOrganizationEvent event, Emitter<Organizat
           clientId: event.clientId,
           name: event.name,
           phone: event.phone,
+          inn: event.inn,
+          businessTypeId: event.businessTypeId,
           address: event.address,
         );
 
@@ -62,7 +64,7 @@ Future<void> _fetchOrganization( FetchOrganizationEvent event, Emitter<Organizat
           emit(OrganizationCreateError(result['message'] ?? 'Ошибка при создании организации'));
         }
       } catch (e) {
-        emit(OrganizationCreateError('Ошибка создания организации: $e'));
+        emit(OrganizationCreateError('Ошибка создания организации: '));
       }
     } else {
       emit(OrganizationCreateError('Нет подключения к интернету'));

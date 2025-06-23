@@ -41,7 +41,11 @@ class DemoBloc extends Bloc<DemoEvent, DemoState> {
       page: _currentPage,
       search: _currentSearchQuery,
       demo: _currentFilters['demo'],
+      status: _currentFilters['status'],
       tariff: _currentFilters['tariff'],
+      partner: _currentFilters['partner'],
+        countryId: _currentFilters['country_id'], // Added country_id filter
+          currencyId: _currentFilters['currency_id'], // Added currency_id filter 
     );
     emit(DemoLoaded(demoData, isLoadingMore: false));
   } catch (e) {
@@ -68,11 +72,15 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
 
     try {
       emit(DemoLoaded(currentState.clientData, isLoadingMore: true));
-      final nextPageData = await apiService.getClients(
+      final nextPageData = await apiService.getDemoClients(
         page: _currentPage + 1,
         search: _currentSearchQuery, 
         demo: _currentFilters['demo'],
+        status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
+        partner: _currentFilters['partner'],
+         countryId: _currentFilters['country_id'], // Added country_id filter
+        currencyId: _currentFilters['currency_id'], // Added currency_id filter
       );
       
       final updatedClients = ClientList(

@@ -37,7 +37,7 @@ Future<void> _fetchTransactionById( FetchTransactionByIdEvent event, Emitter<Tra
       emit(TransactionByIdLoaded(transactions));
     }
   } catch (e) {
-    emit(TransactionByIdError('Failed to load organizationsByID: $e'));
+    emit(TransactionByIdError('Failed to load organizationsByID: '));
   }
 }
 }

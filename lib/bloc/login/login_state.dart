@@ -16,11 +16,16 @@ class LoginLoading extends LoginState {}
 class LoginLoaded extends LoginState {
   final String token;
   final User user;
+  final String role; // Добавляем поле role
 
-  const LoginLoaded(this.token, this.user);
+  const LoginLoaded({
+    required this.token,
+    required this.user,
+    required this.role,
+  });
 
   @override
-  List<Object> get props => [token, user];
+  List<Object> get props => [token, user, role];
 }
 
 class LoginError extends LoginState {

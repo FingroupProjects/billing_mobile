@@ -57,7 +57,7 @@ class _PartnerListState extends State<PartnerList> {
           child: DropdownButtonFormField<String>(
             value: null,
             hint: const Text(
-              'Загрузка партнеров...',
+              'Выберите партнера',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -68,6 +68,11 @@ class _PartnerListState extends State<PartnerList> {
             items: [],
             onChanged: null,
             decoration: _inputDecoration(),
+            icon: Image.asset(
+              'assets/icons/dropdown.png',
+              width: 16,
+              height: 16,
+            ),
           ),
         ),
       ],
@@ -92,7 +97,7 @@ class _PartnerListState extends State<PartnerList> {
           child: DropdownButtonFormField<String>(
             value: null,
             hint: const Text(
-              'Загрузка партнеров...',
+              'Выберите партнера',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -103,6 +108,11 @@ class _PartnerListState extends State<PartnerList> {
             items: [],
             onChanged: null,
             decoration: _inputDecoration(),
+            icon: Image.asset(
+              'assets/icons/dropdown.png',
+              width: 16,
+              height: 16,
+            ),
           ),
         ),
       ],
@@ -127,7 +137,7 @@ class _PartnerListState extends State<PartnerList> {
           child: DropdownButtonFormField<String>(
             value: null,
             hint: Text(
-              'Ошибка: $errorMessage',
+              'Ошибка: rrorMessage',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -138,6 +148,7 @@ class _PartnerListState extends State<PartnerList> {
             items: [],
             onChanged: null,
             decoration: _inputDecoration(),
+
           ),
         ),
       ],

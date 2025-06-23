@@ -1,37 +1,36 @@
-import 'package:billing_mobile/api/api_service.dart';
+
+import 'package:billing_mobile/bloc/clients/NfrClientBloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
-import 'package:billing_mobile/bloc/clients/clients_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_client_app_bar.dart';
+import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
 import 'package:billing_mobile/screens/clients/clients_card.dart';
-import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ClientsScreen extends StatefulWidget {
+class NfrClientsScreen extends StatefulWidget {
   @override
-  _ClientsScreenState createState() => _ClientsScreenState();
+  _NfrClientsScreenState createState() => _NfrClientsScreenState();
 }
 
-class _ClientsScreenState extends State<ClientsScreen> {
+class _NfrClientsScreenState extends State<NfrClientsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
   bool isClickAvatarIcon = false;
   late ScrollController _scrollController;
   Map<String, dynamic> _currentFilters = {};
-  final ApiService _apiService = ApiService(); // Добавляем ApiService
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    context.read<ClientBloc>().add(FetchClients());
+    context.read<NfrClientBloc>().add(FetchNfrClients());
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -39,15 +38,14 @@ class _ClientsScreenState extends State<ClientsScreen> {
     setState(() {
       _isSearching = _searchController.text.isNotEmpty;
     });
-    context.read<ClientBloc>().add(SearchClients(_searchController.text));
+    context.read<NfrClientBloc>().add(SearchNfrClients(_searchController.text));
   }
 
   void _onScroll() {
-    final state = context.read<ClientBloc>().state;
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        (state is ClientLoaded && !state.isLoadingMore)) {
-      context.read<ClientBloc>().add(FetchMoreClients());
+    final state = context.read<NfrClientBloc>().state;
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+        (state is NfrClientLoaded && !state.isLoadingMore)) {
+      context.read<NfrClientBloc>().add(FetchMoreNfrClients());
     }
   }
 
@@ -60,7 +58,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     super.dispose();
   }
 
-  Widget _buildClientsList(ClientLoaded state) {
+  Widget _buildNfrClientsList(NfrClientLoaded state) {
     final clients = state.clientData.data.clients.data;
 
     if (_isSearching && clients.isEmpty) {
@@ -78,7 +76,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     } else if (clients.isEmpty) {
       return const Center(
         child: Text(
-          'Нет клиентов',
+          'Нет NFR клиентов',
           style: TextStyle(
             fontSize: 18,
             fontFamily: 'Gilroy',
@@ -124,17 +122,15 @@ class _ClientsScreenState extends State<ClientsScreen> {
       appBar: AppBar(
         forceMaterialTransparency: true,
         title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Клиенты',
+          title: isClickAvatarIcon ? 'Настройка' : 'NFR Клиенты',
           onClickProfileAvatar: () {
             setState(() {
               isClickAvatarIcon = !isClickAvatarIcon;
             });
           },
-          clearButtonClickFiltr: (isSearching) {},
           showSearchIcon: true,
           showFilterIcon: true,
           isFilterActive: _currentFilters.isNotEmpty,
-          onChangedSearchInput: (String value) {},
           onFilterTap: () {
             Navigator.push(
               context,
@@ -143,9 +139,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   onFilterSelected: (filters) {
                     setState(() {
                       _currentFilters = filters;
-                      print('Applied filters: $_currentFilters');
+                                            print('Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
+
                     });
-                    context.read<ClientBloc>().add(ApplyFilters(filters));
+                    context.read<NfrClientBloc>().add(ApplyNfrFilters(filters));
                   },
                   initialFilters: _currentFilters,
                 ),
@@ -160,20 +157,20 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 _isSearching = false;
                 _searchController.clear();
               });
-              context.read<ClientBloc>().add(SearchClients(''));
+              context.read<NfrClientBloc>().add(SearchNfrClients(''));
             }
-          },
+          }, onChangedSearchInput: (String value) {  }, clearButtonClickFiltr: (bool p1) {  },
         ),
       ),
       body: isClickAvatarIcon
           ? const ProfileScreen()
-          : BlocBuilder<ClientBloc, ClientState>(
+          : BlocBuilder<NfrClientBloc, NfrClientState>(
               builder: (context, state) {
-                if (state is ClientLoading) {
+                if (state is NfrClientLoading) {
                   return const Center(
                     child: CircularProgressIndicator(color: Color(0xff1E2E52)),
                   );
-                } else if (state is ClientError) {
+                } else if (state is NfrClientError) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -181,8 +178,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                         Text('${state.message}'),
                         const SizedBox(height: 16),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           child: Row(
                             children: [
                               Expanded(
@@ -191,49 +187,46 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                   buttonColor: Color(0xff4759FF),
                                   textColor: Colors.white,
                                   onPressed: () {
-                                    context
-                                        .read<ClientBloc>()
-                                        .add(FetchClients());
+                                    context.read<NfrClientBloc>().add(FetchNfrClients());
                                   },
                                   child: const Text(
                                     'Повторить попытку',
-                                    style: TextStyle(
-                                        color: Colors.white, fontFamily: 'Gilroy'),
+                                    style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                   );
-                } else if (state is ClientLoaded) {
+                } else if (state is NfrClientLoaded) {
                   return RefreshIndicator(
                     color: const Color(0xff1E2E52),
                     backgroundColor: Colors.white,
                     onRefresh: () async {
-                      context.read<ClientBloc>().add(FetchClients());
+                      context.read<NfrClientBloc>().add(FetchNfrClients());
                     },
-                    child: _buildClientsList(state),
+                    child: _buildNfrClientsList(state),
                   );
                 }
                 return const Center(child: Text('Нет данных'));
               },
             ),
-     floatingActionButton: FloatingActionButton(
-  onPressed: () async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ClientAddScreen()),
-    );
-    if (result == true) {
-      context.read<ClientBloc>().add(FetchClients());
-    }
-  },
-  backgroundColor: const Color(0xff1E2E52),
-  child: const Icon(Icons.add, color: Colors.white),
-),
+            floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ClientAddScreen()),
+          );
+          if (result == true) {
+            context.read<ClientBloc>().add(FetchClients());
+          }
+        },
+        backgroundColor: const Color(0xff1E2E52),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 }

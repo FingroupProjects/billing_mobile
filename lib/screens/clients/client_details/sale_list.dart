@@ -8,20 +8,20 @@ import 'package:billing_mobile/bloc/sale/sale_state.dart';
 class Sale {
   final int id;
   final String name;
-  // final String saleType;
-  // final String amount;
-  // final int active;
-  // final DateTime createdAt;
-  // final DateTime updatedAt;
+  final String saleType;
+  final String amount;
+  final int active;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Sale({
     required this.id,
     required this.name,
-    // required this.saleType,
-    // required this.amount,
-    // required this.active,
-    // required this.createdAt,
-    // required this.updatedAt,
+    required this.saleType,
+    required this.amount,
+    required this.active,
+    this.createdAt,
+    this.updatedAt,
   });
 }
 
@@ -29,7 +29,7 @@ class SaleList extends StatefulWidget {
   final String? selectedSale;
   final ValueChanged<String?> onChanged;
 
-  SaleList({required this.selectedSale, required this.onChanged});
+  const SaleList({required this.selectedSale, required this.onChanged, super.key});
 
   @override
   _SaleListState createState() => _SaleListState();
@@ -47,19 +47,39 @@ class _SaleListState extends State<SaleList> {
     return BlocBuilder<SaleBloc, SaleState>(
       builder: (context, state) {
         List<SaleData> salesList = [];
-        
-        if (state is SaleLoadedState) {
+
+        if (state is SaleLoadingState) {
+          // return const Center(child: CircularProgressIndicator());
+        } else if (state is SaleLoadedState) {
           salesList = state.sales;
+          if (salesList.isEmpty) {
+            return const Text(
+              'Скидки не найдены',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Gilroy',
+                color: Color(0xff1E2E52),
+              ),
+            );
+          }
         } else if (state is SaleErrorState) {
-          return Text('Ошибка загрузки скидок!');
+          return Text(
+            'Ошибка загрузки скидок: ${state.message}',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Gilroy',
+              color: Colors.red,
+            ),
+          );
         }
 
         List<DropdownMenuItem<String>> dropdownItems = salesList.map<DropdownMenuItem<String>>((SaleData sale) {
           return DropdownMenuItem<String>(
             value: sale.id.toString(),
             child: Text(
-              '${sale.name}' ,
-              // '${sale.name} (${sale.saleType == 'procent' ? '${sale.amount}%' : '${sale.amount} сумма'})' ,
+              '${sale.name} (${sale.saleType == 'procent' ? '${sale.amount}%' : '${sale.amount} сумма'})',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -106,12 +126,12 @@ class _SaleListState extends State<SaleList> {
                 ),
                 items: dropdownItems,
                 onChanged: widget.onChanged,
-                // validator: (value) {
-                //   if (value == null) {
-                //     return 'Поле обязательно для заполнения';
-                //   }
-                //   return null;
-                // },
+                validator: (value) {
+                  if (value == null && salesList.isNotEmpty) {
+                    return 'Поле обязательно для заполнения';
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: const Color(0xFFF4F7FD),

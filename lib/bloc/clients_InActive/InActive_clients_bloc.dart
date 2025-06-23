@@ -41,7 +41,11 @@ class InActiveBloc extends Bloc<InActiveEvent, InActiveState> {
       page: _currentPage,
       search: _currentSearchQuery,
       demo: _currentFilters['demo'],
+      status: _currentFilters['status'],
       tariff: _currentFilters['tariff'],
+      partner: _currentFilters['partner'],
+        countryId: _currentFilters['country_id'], // Added country_id filter
+        currencyId: _currentFilters['currency_id'], // Added currency_id filter
     );
     emit(InActiveLoaded(clientData, isLoadingMore: false));
   } catch (e) {
@@ -72,7 +76,11 @@ Future<void> _onFetchMoreInActive(FetchMoreInActive event, Emitter<InActiveState
         page: _currentPage + 1,
         search: _currentSearchQuery, 
         demo: _currentFilters['demo'],
+        status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
+        partner: _currentFilters['partner'],
+          countryId: _currentFilters['country_id'], // Added country_id filter
+        currencyId: _currentFilters['currency_id'], // Added currency_id filter
       );
       
       final updatedClients = ClientList(

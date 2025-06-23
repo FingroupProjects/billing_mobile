@@ -93,7 +93,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           emit(TransactionCreateError(result['message'] ?? 'Ошибка при создании транзакции'));
         }
       } catch (e) {
-        emit(TransactionCreateError('Ошибка создания транзакции: $e'));
+        emit(TransactionCreateError('Ошибка создания транзакции: '));
       }
     } else {
       emit(TransactionCreateError('Нет подключения к интернету'));

@@ -20,7 +20,7 @@ Future<void> _onLoadCountry( LoadCountryEvent event, Emitter<CountryState> emit 
       emit(CountryLoadedState(countries));
     }
   } catch (e) {
-    emit(CountryErrorState('Failed to load Countrys: $e'));
+    emit(CountryErrorState('Failed to load Countrys: '));
   }
 }
 
