@@ -72,15 +72,16 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
 
     try {
       emit(DemoLoaded(currentState.clientData, isLoadingMore: true));
-      final nextPageData = await apiService.getClients(
+      // ИСПРАВЛЕНИЕ: заменяем getClients на getDemoClients
+      final nextPageData = await apiService.getDemoClients(
         page: _currentPage + 1,
         search: _currentSearchQuery, 
         demo: _currentFilters['demo'],
         status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
         partner: _currentFilters['partner'],
-         countryId: _currentFilters['country_id'], // Added country_id filter
-        currencyId: _currentFilters['currency_id'], // Added currency_id filter
+        countryId: _currentFilters['country_id'],
+        currencyId: _currentFilters['currency_id'],
       );
       
       final updatedClients = ClientList(
@@ -108,7 +109,6 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
     }
   }
 }
-
   Future<void> _onDemoApplyFilters(DemoApplyFilters event, Emitter<DemoState> emit) async {
     _currentFilters = event.filters;
     add(FetchDemo());

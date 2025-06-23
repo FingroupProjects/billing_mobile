@@ -373,27 +373,26 @@ Future<ClientListResponse> getNfrClients({
     throw ('Ошибка загрузки NFR клиентов!');
   }
 }
-
 Future<ClientListResponse> getDemoClients({
   int page = 1,
   String? search,
-  int? demo,
+  int? demo,  // Этот параметр будет игнорироваться
   int? status,
   int? tariff,
   int? partner,
-  int? countryId, // Added countryId parameter
-  int? currencyId, // Added currencyId parameter  
+  int? countryId,
+  int? currencyId,
 }) async {
   try {
     final queryParameters = {
       'page': page.toString(),
+      'demo': '1',  // ВСЕГДА устанавливаем demo = 1
+      'status': (status ?? 1).toString(),
       if (search != null && search.isNotEmpty) 'search': search,
-      'demo': (demo ?? 1).toString(),  
-      'status': (status ?? 1).toString(),  
       if (tariff != null) 'tariff': tariff.toString(),
       if (partner != null) 'partner': partner.toString(),
-       if (countryId != null) 'country_id': countryId.toString(), // Added country_id to query parameters
-      if (currencyId != null) 'currency_id': currencyId.toString(), // Added currency_id to query parameters
+      if (countryId != null) 'country_id': countryId.toString(),
+      if (currencyId != null) 'currency_id': currencyId.toString(),
     };
     
     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
@@ -447,19 +446,19 @@ Future<ClientListResponse> getInActiveClients({
   int? status,
   int? tariff,
   int? partner,
-   int? countryId, // Added countryId parameter
-  int? currencyId, // Added currencyId parameter  
+  int? countryId,
+  int? currencyId,
 }) async {
   try {
     final queryParameters = {
       'page': page.toString(),
+      'demo': (demo ?? 0).toString(),  // Всегда добавляем demo (по умолчанию 0)
+      'status': (status ?? 0).toString(),  // Всегда добавляем status (по умолчанию 0)
       if (search != null && search.isNotEmpty) 'search': search,
-      if (demo != null) 'demo': demo.toString(),
-      'status': (status ?? 0).toString(),  
       if (tariff != null) 'tariff': tariff.toString(),
       if (partner != null) 'partner': partner.toString(),
-      if (countryId != null) 'country_id': countryId.toString(), // Added country_id to query parameters
-      if (currencyId != null) 'currency_id': currencyId.toString(), // Added currency_id to query parameters
+      if (countryId != null) 'country_id': countryId.toString(),
+      if (currencyId != null) 'currency_id': currencyId.toString(),
     };
     
     final uri = Uri.parse('/clients').replace(queryParameters: queryParameters);
@@ -627,9 +626,25 @@ Future<List<CurrencyData>> getCurrencies() async {
     throw Exception('Failed to load currencies: $e');
   }
 }
+/*************  ✨ Windsurf Command ⭐  *************/
+/// Fetches a list of tariffs based on the provided code.
+///
+/// Sends a GET request to the server with the given code to retrieve a list of 
+/// tariffs. The server's response is expected to be either a direct list of 
+/// tariffs, or a map containing the tariffs under 'result.data' or 'data'. 
+/// The function parses the JSON response into a list of `TariffData` objects.
+///
+/// Throws an exception if the server response is not successful or if the 
+/// response format is unexpected.
+///
+/// [code] is the code used to filter the tariffs on the server.
+///
+/// Returns a `Future` that completes with a list of `TariffData`.
+
+/*******  995fe2ee-9bcc-4cc6-bc25-91d2d0c69f56  *******/
 Future<List<TariffData>> getTariffs(String code) async {
   try {
-    final response = await _getRequest('/tariff1?code=$code');
+    final response = await _getRequest('/t/tariff?code=$code');
     print('Tariff request sent with code: $code');
     
     if (response.statusCode == 200) {
