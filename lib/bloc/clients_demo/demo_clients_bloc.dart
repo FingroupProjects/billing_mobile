@@ -72,7 +72,7 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
 
     try {
       emit(DemoLoaded(currentState.clientData, isLoadingMore: true));
-      final nextPageData = await apiService.getClients(
+      final nextPageData = await apiService.getDemoClients(
         page: _currentPage + 1,
         search: _currentSearchQuery, 
         demo: _currentFilters['demo'],

@@ -629,7 +629,7 @@ Future<List<CurrencyData>> getCurrencies() async {
 }
 Future<List<TariffData>> getTariffs(String code) async {
   try {
-    final response = await _getRequest('/tariff1?code=$code');
+    final response = await _getRequest('/t/tariff?code=$code');
     print('Tariff request sent with code: $code');
     
     if (response.statusCode == 200) {

@@ -6,7 +6,8 @@ class User {
   final String? login;
   final String? email;
   final String? phone;
-  final String? image;
+  final String? role;
+  final String? address;
 
   User({
     required this.id,
@@ -14,16 +15,18 @@ class User {
     required this.login,
     required this.email,
     required this.phone,
-    required this.image,
+    this.role,
+    this.address,
   });
 
   User copyWith({
     int? id,
-    String? name, 
+    String? name,
     String? login,
     String? email,
     String? phone,
-    String? image,
+    String? role,
+    String? address,
   }) {
     return User(
       id: id ?? this.id,
@@ -31,31 +34,20 @@ class User {
       login: login ?? this.login,
       email: email ?? this.email,
       phone: phone ?? this.phone,
-      image: image ?? this.image,
+      role: role ?? this.role,
+      address: address ?? this.address,
     );
   }
 
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
-    
     result.addAll({'id': id});
-    
-    if (name != null) {
-      result.addAll({'name': name});
-    }
-    if (login != null) {
-      result.addAll({'login': login});
-    }
-    if (email != null) {
-      result.addAll({'email': email});
-    }
-    if (phone != null) {
-      result.addAll({'phone': phone});
-    }
-    if (image != null) {
-      result.addAll({'image': image});
-    }
-    
+    if (name != null) result.addAll({'name': name});
+    if (login != null) result.addAll({'login': login});
+    if (email != null) result.addAll({'email': email});
+    if (phone != null) result.addAll({'phone': phone});
+    if (role != null) result.addAll({'role': role});
+    if (address != null) result.addAll({'address': address});
     return result;
   }
 
@@ -66,7 +58,8 @@ class User {
       login: map['login'],
       email: map['email'],
       phone: map['phone'],
-      image: map['image'],
+      role: map['role'],
+      address: map['address'],
     );
   }
 
@@ -76,20 +69,20 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, name: $name, login: $login, email!mail, phone: $phone, image: $image)';
+    return 'User(id: $id, name: $name, login: $login, email: $email, phone: $phone, role: $role, address: $address)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
     return other is User &&
         other.id == id &&
         other.name == name &&
         other.login == login &&
         other.email == email &&
         other.phone == phone &&
-        other.image == image;
+        other.role == role &&
+        other.address == address;
   }
 
   @override
@@ -99,9 +92,7 @@ class User {
         login.hashCode ^
         email.hashCode ^
         phone.hashCode ^
-        image.hashCode ;
+        role.hashCode ^
+        address.hashCode;
   }
-
-
-  
 }
