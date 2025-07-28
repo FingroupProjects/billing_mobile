@@ -30,7 +30,7 @@ class LoginScreen extends StatelessWidget {
             } else if (state is LoginLoaded) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
+                MaterialPageRoute(builder: (context) => HomeScreen(user: state.user,)),
               );
             }
           },

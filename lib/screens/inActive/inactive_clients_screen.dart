@@ -4,6 +4,7 @@ import 'package:billing_mobile/bloc/clients_InActive/InActive_clients_state.dart
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_InActive_app_bar.dart';
+import 'package:billing_mobile/models/user.dart';
 import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
 import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/inActive/inactive_clients_card.dart';
@@ -13,6 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class InActiveClientsScreen extends StatefulWidget {
+     final User user; // Добавляем параметр user
+
+    const InActiveClientsScreen({Key? key, required this.user}) : super(key: key);
   @override
   _InActiveClientsScreenState createState() => _InActiveClientsScreenState();
 }
@@ -184,7 +188,7 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
             ),
           ),
           body: isClickAvatarIcon
-              ? const ProfileScreen()
+              ?  ProfileScreen(user: widget.user,)
               : BlocBuilder<InActiveBloc, InActiveState>(
                   builder: (context, state) {
                     if (state is InActiveLoading) {

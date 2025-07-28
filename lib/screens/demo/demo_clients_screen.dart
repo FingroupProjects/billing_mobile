@@ -4,6 +4,7 @@ import 'package:billing_mobile/bloc/clients_demo/demo_clients_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_demo_app_bar.dart';
+import 'package:billing_mobile/models/user.dart';
 import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
 import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/demo/demo_clients_card.dart';
@@ -12,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DemoClientsScreen extends StatefulWidget {
+    final User user; // Добавляем параметр user
+  const DemoClientsScreen({Key? key, required this.user}) : super(key: key);
   @override
   _DemoClientsScreenState createState() => _DemoClientsScreenState();
 }
@@ -165,7 +168,7 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
         ),
       ),
       body: isClickAvatarIcon
-          ? const ProfileScreen()
+          ?  ProfileScreen(user: widget.user,)
           : BlocBuilder<DemoBloc, DemoState>(
               builder: (context, state) {
                 if (state is DemoLoading) {

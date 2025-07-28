@@ -1,10 +1,10 @@
-
 import 'package:billing_mobile/bloc/clients/NfrClientBloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_client_app_bar.dart';
+import 'package:billing_mobile/models/user.dart'; // Добавляем импорт
 import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
 import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
 import 'package:billing_mobile/screens/clients/clients_card.dart';
@@ -13,6 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NfrClientsScreen extends StatefulWidget {
+  final User user; // Добавляем параметр user
+  const NfrClientsScreen({Key? key, required this.user}) : super(key: key);
+
   @override
   _NfrClientsScreenState createState() => _NfrClientsScreenState();
 }
@@ -139,8 +142,7 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
                   onFilterSelected: (filters) {
                     setState(() {
                       _currentFilters = filters;
-                                            print('Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
-
+                      print('Applied filters: $_currentFilters');
                     });
                     context.read<NfrClientBloc>().add(ApplyNfrFilters(filters));
                   },
@@ -159,11 +161,13 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
               });
               context.read<NfrClientBloc>().add(SearchNfrClients(''));
             }
-          }, onChangedSearchInput: (String value) {  }, clearButtonClickFiltr: (bool p1) {  },
+          },
+          onChangedSearchInput: (String value) {},
+          clearButtonClickFiltr: (bool p1) {},
         ),
       ),
       body: isClickAvatarIcon
-          ? const ProfileScreen()
+          ? ProfileScreen(user: widget.user) // Передаём user
           : BlocBuilder<NfrClientBloc, NfrClientState>(
               builder: (context, state) {
                 if (state is NfrClientLoading) {
@@ -214,7 +218,7 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
                 return const Center(child: Text('Нет данных'));
               },
             ),
-            floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
             context,

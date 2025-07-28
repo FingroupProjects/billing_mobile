@@ -5,14 +5,18 @@ import 'package:billing_mobile/bloc/clients/clients_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_client_app_bar.dart';
+import 'package:billing_mobile/models/user.dart'; // Добавляем импорт
 import 'package:billing_mobile/screens/clients/clients_add_screen.dart';
-import 'package:billing_mobile/screens/clients/clients_card.dart';
 import 'package:billing_mobile/screens/clients/client_details/clients_details_screen.dart';
+import 'package:billing_mobile/screens/clients/clients_card.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ClientsScreen extends StatefulWidget {
+  final User user; // Добавляем параметр user
+  const ClientsScreen({Key? key, required this.user}) : super(key: key);
+
   @override
   _ClientsScreenState createState() => _ClientsScreenState();
 }
@@ -24,7 +28,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
   bool isClickAvatarIcon = false;
   late ScrollController _scrollController;
   Map<String, dynamic> _currentFilters = {};
-  final ApiService _apiService = ApiService(); // Добавляем ApiService
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
@@ -166,7 +170,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
         ),
       ),
       body: isClickAvatarIcon
-          ? const ProfileScreen()
+          ? ProfileScreen(user: widget.user) // Передаём user
           : BlocBuilder<ClientBloc, ClientState>(
               builder: (context, state) {
                 if (state is ClientLoading) {
@@ -221,19 +225,19 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 return const Center(child: Text('Нет данных'));
               },
             ),
-     floatingActionButton: FloatingActionButton(
-  onPressed: () async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ClientAddScreen()),
-    );
-    if (result == true) {
-      context.read<ClientBloc>().add(FetchClients());
-    }
-  },
-  backgroundColor: const Color(0xff1E2E52),
-  child: const Icon(Icons.add, color: Colors.white),
-),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ClientAddScreen()),
+          );
+          if (result == true) {
+            context.read<ClientBloc>().add(FetchClients());
+          }
+        },
+        backgroundColor: const Color(0xff1E2E52),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 }

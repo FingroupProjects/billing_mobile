@@ -72,7 +72,7 @@ Future<void> _onFetchMoreInActive(FetchMoreInActive event, Emitter<InActiveState
 
     try {
       emit(InActiveLoaded(currentState.clientData, isLoadingMore: true));
-      final nextPageData = await apiService.getClients(
+      final nextPageData = await apiService.getInActiveClients(
         page: _currentPage + 1,
         search: _currentSearchQuery, 
         demo: _currentFilters['demo'],

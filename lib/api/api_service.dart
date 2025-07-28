@@ -11,6 +11,7 @@ import 'package:billing_mobile/models/partner_model.dart';
 import 'package:billing_mobile/models/sale_model.dart';
 import 'package:billing_mobile/models/tariff_model.dart';
 import 'package:billing_mobile/models/transactions_model.dart';
+import 'package:billing_mobile/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -179,6 +180,14 @@ Future<LoginResponse> login(LoginModel loginModel) async {
       throw (errorMessage);
     }
   }
+    Future<User?> getUser() async {
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = prefs.getString('user');
+      if (userJson != null) {
+        return User.fromJson(userJson);
+      }
+      return null;
+    }
    
   // //_________________________________ START_____API__SCREEN__LEAD____________________________________________//
 
