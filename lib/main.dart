@@ -7,6 +7,7 @@ import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients_InActive/InActive_clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_demo/demo_clients_bloc.dart';
+import 'package:billing_mobile/bloc/commercial_offers/commercial_offers_bloc.dart';
 import 'package:billing_mobile/bloc/currency/currency_bloc.dart';
 import 'package:billing_mobile/bloc/login/login_bloc.dart';
 import 'package:billing_mobile/bloc/organizations/organizations_bloc.dart';
@@ -21,6 +22,7 @@ import 'package:billing_mobile/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:flutter_windowmanager/flutter_windowmanager.dart'; // Add this for Android secure flag
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -71,28 +73,45 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => LoginBloc(apiService)),
         BlocProvider(create: (context) => ClientBloc(apiService: apiService)),
-        BlocProvider(create: (context) => NfrClientBloc(apiService: apiService)),
+        BlocProvider(
+            create: (context) => NfrClientBloc(apiService: apiService)),
         BlocProvider(create: (context) => DemoBloc(apiService: apiService)),
         BlocProvider(create: (context) => InActiveBloc(apiService: apiService)),
+        BlocProvider(
+            create: (context) => CommercialOffersBloc(apiService: apiService)),
         BlocProvider(create: (context) => ClientByIdBloc(apiService)),
-        BlocProvider(create: (context) => OrganizationBloc(apiService: apiService)),
-        BlocProvider(create: (context) => OrganizationByIdBloc(apiService: apiService)),
+        BlocProvider(
+            create: (context) => OrganizationBloc(apiService: apiService)),
+        BlocProvider(
+            create: (context) => OrganizationByIdBloc(apiService: apiService)),
         BlocProvider(create: (context) => PartnerBloc(apiService: apiService)),
         BlocProvider(create: (context) => SaleBloc(apiService: apiService)),
         BlocProvider(create: (context) => CountryBloc(apiService: apiService)),
-        BlocProvider(create: (context) => BusinessTypeBloc(apiService: apiService)),
-        BlocProvider(create: (context) => TransactionBloc(apiService: apiService)),
-        BlocProvider(create: (context) => TransactionByIdBloc(apiService: apiService)),
+        BlocProvider(
+            create: (context) => BusinessTypeBloc(apiService: apiService)),
+        BlocProvider(
+            create: (context) => TransactionBloc(apiService: apiService)),
+        BlocProvider(
+            create: (context) => TransactionByIdBloc(apiService: apiService)),
         BlocProvider(create: (context) => ClientHistoryBloc(apiService)),
         BlocProvider(create: (context) => CurrencyBloc(apiService: apiService)),
         BlocProvider(create: (context) => TariffBloc(apiService: apiService)),
-        
       ],
       child: MaterialApp(
         color: Colors.white,
         debugShowCheckedModeBanner: false,
         title: 'billing',
         navigatorKey: navigatorKey,
+        locale: const Locale('ru'),
+        supportedLocales: const [
+          Locale('ru'),
+          Locale('en'),
+        ],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         theme: ThemeData(
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: Colors.white,

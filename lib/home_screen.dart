@@ -1,6 +1,7 @@
 import 'package:billing_mobile/MyNavBar.dart';
 import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/screens/clients/NfrClientsScreen.dart';
+import 'package:billing_mobile/screens/commercial_offers/commercial_offers_screen.dart';
 import 'package:billing_mobile/screens/demo/demo_clients_screen.dart';
 import 'package:billing_mobile/screens/inActive/inactive_clients_screen.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
@@ -40,6 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Проверяем, является ли пользователь админом
     bool isAdmin = await _apiService.isAdmin();
+
+    widgets.add(const CommercialOffersScreen());
+    titleKeys.add('Аппбар подключение');
+    navBarTitleKeys.add('Подключение');
+    activeIcons.add('material:receipt_long');
+    inactiveIcons.add('material:receipt_long');
 
     widgets.add(ClientsScreen());
     titleKeys.add('Аппбар клиент');
@@ -101,8 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _isSearching = false;
                 });
               },
-              navBarTitles:
-                  _navBarTitleKeys.map((key) => (key)).toList(),
+              navBarTitles: _navBarTitleKeys.map((key) => (key)).toList(),
               activeIcons: _activeIcons,
               inactiveIcons: _inactiveIcons,
             )

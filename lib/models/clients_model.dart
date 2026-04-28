@@ -24,7 +24,9 @@ class ClientData {
   factory ClientData.fromJson(Map<String, dynamic> json) {
     return ClientData(
       clients: ClientList.fromJson(json['clients'] ?? {}),
-      tariffs: (json['tariffs'] as List?)?.map((e) => Tariff.fromJson(e)).toList() ?? [],
+      tariffs:
+          (json['tariffs'] as List?)?.map((e) => Tariff.fromJson(e)).toList() ??
+              [],
     );
   }
 }
@@ -43,7 +45,8 @@ class ClientList {
   factory ClientList.fromJson(Map<String, dynamic> json) {
     return ClientList(
       currentPage: json['current_page'] ?? 1,
-      data: (json['data'] as List?)?.map((e) => Client.fromJson(e)).toList() ?? [],
+      data: (json['data'] as List?)?.map((e) => Client.fromJson(e)).toList() ??
+          [],
       total: json['total'] ?? 0,
     );
   }
@@ -54,7 +57,7 @@ class Client {
   final String name;
   final String phone;
   final String subDomain;
-  final  balance;
+  final String balance;
   final bool isActive;
   final bool isDemo;
   final String? email;
@@ -79,25 +82,35 @@ class Client {
   });
 
   factory Client.fromJson(Map<String, dynamic> json) {
+    final clientJson = json['client'] is Map<String, dynamic>
+        ? json['client'] as Map<String, dynamic>
+        : json;
+    final currencyCode = clientJson['country']?['currency']?['symbol_code'];
+    final rawBalance = json['balance'] ?? clientJson['balance'] ?? '0.00';
+    final balance =
+        currencyCode != null && rawBalance.toString().split(' ').length == 1
+            ? '$rawBalance $currencyCode'
+            : rawBalance.toString();
+
     return Client(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      phone: json['phone'] ?? '',
-      subDomain: json['sub_domain'] ?? '',
-      balance: json['balance'] ?? '0.00',
-      isActive: json['is_active'] ?? false,
-      isDemo: json['is_demo'] ?? false,
-      email: json['email'],
-      clientType: json['client_type'] ?? '',
-      tariff: json['tariff_price']?['tariff'] != null
-          ? Tariff.fromJson(json['tariff_price']['tariff'])
+      id: clientJson['id'] ?? json['client_id'] ?? json['id'] ?? 0,
+      name: clientJson['name'] ?? json['name'] ?? '',
+      phone: clientJson['phone'] ?? json['phone'] ?? '',
+      subDomain: clientJson['sub_domain'] ?? '',
+      balance: balance,
+      isActive: json['has_access'] != null
+          ? json['has_access'] == 1
+          : clientJson['is_active'] ?? false,
+      isDemo: clientJson['is_demo'] ?? json['is_demo'] ?? false,
+      email: clientJson['email'] ?? json['email'],
+      clientType: clientJson['client_type'] ?? '',
+      tariff: clientJson['tariff_price']?['tariff'] != null
+          ? Tariff.fromJson(clientJson['tariff_price']['tariff'])
           : Tariff(
               id: 0,
               name: 'Unknown',
             ),
-      nfr: json['nfr'],
-
-      
+      nfr: clientJson['nfr'] ?? 0,
     );
   }
 }

@@ -65,7 +65,8 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
 
   if (state is DemoLoaded) {
     final currentState = state as DemoLoaded;
-    if (currentState.clientData.data.clients.currentPage >= currentState.clientData.data.clients.total ~/ 20 + 1) {
+    if (currentState.clientData.data.clients.data.length >=
+        currentState.clientData.data.clients.total) {
       _isFetchingMore = false;
       return;
     }

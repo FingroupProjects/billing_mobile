@@ -66,7 +66,8 @@ Future<void> _onFetchMoreClients(FetchMoreClients event, Emitter<ClientState> em
 
   if (state is ClientLoaded) {
     final currentState = state as ClientLoaded;
-    if (currentState.clientData.data.clients.currentPage >= currentState.clientData.data.clients.total ~/ 20 + 1) {
+    if (currentState.clientData.data.clients.data.length >=
+        currentState.clientData.data.clients.total) {
       _isFetchingMore = false;
       return;
     }
