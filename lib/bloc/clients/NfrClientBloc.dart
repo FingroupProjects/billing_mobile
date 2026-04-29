@@ -62,7 +62,8 @@ class NfrClientBloc extends Bloc<NfrClientEvent, NfrClientState> {
     }
   }
 
-  Future<void> _onFetchNfrClients(FetchNfrClients event, Emitter<NfrClientState> emit) async {
+  Future<void> _onFetchNfrClients(
+      FetchNfrClients event, Emitter<NfrClientState> emit) async {
     emit(NfrClientLoading());
     if (!await _checkInternetConnection()) {
       emit(NfrClientError('Нет подключения к интернету'));
@@ -78,7 +79,7 @@ class NfrClientBloc extends Bloc<NfrClientEvent, NfrClientState> {
         status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
         partner: _currentFilters['partner'],
-          countryId: _currentFilters['country_id'], // Added country_id filter
+        countryId: _currentFilters['country_id'], // Added country_id filter
         currencyId: _currentFilters['currency_id'], // Added currency_id filter
       );
       emit(NfrClientLoaded(clientData, isLoadingMore: false));
@@ -87,7 +88,8 @@ class NfrClientBloc extends Bloc<NfrClientEvent, NfrClientState> {
     }
   }
 
-  Future<void> _onFetchMoreNfrClients(FetchMoreNfrClients event, Emitter<NfrClientState> emit) async {
+  Future<void> _onFetchMoreNfrClients(
+      FetchMoreNfrClients event, Emitter<NfrClientState> emit) async {
     if (_isFetchingMore) return;
     _isFetchingMore = true;
 
@@ -99,7 +101,8 @@ class NfrClientBloc extends Bloc<NfrClientEvent, NfrClientState> {
 
     if (state is NfrClientLoaded) {
       final currentState = state as NfrClientLoaded;
-      if (currentState.clientData.data.clients.currentPage >= currentState.clientData.data.clients.total ~/ 20 + 1) {
+      if (currentState.clientData.data.clients.data.length >=
+          currentState.clientData.data.clients.total) {
         _isFetchingMore = false;
         return;
       }
@@ -113,13 +116,17 @@ class NfrClientBloc extends Bloc<NfrClientEvent, NfrClientState> {
           status: _currentFilters['status'],
           tariff: _currentFilters['tariff'],
           partner: _currentFilters['partner'],
-            countryId: _currentFilters['country_id'], // Added country_id filter
-        currencyId: _currentFilters['currency_id'], // Added currency_id filter
+          countryId: _currentFilters['country_id'], // Added country_id filter
+          currencyId:
+              _currentFilters['currency_id'], // Added currency_id filter
         );
 
         final updatedClients = ClientList(
           currentPage: nextPageData.data.clients.currentPage,
-          data: [...currentState.clientData.data.clients.data, ...nextPageData.data.clients.data],
+          data: [
+            ...currentState.clientData.data.clients.data,
+            ...nextPageData.data.clients.data
+          ],
           total: nextPageData.data.clients.total,
         );
 
@@ -143,12 +150,14 @@ class NfrClientBloc extends Bloc<NfrClientEvent, NfrClientState> {
     }
   }
 
-  Future<void> _onApplyNfrFilters(ApplyNfrFilters event, Emitter<NfrClientState> emit) async {
+  Future<void> _onApplyNfrFilters(
+      ApplyNfrFilters event, Emitter<NfrClientState> emit) async {
     _currentFilters = event.filters;
     add(FetchNfrClients());
   }
 
-  Future<void> _onSearchNfrClients(SearchNfrClients event, Emitter<NfrClientState> emit) async {
+  Future<void> _onSearchNfrClients(
+      SearchNfrClients event, Emitter<NfrClientState> emit) async {
     _currentSearchQuery = event.query;
     add(FetchNfrClients());
   }

@@ -60,7 +60,7 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
 
   Widget _buildClientsList(DemoLoaded state) {
     final clients = state.clientData.data.clients.data;
-    
+
     if (_isSearching && clients.isEmpty) {
       return const Center(
         child: Text(
@@ -99,7 +99,8 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ClientDetailsScreen(clientId: client.id),
+                  builder: (context) =>
+                      ClientDetailsScreen(clientId: client.id),
                 ),
               );
             },
@@ -121,46 +122,53 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Демо',
-          onClickProfileAvatar: () {
-            setState(() {
-              isClickAvatarIcon = !isClickAvatarIcon;
-            });
-          },
-          clearButtonClickFiltr: (isSearching) {},
-          showSearchIcon: true,
-          showFilterIcon: true,
-          isFilterActive: _currentFilters.isNotEmpty, 
-          onChangedSearchInput: (String value) {},
-          onFilterTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FilterDemoScreen(
-                  onFilterSelected: (filters) {
-                    setState(() {
-                      _currentFilters = filters;
-                                            print('Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
-
-                    });
-                    context.read<DemoBloc>().add(DemoApplyFilters(filters));
-                  },
-                  initialFilters: _currentFilters,
-                ),
-              ),
+        title: BlocBuilder<DemoBloc, DemoState>(
+          builder: (context, state) {
+            return CustomAppBar(
+              title: isClickAvatarIcon ? 'Настройка' : 'Демо',
+              totalCount: isClickAvatarIcon || state is! DemoLoaded
+                  ? null
+                  : state.clientData.data.clients.total,
+              onClickProfileAvatar: () {
+                setState(() {
+                  isClickAvatarIcon = !isClickAvatarIcon;
+                });
+              },
+              clearButtonClickFiltr: (isSearching) {},
+              showSearchIcon: true,
+              showFilterIcon: true,
+              isFilterActive: _currentFilters.isNotEmpty,
+              onChangedSearchInput: (String value) {},
+              onFilterTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilterDemoScreen(
+                      onFilterSelected: (filters) {
+                        setState(() {
+                          _currentFilters = filters;
+                          print(
+                              'Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
+                        });
+                        context.read<DemoBloc>().add(DemoApplyFilters(filters));
+                      },
+                      initialFilters: _currentFilters,
+                    ),
+                  ),
+                );
+              },
+              textEditingController: _searchController,
+              focusNode: _searchFocusNode,
+              clearButtonClick: (value) {
+                if (value == false) {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                  context.read<DemoBloc>().add(SearchDemo(''));
+                }
+              },
             );
-          },
-          textEditingController: _searchController,
-          focusNode: _searchFocusNode,
-          clearButtonClick: (value) {
-            if (value == false) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              context.read<DemoBloc>().add(SearchDemo(''));
-            }
           },
         ),
       ),
@@ -177,25 +185,32 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                  Text('${state.message}'),
-                  const SizedBox(height: 16),
-                  Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                            child: CustomButton(
-                            buttonText: 'Обновить',
-                            buttonColor: Color(0xff4759FF),
-                            textColor: Colors.white,
-                            onPressed: () { context.read<DemoBloc>().add(FetchDemo());},
-                            child: const Text('Повторить попытку', style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
-                            ),
-                                 ),
-                             ),
-                           ],
-                         ),
-                       )
+                        Text('${state.message}'),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: CustomButton(
+                                  buttonText: 'Обновить',
+                                  buttonColor: Color(0xff4759FF),
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    context.read<DemoBloc>().add(FetchDemo());
+                                  },
+                                  child: const Text(
+                                    'Повторить попытку',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Gilroy'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   );

@@ -28,95 +28,103 @@ class InActiveBloc extends Bloc<InActiveEvent, InActiveState> {
     }
   }
 
-  Future<void> _onFetchInActive(FetchInActive event, Emitter<InActiveState> emit) async {
-  emit(InActiveLoading());
-  if (!await _checkInternetConnection()) {
-    emit(InActiveError('Нет подключения к интернету'));
-    return;
-  }
-  
-  try {
-    _currentPage = 1;
-    final clientData = await apiService.getInActiveClients(
-      page: _currentPage,
-      search: _currentSearchQuery,
-      demo: _currentFilters['demo'],
-      status: _currentFilters['status'],
-      tariff: _currentFilters['tariff'],
-      partner: _currentFilters['partner'],
-        countryId: _currentFilters['country_id'], // Added country_id filter
-        currencyId: _currentFilters['currency_id'], // Added currency_id filter
-    );
-    emit(InActiveLoaded(clientData, isLoadingMore: false));
-  } catch (e) {
-    emit(InActiveError(e.toString()));
-  }
-}
-
-Future<void> _onFetchMoreInActive(FetchMoreInActive event, Emitter<InActiveState> emit) async {
-  if (_isFetchingMore) return;
-  _isFetchingMore = true;
-
-  if (!await _checkInternetConnection()) {
-    emit(InActiveError('Нет подключения к интернету'));
-    _isFetchingMore = false;
-    return;
-  }
-
-  if (state is InActiveLoaded) {
-    final currentState = state as InActiveLoaded;
-    if (currentState.clientData.data.clients.currentPage >= currentState.clientData.data.clients.total ~/ 20 + 1) {
-      _isFetchingMore = false;
+  Future<void> _onFetchInActive(
+      FetchInActive event, Emitter<InActiveState> emit) async {
+    emit(InActiveLoading());
+    if (!await _checkInternetConnection()) {
+      emit(InActiveError('Нет подключения к интернету'));
       return;
     }
 
     try {
-      emit(InActiveLoaded(currentState.clientData, isLoadingMore: true));
-      final nextPageData = await apiService.getInActiveClients(
-        page: _currentPage + 1,
-        search: _currentSearchQuery, 
+      _currentPage = 1;
+      final clientData = await apiService.getInActiveClients(
+        page: _currentPage,
+        search: _currentSearchQuery,
         demo: _currentFilters['demo'],
         status: _currentFilters['status'],
         tariff: _currentFilters['tariff'],
         partner: _currentFilters['partner'],
-          countryId: _currentFilters['country_id'], // Added country_id filter
+        countryId: _currentFilters['country_id'], // Added country_id filter
         currencyId: _currentFilters['currency_id'], // Added currency_id filter
       );
-      
-      final updatedClients = ClientList(
-        currentPage: nextPageData.data.clients.currentPage,
-        data: [...currentState.clientData.data.clients.data, ...nextPageData.data.clients.data],
-        total: nextPageData.data.clients.total,
-      );
-      
-      final updatedData = ClientData(
-        clients: updatedClients,
-        tariffs: currentState.clientData.data.tariffs,
-      );
-      
-      final updatedResponse = ClientListResponse(
-        view: currentState.clientData.view,
-        data: updatedData,
-      );
-      
-      _currentPage++;
-      emit(InActiveLoaded(updatedResponse, isLoadingMore: false));
+      emit(InActiveLoaded(clientData, isLoadingMore: false));
     } catch (e) {
       emit(InActiveError(e.toString()));
-    } finally {
-      _isFetchingMore = false;
     }
   }
-}
 
-  Future<void> _onInActiveApplyFilters(InActiveApplyFilters event, Emitter<InActiveState> emit) async {
+  Future<void> _onFetchMoreInActive(
+      FetchMoreInActive event, Emitter<InActiveState> emit) async {
+    if (_isFetchingMore) return;
+    _isFetchingMore = true;
+
+    if (!await _checkInternetConnection()) {
+      emit(InActiveError('Нет подключения к интернету'));
+      _isFetchingMore = false;
+      return;
+    }
+
+    if (state is InActiveLoaded) {
+      final currentState = state as InActiveLoaded;
+      if (currentState.clientData.data.clients.data.length >=
+          currentState.clientData.data.clients.total) {
+        _isFetchingMore = false;
+        return;
+      }
+
+      try {
+        emit(InActiveLoaded(currentState.clientData, isLoadingMore: true));
+        final nextPageData = await apiService.getInActiveClients(
+          page: _currentPage + 1,
+          search: _currentSearchQuery,
+          demo: _currentFilters['demo'],
+          status: _currentFilters['status'],
+          tariff: _currentFilters['tariff'],
+          partner: _currentFilters['partner'],
+          countryId: _currentFilters['country_id'], // Added country_id filter
+          currencyId:
+              _currentFilters['currency_id'], // Added currency_id filter
+        );
+
+        final updatedClients = ClientList(
+          currentPage: nextPageData.data.clients.currentPage,
+          data: [
+            ...currentState.clientData.data.clients.data,
+            ...nextPageData.data.clients.data
+          ],
+          total: nextPageData.data.clients.total,
+        );
+
+        final updatedData = ClientData(
+          clients: updatedClients,
+          tariffs: currentState.clientData.data.tariffs,
+        );
+
+        final updatedResponse = ClientListResponse(
+          view: currentState.clientData.view,
+          data: updatedData,
+        );
+
+        _currentPage++;
+        emit(InActiveLoaded(updatedResponse, isLoadingMore: false));
+      } catch (e) {
+        emit(InActiveError(e.toString()));
+      } finally {
+        _isFetchingMore = false;
+      }
+    }
+  }
+
+  Future<void> _onInActiveApplyFilters(
+      InActiveApplyFilters event, Emitter<InActiveState> emit) async {
     _currentFilters = event.filters;
     add(FetchInActive());
   }
 
-  Future<void> _onSearchInActive(SearchInActive event, Emitter<InActiveState> emit) async {
+  Future<void> _onSearchInActive(
+      SearchInActive event, Emitter<InActiveState> emit) async {
     _currentSearchQuery = event.query;
     add(FetchInActive());
   }
-
 }

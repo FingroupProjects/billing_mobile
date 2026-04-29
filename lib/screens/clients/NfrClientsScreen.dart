@@ -1,4 +1,3 @@
-
 import 'package:billing_mobile/bloc/clients/NfrClientBloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
@@ -43,7 +42,8 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
 
   void _onScroll() {
     final state = context.read<NfrClientBloc>().state;
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
         (state is NfrClientLoaded && !state.isLoadingMore)) {
       context.read<NfrClientBloc>().add(FetchMoreNfrClients());
     }
@@ -99,7 +99,8 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ClientDetailsScreen(clientId: client.id),
+                  builder: (context) =>
+                      ClientDetailsScreen(clientId: client.id),
                 ),
               );
             },
@@ -121,45 +122,56 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'NFR Клиенты',
-          onClickProfileAvatar: () {
-            setState(() {
-              isClickAvatarIcon = !isClickAvatarIcon;
-            });
-          },
-          showSearchIcon: true,
-          showFilterIcon: true,
-          isFilterActive: _currentFilters.isNotEmpty,
-          onFilterTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FilterClientScreen(
-                  onFilterSelected: (filters) {
-                    setState(() {
-                      _currentFilters = filters;
-                                            print('Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
-
-                    });
-                    context.read<NfrClientBloc>().add(ApplyNfrFilters(filters));
-                  },
-                  initialFilters: _currentFilters,
-                ),
-              ),
+        title: BlocBuilder<NfrClientBloc, NfrClientState>(
+          builder: (context, state) {
+            return CustomAppBar(
+              title: isClickAvatarIcon ? 'Настройка' : 'NFR Клиенты',
+              totalCount: isClickAvatarIcon || state is! NfrClientLoaded
+                  ? null
+                  : state.clientData.data.clients.total,
+              onClickProfileAvatar: () {
+                setState(() {
+                  isClickAvatarIcon = !isClickAvatarIcon;
+                });
+              },
+              showSearchIcon: true,
+              showFilterIcon: true,
+              isFilterActive: _currentFilters.isNotEmpty,
+              onFilterTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilterClientScreen(
+                      onFilterSelected: (filters) {
+                        setState(() {
+                          _currentFilters = filters;
+                          print(
+                              'Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
+                        });
+                        context
+                            .read<NfrClientBloc>()
+                            .add(ApplyNfrFilters(filters));
+                      },
+                      initialFilters: _currentFilters,
+                    ),
+                  ),
+                );
+              },
+              textEditingController: _searchController,
+              focusNode: _searchFocusNode,
+              clearButtonClick: (value) {
+                if (value == false) {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                  context.read<NfrClientBloc>().add(SearchNfrClients(''));
+                }
+              },
+              onChangedSearchInput: (String value) {},
+              clearButtonClickFiltr: (bool p1) {},
             );
           },
-          textEditingController: _searchController,
-          focusNode: _searchFocusNode,
-          clearButtonClick: (value) {
-            if (value == false) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              context.read<NfrClientBloc>().add(SearchNfrClients(''));
-            }
-          }, onChangedSearchInput: (String value) {  }, clearButtonClickFiltr: (bool p1) {  },
         ),
       ),
       body: isClickAvatarIcon
@@ -178,7 +190,8 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
                         Text('${state.message}'),
                         const SizedBox(height: 16),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
                           child: Row(
                             children: [
                               Expanded(
@@ -187,11 +200,15 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
                                   buttonColor: Color(0xff4759FF),
                                   textColor: Colors.white,
                                   onPressed: () {
-                                    context.read<NfrClientBloc>().add(FetchNfrClients());
+                                    context
+                                        .read<NfrClientBloc>()
+                                        .add(FetchNfrClients());
                                   },
                                   child: const Text(
                                     'Повторить попытку',
-                                    style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Gilroy'),
                                   ),
                                 ),
                               ),
@@ -214,7 +231,7 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
                 return const Center(child: Text('Нет данных'));
               },
             ),
-            floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
             context,

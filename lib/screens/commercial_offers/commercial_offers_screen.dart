@@ -127,29 +127,36 @@ class _CommercialOffersScreenState extends State<CommercialOffersScreen> {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Подключение',
-          onClickProfileAvatar: () {
-            setState(() {
-              isClickAvatarIcon = !isClickAvatarIcon;
-            });
-          },
-          clearButtonClickFiltr: (isSearching) {},
-          showSearchIcon: true,
-          showFilterIcon: false,
-          onChangedSearchInput: (String value) {},
-          textEditingController: _searchController,
-          focusNode: _searchFocusNode,
-          clearButtonClick: (value) {
-            if (value == false) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              context
-                  .read<CommercialOffersBloc>()
-                  .add(SearchCommercialOffers(''));
-            }
+        title: BlocBuilder<CommercialOffersBloc, CommercialOffersState>(
+          builder: (context, state) {
+            return CustomAppBar(
+              title: isClickAvatarIcon ? 'Настройка' : 'Подключение',
+              totalCount: isClickAvatarIcon || state is! CommercialOffersLoaded
+                  ? null
+                  : state.offers.total,
+              onClickProfileAvatar: () {
+                setState(() {
+                  isClickAvatarIcon = !isClickAvatarIcon;
+                });
+              },
+              clearButtonClickFiltr: (isSearching) {},
+              showSearchIcon: true,
+              showFilterIcon: false,
+              onChangedSearchInput: (String value) {},
+              textEditingController: _searchController,
+              focusNode: _searchFocusNode,
+              clearButtonClick: (value) {
+                if (value == false) {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                  context
+                      .read<CommercialOffersBloc>()
+                      .add(SearchCommercialOffers(''));
+                }
+              },
+            );
           },
         ),
       ),

@@ -60,7 +60,7 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
 
   Widget _buildClientsList(InActiveLoaded state) {
     final clients = state.clientData.data.clients.data;
-    
+
     if (_isSearching && clients.isEmpty) {
       return const Center(
         child: Text(
@@ -99,7 +99,8 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ClientDetailsScreen(clientId: client.id),
+                  builder: (context) =>
+                      ClientDetailsScreen(clientId: client.id),
                 ),
               );
             },
@@ -121,44 +122,53 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Неактивный',
-          onClickProfileAvatar: () {
-            setState(() {
-              isClickAvatarIcon = !isClickAvatarIcon;
-            });
-          },
-          clearButtonClickFiltr: (isSearching) {},
-          showSearchIcon: true,
-          showFilterIcon: true,
-          isFilterActive: _currentFilters.isNotEmpty, 
-          onChangedSearchInput: (String value) {},
-          onFilterTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FilterInActiveScreen(
-                  onFilterSelected: (filters) {
-                    setState(() {
-                      _currentFilters = filters;
-                    });
-                    context.read<InActiveBloc>().add(InActiveApplyFilters(filters));
-                  },
-                  initialFilters: _currentFilters,
-                ),
-              ),
+        title: BlocBuilder<InActiveBloc, InActiveState>(
+          builder: (context, state) {
+            return CustomAppBar(
+              title: isClickAvatarIcon ? 'Настройка' : 'Неактивный',
+              totalCount: isClickAvatarIcon || state is! InActiveLoaded
+                  ? null
+                  : state.clientData.data.clients.total,
+              onClickProfileAvatar: () {
+                setState(() {
+                  isClickAvatarIcon = !isClickAvatarIcon;
+                });
+              },
+              clearButtonClickFiltr: (isSearching) {},
+              showSearchIcon: true,
+              showFilterIcon: true,
+              isFilterActive: _currentFilters.isNotEmpty,
+              onChangedSearchInput: (String value) {},
+              onFilterTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilterInActiveScreen(
+                      onFilterSelected: (filters) {
+                        setState(() {
+                          _currentFilters = filters;
+                        });
+                        context
+                            .read<InActiveBloc>()
+                            .add(InActiveApplyFilters(filters));
+                      },
+                      initialFilters: _currentFilters,
+                    ),
+                  ),
+                );
+              },
+              textEditingController: _searchController,
+              focusNode: _searchFocusNode,
+              clearButtonClick: (value) {
+                if (value == false) {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                  context.read<InActiveBloc>().add(SearchInActive(''));
+                }
+              },
             );
-          },
-          textEditingController: _searchController,
-          focusNode: _searchFocusNode,
-          clearButtonClick: (value) {
-            if (value == false) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              context.read<InActiveBloc>().add(SearchInActive(''));
-            }
           },
         ),
       ),
@@ -175,25 +185,34 @@ class _InActiveClientsScreenState extends State<InActiveClientsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                  Text('${state.message}'),
-                  const SizedBox(height: 16),
-                  Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                            child: CustomButton(
-                            buttonText: 'Обновить',
-                            buttonColor: Color(0xff4759FF),
-                            textColor: Colors.white,
-                            onPressed: () { context.read<InActiveBloc>().add(FetchInActive());},
-                            child: const Text('Повторить попытку', style: TextStyle(color: Colors.white, fontFamily: 'Gilroy'),
-                            ),
-                                 ),
-                             ),
-                           ],
-                         ),
-                       )
+                        Text('${state.message}'),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: CustomButton(
+                                  buttonText: 'Обновить',
+                                  buttonColor: Color(0xff4759FF),
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    context
+                                        .read<InActiveBloc>()
+                                        .add(FetchInActive());
+                                  },
+                                  child: const Text(
+                                    'Повторить попытку',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Gilroy'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   );

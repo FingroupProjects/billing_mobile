@@ -13,7 +13,8 @@ class CustomAppBar extends StatefulWidget {
   final bool showSearchIcon;
   final bool showFilterIcon;
   final VoidCallback? onFilterTap;
-  final bool isFilterActive; 
+  final bool isFilterActive;
+  final int? totalCount;
 
   CustomAppBar({
     super.key,
@@ -27,14 +28,16 @@ class CustomAppBar extends StatefulWidget {
     required this.clearButtonClickFiltr,
     this.showSearchIcon = true,
     this.showFilterIcon = false,
-    this.isFilterActive = false, 
+    this.isFilterActive = false,
+    this.totalCount,
   });
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
 }
 
-class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderStateMixin {
+class _CustomAppBarState extends State<CustomAppBar>
+    with SingleTickerProviderStateMixin {
   bool _isSearching = false;
   late TextEditingController _searchController;
   late FocusNode focusNode;
@@ -100,14 +103,25 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
         SizedBox(width: 8),
         if (!_isSearching)
           Expanded(
-            child: Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 20,
-                fontFamily: 'Gilroy',
-                fontWeight: FontWeight.w600,
-                color: Color(0xff1E2E52), 
-              ),
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    widget.title,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontFamily: 'Gilroy',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff1E2E52),
+                    ),
+                  ),
+                ),
+                if (widget.totalCount != null) ...[
+                  SizedBox(width: 8),
+                  _TotalBadge(total: widget.totalCount!),
+                ],
+              ],
             ),
           ),
         if (_isSearching)
@@ -122,7 +136,10 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                 onChanged: widget.onChangedSearchInput,
                 decoration: const InputDecoration(
                   hintText: 'Поиск',
-                  hintStyle: TextStyle(fontFamily: 'Gilroy', color: Color(0xff99A4BA), fontSize: 16),
+                  hintStyle: TextStyle(
+                      fontFamily: 'Gilroy',
+                      color: Color(0xff99A4BA),
+                      fontSize: 16),
                   border: InputBorder.none,
                 ),
                 style: TextStyle(fontSize: 16),
@@ -202,6 +219,37 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
             },
           ),
       ]),
+    );
+  }
+}
+
+class _TotalBadge extends StatelessWidget {
+  final int total;
+
+  const _TotalBadge({required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 7),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: const Color(0xff1E2E52),
+          width: 2,
+        ),
+      ),
+      child: Text(
+        total.toString(),
+        style: const TextStyle(
+          fontSize: 12,
+          fontFamily: 'Gilroy',
+          fontWeight: FontWeight.w700,
+          color: Color(0xff1E2E52),
+        ),
+      ),
     );
   }
 }

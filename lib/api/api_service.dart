@@ -138,9 +138,11 @@ class ApiService {
                 ? organizations['current_page'] ?? 1
                 : 1,
             'data': normalizedOrganizationList,
-            'total': organizations is Map<String, dynamic>
-                ? organizations['total'] ?? normalizedOrganizationList.length
-                : normalizedOrganizationList.length,
+            'total': jsonData['total'] ??
+                (organizations is Map<String, dynamic>
+                    ? organizations['total'] ??
+                        normalizedOrganizationList.length
+                    : normalizedOrganizationList.length),
           },
           'partners': jsonData['partners'] ?? [],
           'tariffs': jsonData['tariffs'] ?? [],
@@ -342,7 +344,7 @@ class ApiService {
               currencyId.toString(), // Added currency_id to query parameters
       };
 
-      final uri = Uri.parse('/organizations-v2')
+      final uri = Uri.parse('/organizations-active-v2')
           .replace(queryParameters: queryParameters);
       final response = await _getRequest(uri.toString());
 
@@ -350,7 +352,7 @@ class ApiService {
         case 200:
           final jsonData = json.decode(response.body);
           return _clientListResponseFromJson(jsonData,
-              view: '/organizations-v2');
+              view: '/organizations-active-v2');
 
         case 400:
           throw ('Некорректный запрос: ${response.body}');
@@ -392,8 +394,8 @@ class ApiService {
       final queryParameters = {
         'page': page.toString(),
         if (search != null && search.isNotEmpty) 'search': search,
-        'demo': (demo ?? 0).toString(),
-        'status': (status ?? 1).toString(),
+        if (demo != null) 'demo': demo.toString(),
+        if (status != null) 'status': status.toString(),
         if (tariff != null) 'tariff': tariff.toString(),
         if (partner != null) 'partner': partner.toString(),
         if (countryId != null)
@@ -404,25 +406,15 @@ class ApiService {
               currencyId.toString(), // Added currency_id to query parameters
       };
 
-      final uri =
-          Uri.parse('/clients/nfr').replace(queryParameters: queryParameters);
+      final uri = Uri.parse('/organizations-nfr-v2')
+          .replace(queryParameters: queryParameters);
       final response = await _getRequest(uri.toString());
 
       switch (response.statusCode) {
         case 200:
           final jsonData = json.decode(response.body);
-          if (jsonData['clients'] != null) {
-            final adaptedJson = {
-              'view': '/nfr-clients',
-              'data': {
-                'clients': jsonData['clients'],
-                'partners': jsonData['partners'] ?? [],
-                'tariffs': jsonData['tariffs'] ?? [],
-              }
-            };
-            return ClientListResponse.fromJson(adaptedJson);
-          }
-          return ClientListResponse.fromJson(jsonData);
+          return _clientListResponseFromJson(jsonData,
+              view: '/organizations-nfr-v2');
 
         case 400:
           throw ('Некорректный запрос: ${response.body}');
@@ -521,7 +513,7 @@ class ApiService {
         'page': page.toString(),
         if (search != null && search.isNotEmpty) 'search': search,
         if (demo != null) 'demo': demo.toString(),
-        'status': (status ?? 0).toString(),
+        if (status != null) 'status': status.toString(),
         if (tariff != null) 'tariff': tariff.toString(),
         if (partner != null) 'partner': partner.toString(),
         if (countryId != null)
@@ -532,25 +524,15 @@ class ApiService {
               currencyId.toString(), // Added currency_id to query parameters
       };
 
-      final uri =
-          Uri.parse('/clients').replace(queryParameters: queryParameters);
+      final uri = Uri.parse('/organizations-inActive-v2')
+          .replace(queryParameters: queryParameters);
       final response = await _getRequest(uri.toString());
 
       switch (response.statusCode) {
         case 200:
           final jsonData = json.decode(response.body);
-          if (jsonData['clients'] != null) {
-            final adaptedJson = {
-              'view': '/clients',
-              'data': {
-                'clients': jsonData['clients'],
-                'partners': jsonData['partners'] ?? [],
-                'tariffs': jsonData['tariffs'] ?? [],
-              }
-            };
-            return ClientListResponse.fromJson(adaptedJson);
-          }
-          return ClientListResponse.fromJson(jsonData);
+          return _clientListResponseFromJson(jsonData,
+              view: '/organizations-inActive-v2');
 
         case 400:
           throw ('Некорректный запрос: ${response.body}');

@@ -44,12 +44,17 @@ class ClientList {
 
   factory ClientList.fromJson(Map<String, dynamic> json) {
     return ClientList(
-      currentPage: json['current_page'] ?? 1,
+      currentPage: _parseInt(json['current_page'], fallback: 1),
       data: (json['data'] as List?)?.map((e) => Client.fromJson(e)).toList() ??
           [],
-      total: json['total'] ?? 0,
+      total: _parseInt(json['total']),
     );
   }
+}
+
+int _parseInt(dynamic value, {int fallback = 0}) {
+  if (value is int) return value;
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
 }
 
 class Client {

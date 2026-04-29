@@ -1,4 +1,3 @@
-import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_event.dart';
 import 'package:billing_mobile/bloc/clients/clients_state.dart';
@@ -24,7 +23,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
   bool isClickAvatarIcon = false;
   late ScrollController _scrollController;
   Map<String, dynamic> _currentFilters = {};
-  final ApiService _apiService = ApiService(); // Добавляем ApiService
 
   @override
   void initState() {
@@ -101,7 +99,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ClientDetailsScreen(clientId: client.id),
+                  builder: (context) =>
+                      ClientDetailsScreen(clientId: client.id),
                 ),
               );
             },
@@ -123,45 +122,52 @@ class _ClientsScreenState extends State<ClientsScreen> {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: CustomAppBar(
-          title: isClickAvatarIcon ? 'Настройка' : 'Клиенты',
-          onClickProfileAvatar: () {
-            setState(() {
-              isClickAvatarIcon = !isClickAvatarIcon;
-            });
-          },
-          clearButtonClickFiltr: (isSearching) {},
-          showSearchIcon: true,
-          showFilterIcon: true,
-          isFilterActive: _currentFilters.isNotEmpty,
-          onChangedSearchInput: (String value) {},
-          onFilterTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FilterClientScreen(
-                  onFilterSelected: (filters) {
-                    setState(() {
-                      _currentFilters = filters;
-                      print('Applied filters: $_currentFilters');
-                    });
-                    context.read<ClientBloc>().add(ApplyFilters(filters));
-                  },
-                  initialFilters: _currentFilters,
-                ),
-              ),
+        title: BlocBuilder<ClientBloc, ClientState>(
+          builder: (context, state) {
+            return CustomAppBar(
+              title: isClickAvatarIcon ? 'Настройка' : 'Клиенты',
+              totalCount: isClickAvatarIcon || state is! ClientLoaded
+                  ? null
+                  : state.clientData.data.clients.total,
+              onClickProfileAvatar: () {
+                setState(() {
+                  isClickAvatarIcon = !isClickAvatarIcon;
+                });
+              },
+              clearButtonClickFiltr: (isSearching) {},
+              showSearchIcon: true,
+              showFilterIcon: true,
+              isFilterActive: _currentFilters.isNotEmpty,
+              onChangedSearchInput: (String value) {},
+              onFilterTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilterClientScreen(
+                      onFilterSelected: (filters) {
+                        setState(() {
+                          _currentFilters = filters;
+                          print('Applied filters: $_currentFilters');
+                        });
+                        context.read<ClientBloc>().add(ApplyFilters(filters));
+                      },
+                      initialFilters: _currentFilters,
+                    ),
+                  ),
+                );
+              },
+              textEditingController: _searchController,
+              focusNode: _searchFocusNode,
+              clearButtonClick: (value) {
+                if (value == false) {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                  context.read<ClientBloc>().add(SearchClients(''));
+                }
+              },
             );
-          },
-          textEditingController: _searchController,
-          focusNode: _searchFocusNode,
-          clearButtonClick: (value) {
-            if (value == false) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear();
-              });
-              context.read<ClientBloc>().add(SearchClients(''));
-            }
           },
         ),
       ),
@@ -198,7 +204,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                   child: const Text(
                                     'Повторить попытку',
                                     style: TextStyle(
-                                        color: Colors.white, fontFamily: 'Gilroy'),
+                                        color: Colors.white,
+                                        fontFamily: 'Gilroy'),
                                   ),
                                 ),
                               ),
@@ -221,19 +228,19 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 return const Center(child: Text('Нет данных'));
               },
             ),
-     floatingActionButton: FloatingActionButton(
-  onPressed: () async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ClientAddScreen()),
-    );
-    if (result == true) {
-      context.read<ClientBloc>().add(FetchClients());
-    }
-  },
-  backgroundColor: const Color(0xff1E2E52),
-  child: const Icon(Icons.add, color: Colors.white),
-),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ClientAddScreen()),
+          );
+          if (result == true) {
+            context.read<ClientBloc>().add(FetchClients());
+          }
+        },
+        backgroundColor: const Color(0xff1E2E52),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 }
