@@ -8,25 +8,34 @@ abstract class OrganizationByIdState extends Equatable {
   List<Object> get props => [];
 }
 
-class OrganizationByIdInitialState extends OrganizationByIdState {}
+class OrganizationByIdInitialState extends OrganizationByIdState {
+  const OrganizationByIdInitialState();
+}
 
-class OrganizationByIdLoading extends OrganizationByIdState {}
+class OrganizationByIdLoading extends OrganizationByIdState {
+  const OrganizationByIdLoading();
+}
 
 class OrganizationByIdLoaded extends OrganizationByIdState {
-  final List<Organization> organizations;
+  final OrganizationDetails organizationDetails;
 
-  const OrganizationByIdLoaded(this.organizations);
+  const OrganizationByIdLoaded(this.organizationDetails);
 
+  @override
+  List<Object> get props => [organizationDetails];
 }
 
 class OrganizationSuccess extends OrganizationByIdState {
   final String message;
 
-  OrganizationSuccess(this.message);
+  const OrganizationSuccess(this.message);
 }
 
 class OrganizationByIdError extends OrganizationByIdState {
   final String message;
 
-const OrganizationByIdError(this.message);
+  const OrganizationByIdError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

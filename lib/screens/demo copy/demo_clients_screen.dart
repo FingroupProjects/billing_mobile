@@ -99,7 +99,8 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ClientDetailsScreen(clientId: client.id),
+                  builder: (context) =>
+                      ClientDetailsScreen(organizationId: client.organizationId),
                 ),
               );
             },

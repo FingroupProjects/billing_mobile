@@ -8,21 +8,15 @@ class DemoClientCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const DemoClientCard({
-    Key? key,
+    super.key,
     required this.client,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Create number formatter for adding commas
-    final NumberFormat formatter = NumberFormat("#,##0", "en_US");
-    
-    // Split balance string into number and currency parts
-    final balanceParts = client.balance.split(' ');
-    final numberPart = double.parse(balanceParts[0]);
-    final formattedBalance = "${formatter.format(numberPart)} ${balanceParts.sublist(1).join(' ')}";
-    
+    final formattedBalance = _formatBalance(client.balance);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -100,7 +94,7 @@ class DemoClientCard extends StatelessWidget {
                     color: Colors.white,
                   ),
                   child: Text(
-                    formattedBalance, // Use formatted balance with original currency
+                    formattedBalance,
                     style: TaskCardStyles.priorityStyle.copyWith(
                       color: const Color(0xff1E2E52), 
                       fontSize: 14,
@@ -116,6 +110,23 @@ class DemoClientCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatBalance(String balance) {
+    final formatter = NumberFormat('#,##0.####', 'en_US');
+    final balanceParts = balance.trim().split(RegExp(r'\s+'));
+    if (balanceParts.isEmpty) {
+      return balance;
+    }
+
+    final numberPart = double.tryParse(balanceParts.first.replaceAll(',', '.'));
+    if (numberPart == null) {
+      return balance;
+    }
+
+    final currency = balanceParts.skip(1).join(' ');
+    final formattedNumber = formatter.format(numberPart);
+    return currency.isEmpty ? formattedNumber : '$formattedNumber $currency';
   }
 
   Widget _buildInfoRow({required String label, required String value}) {

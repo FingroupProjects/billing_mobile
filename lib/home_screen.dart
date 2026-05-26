@@ -45,8 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     widgets.add(const CommercialOffersScreen());
     titleKeys.add('Аппбар подключение');
     navBarTitleKeys.add('Подключение');
-    activeIcons.add('material:receipt_long');
-    inactiveIcons.add('material:receipt_long');
+    activeIcons.add('assets/icons/connected-user-on.png');
+    inactiveIcons.add('assets/icons/connected-user-off.png');
 
     widgets.add(ClientsScreen());
     titleKeys.add('Аппбар клиент');

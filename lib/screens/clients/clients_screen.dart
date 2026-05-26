@@ -100,7 +100,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      ClientDetailsScreen(clientId: client.id),
+                      ClientDetailsScreen(organizationId: client.organizationId),
                 ),
               );
             },

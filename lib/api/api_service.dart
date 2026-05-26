@@ -886,15 +886,15 @@ class ApiService {
     }
   }
 
-  Future<List<Organization>> getOrganizationsById(String organizationId) async {
+  Future<OrganizationDetails> getOrganizationsById(String organizationId) async {
     try {
-      final response = await _getRequest('/organizations/$organizationId');
+      final response = await _getRequest('/organizations-v2/$organizationId');
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         if (jsonData['organization'] != null) {
-          return [Organization.fromJson(jsonData['organization'])];
+          return OrganizationDetails.fromJson(jsonData);
         } else {
-          return [];
+          throw Exception('Organization not found');
         }
       } else {
         throw Exception(

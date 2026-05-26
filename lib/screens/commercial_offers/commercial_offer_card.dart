@@ -18,6 +18,7 @@ class CommercialOfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canConfirm = offer.status != 'paid';
     final createdDate = offer.createdAt != null
         ? DateFormat('dd.MM.yyyy').format(offer.createdAt!.toLocal())
         : '';
@@ -74,42 +75,44 @@ class CommercialOfferCard extends StatelessWidget {
                         '${_formatAmount(offer.payableTotal)} ${offer.payableCurrency}',
                   ),
                 ),
-                const SizedBox(width: 12),
-                SizedBox(
-                  height: 42,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final saved = await showDialog<bool>(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => CommercialOfferStatusDialog(
-                          offerId: offer.id,
-                        ),
-                      );
+                if (canConfirm) ...[
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    height: 42,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final saved = await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => CommercialOfferStatusDialog(
+                            offerId: offer.id,
+                          ),
+                        );
 
-                      if (saved == true) {
-                        onStatusSaved?.call();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff1E2E52),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        if (saved == true) {
+                          onStatusSaved?.call();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff1E2E52),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'Подтвердить',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'Gilroy',
-                        fontWeight: FontWeight.w600,
+                      child: const Text(
+                        'Подтвердить',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Gilroy',
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ],

@@ -100,7 +100,7 @@ class _NfrClientsScreenState extends State<NfrClientsScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      ClientDetailsScreen(clientId: client.id),
+                      ClientDetailsScreen(organizationId: client.organizationId),
                 ),
               );
             },

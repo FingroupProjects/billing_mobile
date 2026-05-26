@@ -5,7 +5,6 @@ import 'package:billing_mobile/bloc/client_history/client_history_bloc.dart';
 import 'package:billing_mobile/bloc/clients/NfrClientBloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients_InActive/InActive_clients_bloc.dart';
-import 'package:billing_mobile/bloc/clients_by_id/clientById_bloc.dart';
 import 'package:billing_mobile/bloc/clients_demo/demo_clients_bloc.dart';
 import 'package:billing_mobile/bloc/commercial_offers/commercial_offers_bloc.dart';
 import 'package:billing_mobile/bloc/currency/currency_bloc.dart';
@@ -79,7 +78,6 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => InActiveBloc(apiService: apiService)),
         BlocProvider(
             create: (context) => CommercialOffersBloc(apiService: apiService)),
-        BlocProvider(create: (context) => ClientByIdBloc(apiService)),
         BlocProvider(
             create: (context) => OrganizationBloc(apiService: apiService)),
         BlocProvider(

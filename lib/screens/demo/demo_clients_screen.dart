@@ -100,7 +100,7 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      ClientDetailsScreen(clientId: client.id),
+                      ClientDetailsScreen(organizationId: client.organizationId),
                 ),
               );
             },

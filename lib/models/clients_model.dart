@@ -57,7 +57,24 @@ int _parseInt(dynamic value, {int fallback = 0}) {
   return int.tryParse(value?.toString() ?? '') ?? fallback;
 }
 
+bool _parseBool(dynamic value, {bool fallback = false}) {
+  if (value is bool) return value;
+  if (value is int) return value == 1;
+  if (value is String) {
+    final normalizedValue = value.toLowerCase();
+    if (normalizedValue == 'true' || normalizedValue == '1') return true;
+    if (normalizedValue == 'false' || normalizedValue == '0') return false;
+  }
+  return fallback;
+}
+
+DateTime? _parseDateTime(dynamic value) {
+  if (value == null) return null;
+  return DateTime.tryParse(value.toString());
+}
+
 class Client {
+  final int organizationId;
   final int id;
   final String name;
   final String phone;
@@ -72,6 +89,7 @@ class Client {
   final int nfr;
 
   Client({
+    required this.organizationId,
     required this.id,
     required this.name,
     required this.phone,
@@ -90,32 +108,40 @@ class Client {
     final clientJson = json['client'] is Map<String, dynamic>
         ? json['client'] as Map<String, dynamic>
         : json;
+    final organizationJson = json;
     final currencyCode = clientJson['country']?['currency']?['symbol_code'];
-    final rawBalance = json['balance'] ?? clientJson['balance'] ?? '0.00';
+    final rawBalance = organizationJson['real_balance'] ??
+        organizationJson['balance'] ??
+        clientJson['real_balance'] ??
+        clientJson['balance'] ??
+        '0.00';
     final balance =
         currencyCode != null && rawBalance.toString().split(' ').length == 1
             ? '$rawBalance $currencyCode'
             : rawBalance.toString();
 
     return Client(
-      id: clientJson['id'] ?? json['client_id'] ?? json['id'] ?? 0,
-      name: clientJson['name'] ?? json['name'] ?? '',
-      phone: clientJson['phone'] ?? json['phone'] ?? '',
-      subDomain: clientJson['sub_domain'] ?? '',
+      organizationId: _parseInt(organizationJson['id']),
+      id: _parseInt(
+          clientJson['id'] ?? organizationJson['client_id'] ?? organizationJson['id']),
+      name: (clientJson['name'] ?? organizationJson['name'] ?? '').toString(),
+      phone: (clientJson['phone'] ?? organizationJson['phone'] ?? '').toString(),
+      subDomain: (clientJson['sub_domain'] ?? '').toString(),
       balance: balance,
-      isActive: json['has_access'] != null
-          ? json['has_access'] == 1
-          : clientJson['is_active'] ?? false,
-      isDemo: clientJson['is_demo'] ?? json['is_demo'] ?? false,
-      email: clientJson['email'] ?? json['email'],
-      clientType: clientJson['client_type'] ?? '',
+      isActive: organizationJson['has_access'] != null
+          ? _parseBool(organizationJson['has_access'])
+          : _parseBool(clientJson['is_active']),
+      isDemo: _parseBool(clientJson['is_demo'] ?? organizationJson['is_demo']),
+      email: (clientJson['email'] ?? organizationJson['email'])?.toString(),
+      clientType: (clientJson['client_type'] ?? '').toString(),
+      lastActivity: _parseDateTime(clientJson['last_activity']),
       tariff: clientJson['tariff_price']?['tariff'] != null
           ? Tariff.fromJson(clientJson['tariff_price']['tariff'])
           : Tariff(
               id: 0,
               name: 'Unknown',
             ),
-      nfr: clientJson['nfr'] ?? 0,
+      nfr: _parseInt(clientJson['nfr']),
     );
   }
 }
