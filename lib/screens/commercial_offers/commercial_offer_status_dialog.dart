@@ -26,7 +26,6 @@ class _CommercialOfferStatusDialogState
   late Future<List<CommercialOfferAccount>> _accountsFuture;
 
   String _status = 'paid';
-  String _paymentMethod = 'invoice';
   DateTime _statusDate = DateTime.now();
   int? _accountId;
   bool _isSaving = false;
@@ -37,8 +36,6 @@ class _CommercialOfferStatusDialogState
     final initial = widget.initialStatus;
     if (initial != null) {
       _status = initial.status == 'pending' ? 'paid' : initial.status;
-      _paymentMethod =
-          initial.paymentMethod.isEmpty ? 'invoice' : initial.paymentMethod;
       _statusDate = initial.statusDate ?? DateTime.now();
       _accountId = initial.account?.id;
       _paymentOrderController.text = initial.paymentOrderNumber ?? '';
@@ -100,11 +97,9 @@ class _CommercialOfferStatusDialogState
         offerId: widget.offerId,
         status: _status,
         statusDate: DateFormat('yyyy-MM-dd').format(_statusDate),
-        paymentMethod: _paymentMethod,
-        accountId: _paymentMethod == 'invoice' ? _accountId : null,
-        paymentOrderNumber: _paymentMethod == 'invoice'
-            ? _paymentOrderController.text.trim()
-            : null,
+        paymentMethod: 'invoice',
+        accountId: _accountId,
+        paymentOrderNumber: _paymentOrderController.text.trim(),
       );
 
       if (!mounted) return;
@@ -227,106 +222,77 @@ class _CommercialOfferStatusDialogState
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const _Label(text: 'Способ оплаты'),
-                    _DropdownField<String>(
-                      value: _paymentMethod,
-                      items: [
-                        DropdownMenuItem(
-                          value: 'invoice',
-                          child: _menuText('Счет'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'card',
-                          child: _menuText('Карта'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'cash',
-                          child: _menuText('Наличка'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value == null) return;
-                        setState(() {
-                          _paymentMethod = value;
-                        });
+                    const _Label(text: 'Номер платежки'),
+                    TextFormField(
+                      controller: _paymentOrderController,
+                      enabled: !_isSaving,
+                      cursorColor: const Color(0xff1E2E52),
+                      decoration:
+                          _inputDecoration(hintText: 'Введите номер платежки'),
+                      style: _fieldTextStyle(),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Введите номер платежки';
+                        }
+                        return null;
                       },
                     ),
-                    if (_paymentMethod == 'invoice') ...[
-                      const SizedBox(height: 14),
-                      const _Label(text: 'Номер платежки'),
-                      TextFormField(
-                        controller: _paymentOrderController,
-                        enabled: !_isSaving,
-                        cursorColor: const Color(0xff1E2E52),
-                        decoration: _inputDecoration(
-                            hintText: 'Введите номер платежки'),
-                        style: _fieldTextStyle(),
-                        validator: (value) {
-                          if (_paymentMethod == 'invoice' &&
-                              (value == null || value.trim().isEmpty)) {
-                            return 'Введите номер платежки';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 14),
-                      const _Label(text: 'Счет'),
-                      FutureBuilder<List<CommercialOfferAccount>>(
-                        future: _accountsFuture,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: Color(0xff1E2E52),
-                                ),
+                    const SizedBox(height: 14),
+                    const _Label(text: 'Счет'),
+                    FutureBuilder<List<CommercialOfferAccount>>(
+                      future: _accountsFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xff1E2E52),
                               ),
-                            );
-                          }
-
-                          final accounts = snapshot.data ?? [];
-                          return DropdownButtonFormField<int>(
-                            initialValue: accounts
-                                    .any((account) => account.id == _accountId)
-                                ? _accountId
-                                : null,
-                            decoration:
-                                _inputDecoration(hintText: 'Выберите счет'),
-                            dropdownColor: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            icon: const Icon(
-                              Icons.keyboard_arrow_down,
-                              color: Color(0xff1E2E52),
                             ),
-                            items: accounts
-                                .map(
-                                  (account) => DropdownMenuItem<int>(
-                                    value: account.id,
-                                    child: _menuText(account.title),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: _isSaving
-                                ? null
-                                : (value) {
-                                    setState(() {
-                                      _accountId = value;
-                                    });
-                                  },
-                            validator: (value) {
-                              if (_paymentMethod == 'invoice' &&
-                                  value == null) {
-                                return 'Выберите счет';
-                              }
-                              return null;
-                            },
-                            style: _fieldTextStyle(),
                           );
-                        },
-                      ),
-                    ],
+                        }
+
+                        final accounts = snapshot.data ?? [];
+                        return DropdownButtonFormField<int>(
+                          initialValue:
+                              accounts.any((account) => account.id == _accountId)
+                                  ? _accountId
+                                  : null,
+                          decoration:
+                              _inputDecoration(hintText: 'Выберите счет'),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          icon: const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Color(0xff1E2E52),
+                          ),
+                          items: accounts
+                              .map(
+                                (account) => DropdownMenuItem<int>(
+                                  value: account.id,
+                                  child: _menuText(account.title),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: _isSaving
+                              ? null
+                              : (value) {
+                                  setState(() {
+                                    _accountId = value;
+                                  });
+                                },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Выберите счет';
+                            }
+                            return null;
+                          },
+                          style: _fieldTextStyle(),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 22),
                     Row(
                       children: [
