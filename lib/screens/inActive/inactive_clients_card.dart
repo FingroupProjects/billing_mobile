@@ -17,12 +17,13 @@ class InActiveClientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Create number formatter for adding commas
     final NumberFormat formatter = NumberFormat("#,##0", "en_US");
-    
+
     // Split balance string into number and currency parts
     final balanceParts = client.balance.split(' ');
     final numberPart = double.parse(balanceParts[0]);
-    final formattedBalance = "${formatter.format(numberPart)} ${balanceParts.sublist(1).join(' ')}";
-    
+    final formattedBalance =
+        "${formatter.format(numberPart)} ${balanceParts.sublist(1).join(' ')}";
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -30,7 +31,7 @@ class InActiveClientCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: TaskCardStyles.taskCardDecoration.copyWith(
           border: Border.all(
-            color: client.isActive ? Colors.green : Colors.red,
+            color: Colors.red,
             width: 1.5,
           ),
         ),
@@ -38,7 +39,7 @@ class InActiveClientCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start, 
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
@@ -95,14 +96,16 @@ class InActiveClientCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: TaskCardStyles.priorityContainerDecoration.copyWith(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration:
+                      TaskCardStyles.priorityContainerDecoration.copyWith(
                     color: Colors.white,
                   ),
                   child: Text(
                     formattedBalance, // Use formatted balance with original currency
                     style: TaskCardStyles.priorityStyle.copyWith(
-                      color: const Color(0xff1E2E52), 
+                      color: const Color(0xff1E2E52),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),

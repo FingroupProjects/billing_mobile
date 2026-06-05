@@ -1,5 +1,6 @@
 import 'package:billing_mobile/bloc/partners/partners_bloc.dart';
 import 'package:billing_mobile/bloc/partners/partners_state.dart';
+import 'package:billing_mobile/custom_widget/filter/filter_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:billing_mobile/bloc/partners/partners_event.dart';
@@ -46,29 +47,27 @@ class _PartnerListState extends State<PartnerList> {
         const Text(
           'Партнер',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
             fontFamily: 'Gilroy',
-            color: Color(0xff1E2E52),
+            color: kFilterTextColor,
           ),
         ),
-        const SizedBox(height: 4),
-        Container(
-          child: DropdownButtonFormField<String>(
-            value: null,
-            hint: const Text(
-              'Загрузка партнеров...',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Gilroy',
-                color: Color(0xff1E2E52),
-              ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          value: null,
+          hint: const Text(
+            'Загрузка партнеров...',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Gilroy',
+              color: kFilterTextColor,
             ),
-            items: [],
-            onChanged: null,
-            decoration: _inputDecoration(),
           ),
+          items: const [],
+          onChanged: null,
+          decoration: _inputDecoration(),
         ),
       ],
     );
@@ -81,29 +80,27 @@ class _PartnerListState extends State<PartnerList> {
         const Text(
           'Партнер',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
             fontFamily: 'Gilroy',
-            color: Color(0xff1E2E52),
+            color: kFilterTextColor,
           ),
         ),
-        const SizedBox(height: 4),
-        Container(
-          child: DropdownButtonFormField<String>(
-            value: null,
-            hint: const Text(
-              'Загрузка партнеров...',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Gilroy',
-                color: Color(0xff1E2E52),
-              ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          value: null,
+          hint: const Text(
+            'Загрузка партнеров...',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Gilroy',
+              color: kFilterTextColor,
             ),
-            items: [],
-            onChanged: null,
-            decoration: _inputDecoration(),
           ),
+          items: const [],
+          onChanged: null,
+          decoration: _inputDecoration(),
         ),
       ],
     );
@@ -116,29 +113,27 @@ class _PartnerListState extends State<PartnerList> {
         const Text(
           'Партнер',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
             fontFamily: 'Gilroy',
-            color: Color(0xff1E2E52),
+            color: kFilterTextColor,
           ),
         ),
-        const SizedBox(height: 4),
-        Container(
-          child: DropdownButtonFormField<String>(
-            value: null,
-            hint: Text(
-              'Ошибка: rrorMessage',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Gilroy',
-                color: Colors.red,
-              ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          value: null,
+          hint: Text(
+            errorMessage,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Gilroy',
+              color: Colors.red,
             ),
-            items: [],
-            onChanged: null,
-            decoration: _inputDecoration(),
           ),
+          items: const [],
+          onChanged: null,
+          decoration: _inputDecoration(),
         ),
       ],
     );
@@ -173,42 +168,34 @@ class _PartnerListState extends State<PartnerList> {
         const Text(
           'Партнер',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
             fontFamily: 'Gilroy',
-            color: Color(0xff1E2E52),
+            color: kFilterTextColor,
           ),
         ),
-        const SizedBox(height: 4),
-        Container(
-          child: DropdownButtonFormField<String>(
-            value: dropdownItems.any((item) => item.value == widget.selectedPartner)
-                ? widget.selectedPartner
-                : null,
-            hint: const Text(
-              'Выберите партнера',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Gilroy',
-                color: Color(0xff1E2E52),
-              ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          value: dropdownItems.any((item) => item.value == widget.selectedPartner)
+              ? widget.selectedPartner
+              : null,
+          hint: const Text(
+            'Выберите партнера',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Gilroy',
+              color: kFilterTextColor,
             ),
-            items: dropdownItems,
-            onChanged: widget.onChanged,
-            // validator: (value) {
-            //   if (value == null) {
-            //     return 'Поле обязательно для заполнения';
-            //   }
-            //   return null;
-            // },
-            decoration: _inputDecoration(),
-            dropdownColor: Colors.white,
-            icon: Image.asset(
-              'assets/icons/dropdown.png',
-              width: 16,
-              height: 16,
-            ),
+          ),
+          items: dropdownItems,
+          onChanged: widget.onChanged,
+          decoration: _inputDecoration(),
+          dropdownColor: Colors.white,
+          icon: Image.asset(
+            'assets/icons/dropdown.png',
+            width: 16,
+            height: 16,
           ),
         ),
       ],
@@ -216,41 +203,6 @@ class _PartnerListState extends State<PartnerList> {
   }
 
   InputDecoration _inputDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: const Color(0xFFF4F7FD),
-      labelStyle: const TextStyle(
-        color: Colors.grey,
-        fontFamily: 'Gilroy',
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-      ),
-      border: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFFF4F7FD)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFFF4F7FD)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFFF4F7FD)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.red, width: 1.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.red, width: 1.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      errorStyle: const TextStyle(
-        fontSize: 14,
-        color: Colors.red,
-        fontWeight: FontWeight.w500,
-        fontFamily: 'Gilroy',
-      ),
-    );
+    return buildFilterDropdownDecoration();
   }
 }

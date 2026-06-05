@@ -45,7 +45,7 @@ class _ClientAddScreenState extends State<ClientAddScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TariffBloc(apiService: ApiService())..add(const LoadTariffEvent('992')), // Single instance
+      create: (context) => TariffBloc(apiService: ApiService())..add(const LoadTariffEvent('998')), // Single instance
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -106,13 +106,7 @@ class _ClientAddScreenState extends State<ClientAddScreen> {
             ),
             BlocListener<TariffBloc, TariffState>(
               listener: (context, state) {
-                if (state is TariffErrorState) {
-                  showCustomSnackBar(
-                    context: context,
-                    message: state.message,
-                    isSuccess: false,
-                  );
-                } else if (state is TariffLoadedState) {
+                if (state is TariffLoadedState) {
                   setState(() {
                     selectedTariff = null;
                   });

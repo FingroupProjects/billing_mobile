@@ -14,6 +14,7 @@ class Organization {
   final String? rejectCause;
   final String businessTypeName;
   final double? balance;
+  final bool isActive;
 
   Organization({
     required this.id,
@@ -29,6 +30,7 @@ class Organization {
     this.rejectCause,
     required this.businessTypeName,
     this.balance,
+    required this.isActive,
   });
 
   factory Organization.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,7 @@ class Organization {
       rejectCause: json['reject_cause']?.toString(),
       businessTypeName: json['business_type']?['name']?.toString() ?? '',
       balance: _tryParseDouble(json['real_balance'] ?? json['balance']),
+      isActive: _parseOrganizationActiveStatus(json),
     );
   }
 }
@@ -70,23 +73,29 @@ class OrganizationDetails {
   });
 
   factory OrganizationDetails.fromJson(Map<String, dynamic> json) {
-    final organizationJson = json['organization'] as Map<String, dynamic>? ?? {};
-    final clientJson = organizationJson['client'] as Map<String, dynamic>? ?? {};
+    final organizationJson =
+        json['organization'] as Map<String, dynamic>? ?? {};
+    final clientJson =
+        organizationJson['client'] as Map<String, dynamic>? ?? {};
 
     return OrganizationDetails(
       organization: Organization.fromJson({
         ...organizationJson,
-        'real_balance': json['real_balance'] ?? organizationJson['real_balance'],
+        'real_balance':
+            json['real_balance'] ?? organizationJson['real_balance'],
+        'connection_status_history': json['connection_status_history'] ??
+            organizationJson['connection_status_history'],
       }),
       client: OrganizationClient.fromJson(clientJson),
       connectedServices: (json['connected_services'] as List? ?? [])
           .whereType<Map<String, dynamic>>()
           .map(ConnectedService.fromJson)
           .toList(),
-      connectionStatusHistory: (json['connection_status_history'] as List? ?? [])
-          .whereType<Map<String, dynamic>>()
-          .map(ConnectionStatusHistoryItem.fromJson)
-          .toList(),
+      connectionStatusHistory:
+          (json['connection_status_history'] as List? ?? [])
+              .whereType<Map<String, dynamic>>()
+              .map(ConnectionStatusHistoryItem.fromJson)
+              .toList(),
       balanceOperations: (json['balance_operations'] as List? ?? [])
           .whereType<Map<String, dynamic>>()
           .map(BalanceOperation.fromJson)
@@ -205,7 +214,8 @@ class ConnectionStatusHistoryItem {
       status: json['status']?.toString() ?? '',
       statusDate: _parseDateTime(json['status_date']),
       authorName: json['author']?['name']?.toString() ?? '',
-      commercialOfferId: _tryParseInt(json['commercial_offer']?['id'] ?? json['commercial_offer_id']),
+      commercialOfferId: _tryParseInt(
+          json['commercial_offer']?['id'] ?? json['commercial_offer_id']),
       requestType: json['commercial_offer']?['request_type']?.toString() ?? '',
       reason: json['reason']?.toString() ?? '',
     );
@@ -261,7 +271,10 @@ class IntegrationLog {
     return IntegrationLog(
       id: _parseInt(json['id']),
       date: _parseDateTime(
-        json['date'] ?? json['created_at'] ?? json['sent_at'] ?? json['updated_at'],
+        json['date'] ??
+            json['created_at'] ??
+            json['sent_at'] ??
+            json['updated_at'],
       ),
       type: _firstNonEmpty([
         json['type'],
@@ -288,6 +301,36 @@ class IntegrationLog {
       details: _extractLogDetails(json),
     );
   }
+}
+
+bool _parseOrganizationActiveStatus(Map<String, dynamic> json) {
+  final history = json['connection_status_history'] as List?;
+  if (history != null && history.isNotEmpty) {
+    final normalizedHistory = history
+        .whereType<Map>()
+        .map((item) => item.cast<String, dynamic>())
+        .toList();
+
+    normalizedHistory.sort((a, b) {
+      final aDate = _parseDateTime(a['status_date']);
+      final bDate = _parseDateTime(b['status_date']);
+      if (aDate != null && bDate != null) {
+        final dateCompare = bDate.compareTo(aDate);
+        if (dateCompare != 0) return dateCompare;
+      }
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+
+      return _parseInt(b['id']).compareTo(_parseInt(a['id']));
+    });
+
+    final latestStatus =
+        normalizedHistory.first['status']?.toString().toLowerCase();
+    if (latestStatus == 'connected') return true;
+    if (latestStatus == 'disconnected') return false;
+  }
+
+  return _parseBool(json['has_access']);
 }
 
 String _extractLogDetails(Map<String, dynamic> json) {

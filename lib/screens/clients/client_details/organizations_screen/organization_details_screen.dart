@@ -76,7 +76,8 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
               color: const Color(0xff1E2E52),
               onRefresh: () async {
                 context.read<OrganizationByIdBloc>().add(
-                      FetchOrganizationByIdEvent(widget.organizationId.toString()),
+                      FetchOrganizationByIdEvent(
+                          widget.organizationId.toString()),
                     );
               },
               child: _buildContent(state.organizationDetails),
@@ -135,13 +136,14 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
           _buildOverviewInfoRow('Телефон', _valueOrFallback(client.phone)),
           _buildOverviewInfoRow('Почта', _valueOrFallback(client.email)),
           _buildOverviewInfoRow('Клиент', _valueOrFallback(client.name)),
-          _buildOverviewInfoRow('Партнер', _valueOrFallback(client.partnerName)),
+          _buildOverviewInfoRow(
+              'Партнер', _valueOrFallback(client.partnerName)),
           _buildOverviewInfoRow('Тариф', primaryTariff),
           _buildOverviewInfoRow('Поддомен', _valueOrFallback(client.subDomain)),
           _buildOverviewInfoRow(
             'Статус',
-            organization.hasAccess == 1 ? 'Активный' : 'Неактивный',
-            valueColor: organization.hasAccess == 1 ? Colors.green : Colors.red,
+            organization.isActive ? 'Активный' : 'Неактивный',
+            valueColor: organization.isActive ? Colors.green : Colors.red,
           ),
           _buildOverviewInfoRow(
             'Последняя активность',
@@ -214,7 +216,8 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
                                   .entries
                                   .map(
                                     (entry) => Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6),
                                       child: _buildConnectionHistoryItem(
                                         entry.value,
                                         entry.key + 1,
@@ -261,7 +264,8 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
                   ),
                   child: _buildListTileCard(
                     leading: '${index + 1}',
-                    title: _formatDateTime(transactions[index].date, withTime: true),
+                    title: _formatDateTime(transactions[index].date,
+                        withTime: true),
                     trailing: _buildStatusChip(
                       transactions[index].type == 'income'
                           ? 'Пополнение'
@@ -280,7 +284,8 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
                       ),
                       _metaPair('Валюта',
                           _valueOrFallback(transactions[index].currencyCode)),
-                      _metaPair('ID операции', transactions[index].id.toString()),
+                      _metaPair(
+                          'ID операции', transactions[index].id.toString()),
                     ],
                   ),
                 ),
@@ -343,7 +348,8 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
     );
   }
 
-  Widget _buildConnectionHistoryItem(ConnectionStatusHistoryItem item, int index) {
+  Widget _buildConnectionHistoryItem(
+      ConnectionStatusHistoryItem item, int index) {
     final documentText = item.commercialOfferId != null
         ? 'КП #${item.commercialOfferId}'
         : 'Не указан';
@@ -655,11 +661,14 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
             ),
           ),
         ),
-        const SizedBox(width: 12,),
+        const SizedBox(
+          width: 12,
+        ),
         Expanded(
           flex: 6,
           child: GestureDetector(
-            onLongPress: isCopyable ? () => _copyToClipboard(label, value) : null,
+            onLongPress:
+                isCopyable ? () => _copyToClipboard(label, value) : null,
             child: Text(
               value,
               style: TextStyle(
@@ -726,7 +735,8 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
         decoration: BoxDecoration(
           color: isSelected ? color.withValues(alpha: 0.12) : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? color : const Color(0xffD6DEEB)),
+          border:
+              Border.all(color: isSelected ? color : const Color(0xffD6DEEB)),
         ),
         child: Text(
           label,
@@ -778,7 +788,8 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
     );
   }
 
-  List<BalanceOperation> _filterTransactions(List<BalanceOperation> operations) {
+  List<BalanceOperation> _filterTransactions(
+      List<BalanceOperation> operations) {
     switch (_transactionFilter) {
       case BalanceOperationFilter.income:
         return operations.where((item) => item.type == 'income').toList();
@@ -795,7 +806,9 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
   String _formatMoney(double amount, String currencyCode) {
     final formatter = NumberFormat('#,##0.00##', 'en_US');
     final formattedAmount = formatter.format(amount);
-    return currencyCode.isEmpty ? formattedAmount : '$formattedAmount $currencyCode';
+    return currencyCode.isEmpty
+        ? formattedAmount
+        : '$formattedAmount $currencyCode';
   }
 
   String _formatDateTime(DateTime? dateTime, {bool withTime = false}) {
@@ -830,5 +843,4 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
         return const Color(0xff1E2E52);
     }
   }
-
 }

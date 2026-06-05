@@ -12,7 +12,7 @@ import 'package:billing_mobile/bloc/organizations/organizations_event.dart';
 import 'package:billing_mobile/bloc/organizations/organizations_state.dart';
 import 'package:billing_mobile/models/organizations_model.dart';
 
-class    OrganizationsWidget extends StatefulWidget {
+class OrganizationsWidget extends StatefulWidget {
   final int clientId;
 
   OrganizationsWidget({Key? key, required this.clientId}) : super(key: key);
@@ -27,7 +27,9 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
   @override
   void initState() {
     super.initState();
-    context.read<OrganizationBloc>().add(FetchOrganizationEvent(widget.clientId.toString()));
+    context
+        .read<OrganizationBloc>()
+        .add(FetchOrganizationEvent(widget.clientId.toString()));
   }
 
   @override
@@ -116,7 +118,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
 
   Widget _buildOrganizationItem(Organization organization) {
     final createdAt = DateFormat('dd.MM.yyyy').format(organization.createdAt);
-    final isActive = organization.hasAccess == 1;
+    final isActive = organization.isActive;
 
     return GestureDetector(
       onTap: () => _showDetailsOrganizationScreen(organization),
@@ -132,7 +134,8 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
+            padding:
+                const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
             child: Row(
               children: [
                 const Icon(Icons.business, color: Color(0xff1E2E52), size: 24),
@@ -190,11 +193,15 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
                     return isAdmin
                         ? IconButton(
                             icon: Image.asset(
-                              isActive ? 'assets/icons/power_on.png' : 'assets/icons/power_off.png',
+                              isActive
+                                  ? 'assets/icons/power_on.png'
+                                  : 'assets/icons/power_off.png',
                               width: 28,
                               height: 28,
                             ),
-                            onPressed: () => _showActivateDeactivateOrganizationDialog(organization),
+                            onPressed: () =>
+                                _showActivateDeactivateOrganizationDialog(
+                                    organization),
                           )
                         : const SizedBox.shrink();
                   },
@@ -232,7 +239,8 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
                     onPressed: _showAddOrganizationScreen,
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       backgroundColor: const Color(0xff1E2E52),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -259,12 +267,15 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => CreateOrganizationScreen(clientId: widget.clientId),
+        builder: (context) =>
+            CreateOrganizationScreen(clientId: widget.clientId),
       ),
     );
 
     if (result == true) {
-      context.read<OrganizationBloc>().add(FetchOrganizationEvent(widget.clientId.toString()));
+      context
+          .read<OrganizationBloc>()
+          .add(FetchOrganizationEvent(widget.clientId.toString()));
     }
   }
 
@@ -272,7 +283,8 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => OrganizationDetailsScreen(organizationId: organization.id),
+        builder: (context) =>
+            OrganizationDetailsScreen(organizationId: organization.id),
       ),
     );
   }
@@ -283,7 +295,7 @@ class _OrganizationsWidgetState extends State<OrganizationsWidget> {
       builder: (BuildContext context) {
         return ActiveDeactiveOrganizationDialog(
           organizationId: organization.id,
-          active: organization.hasAccess == 1,
+          active: organization.isActive,
         );
       },
     );

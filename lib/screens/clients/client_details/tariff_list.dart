@@ -1,6 +1,7 @@
 import 'package:billing_mobile/bloc/tariff/tariff_bloc.dart';
 import 'package:billing_mobile/bloc/tariff/tariff_event.dart';
 import 'package:billing_mobile/bloc/tariff/tariff_state.dart';
+import 'package:billing_mobile/custom_widget/filter/filter_ui.dart';
 import 'package:billing_mobile/models/tariff_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +23,7 @@ class _TariffListState extends State<TariffList> {
     // Trigger tariff loading if not already loaded
     final tariffBloc = context.read<TariffBloc>();
     if (tariffBloc.state is TariffInitialState) {
-      tariffBloc.add(const LoadTariffEvent('992')); // Default code
+      tariffBloc.add(const LoadTariffEvent('998')); // Default code
     }
   }
 
@@ -30,24 +31,17 @@ class _TariffListState extends State<TariffList> {
   Widget build(BuildContext context) {
     return BlocBuilder<TariffBloc, TariffState>(
       builder: (context, state) {
-        print('TariffList state: $state'); // Debug log
         List<TariffData> tariffsList = [];
 
         if (state is TariffLoadedState) {
           tariffsList = state.tariffs;
-          print('Tariffs loaded: ${tariffsList.length}'); // Debug log
-        } else if (state is TariffErrorState) {
-          print('Tariff error: ${state.message}'); // Debug log
-          return const Text('Ошибка загрузки тарифов!');
-        } else if (state is TariffLoadingState) {
-          // return const CircularProgressIndicator(); // Show loading indicator
         }
 
         List<DropdownMenuItem<String>> dropdownItems = tariffsList.map<DropdownMenuItem<String>>((TariffData tariffData) {
           return DropdownMenuItem<String>(
-            value: tariffData.id.toString(),
+            value: tariffData.tariff.id.toString(),
             child: Text(
-              '${tariffData.tariff.name} (\$${tariffData.tariffPrice})',
+              tariffData.tariff.name,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -61,7 +55,7 @@ class _TariffListState extends State<TariffList> {
 
         if (tariffsList.length == 1) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            widget.onChanged(tariffsList.first.id.toString());
+            widget.onChanged(tariffsList.first.tariff.id.toString());
           });
         }
 
@@ -71,93 +65,35 @@ class _TariffListState extends State<TariffList> {
             const Text(
               'Тариф',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Gilroy',
-                color: Color(0xff1E2E52),
+                color: kFilterTextColor,
               ),
             ),
-            const SizedBox(height: 4),
-            Container(
-              child: DropdownButtonFormField<String>(
-                isExpanded: true, // Ensure dropdown items are fully visible
-                value: dropdownItems.any((item) => item.value == widget.selectedTariff)
-                    ? widget.selectedTariff
-                    : null,
-                hint: const Text(
-                  'Выберите тариф',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Gilroy',
-                    color: Color(0xff1E2E52),
-                  ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              isExpanded: true,
+              value: dropdownItems.any((item) => item.value == widget.selectedTariff)
+                  ? widget.selectedTariff
+                  : null,
+              hint: const Text(
+                'Выберите тариф',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Gilroy',
+                  color: kFilterTextColor,
                 ),
-                items: dropdownItems.isNotEmpty
-                    ? dropdownItems
-                    : [
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text(
-                  'Выберите тариф',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Gilroy',
-                    color: Color(0xff1E2E52),
-                  ),
-                ),
-                        ),
-                      ], // Fallback item
-                onChanged: tariffsList.isNotEmpty ? widget.onChanged : null, // Disable if no tariffs
-                validator: (value) {
-                  if (value == null) {
-                    return 'Поле обязательно для заполнения';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFFF4F7FD),
-                  labelStyle: const TextStyle(
-                    color: Colors.grey,
-                    fontFamily: 'Gilroy',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Color(0xFFF4F7FD)),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Color(0xFFF4F7FD)),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Color(0xFFF4F7FD)),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.red, width: 1.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.red, width: 1.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  errorStyle: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.red,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Gilroy',
-                  ),
-                ),
-                dropdownColor: Colors.white,
-                icon: Image.asset(
-                  'assets/icons/dropdown.png',
-                  width: 16,
-                  height: 16,
-                ),
+              ),
+              items: dropdownItems,
+              onChanged: tariffsList.isNotEmpty ? widget.onChanged : null,
+              decoration: buildFilterDropdownDecoration(),
+              dropdownColor: Colors.white,
+              icon: Image.asset(
+                'assets/icons/dropdown.png',
+                width: 16,
+                height: 16,
               ),
             ),
           ],

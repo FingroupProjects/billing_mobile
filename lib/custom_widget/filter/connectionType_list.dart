@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:billing_mobile/custom_widget/filter/filter_ui.dart';
 
 class ConnectionTypedata {
   final int id;
@@ -52,76 +53,33 @@ class _ConnectionTypeListState extends State<ConnectionTypeList> {
       children: [
         const Text( 'Тип подключения',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
             fontFamily: 'Gilroy',
-            color: Color(0xff1E2E52),
+            color: kFilterTextColor,
           ),
         ),
-        const SizedBox(height: 4),
-        Container(
-          child: DropdownButtonFormField<String>(
-            value: dropdownItems.any((item) => item.value == widget.selectedstatus)
-                ? widget.selectedstatus
-                : null,
-            hint: Text( 'Выберете статус',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Gilroy',
-                color: Color(0xff1E2E52),
-              ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          value: dropdownItems.any((item) => item.value == widget.selectedstatus)
+              ? widget.selectedstatus
+              : null,
+          hint: const Text( 'Выберите статус',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Gilroy',
+              color: kFilterTextColor,
             ),
-            items: dropdownItems,
-            onChanged: widget.onChanged,
-            // validator: (value) {
-            //   if (value == null) {
-            //     return'Поле обязательно для заполнения';
-            //   }
-            //   return null;
-            // },
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Color(0xFFF4F7FD),
-              labelStyle: TextStyle(
-                color: Colors.grey,
-                fontFamily: 'Gilroy',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF4F7FD)),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF4F7FD)),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFF4F7FD)),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 1.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 1.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              errorStyle: TextStyle(
-                fontSize: 14,
-                color: Colors.red,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Gilroy',
-              ),
-            ),
-            dropdownColor: Colors.white,
-            icon: Image.asset(
-              'assets/icons/dropdown.png',
-              width: 16,
-              height: 16,
-            ),
+          ),
+          items: dropdownItems,
+          onChanged: widget.onChanged,
+          decoration: buildFilterDropdownDecoration(),
+          dropdownColor: Colors.white,
+          icon: Image.asset(
+            'assets/icons/dropdown.png',
+            width: 16,
+            height: 16,
           ),
         ),
       ],

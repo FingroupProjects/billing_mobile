@@ -18,7 +18,8 @@ class CommercialOfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canConfirm = offer.status != 'paid';
+    final canConfirm =
+        offer.status != 'paid' && offer.status != 'canceled';
     final createdDate = offer.createdAt != null
         ? DateFormat('dd.MM.yyyy').format(offer.createdAt!.toLocal())
         : '';

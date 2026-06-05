@@ -73,6 +73,78 @@ DateTime? _parseDateTime(dynamic value) {
   return DateTime.tryParse(value.toString());
 }
 
+bool? _parseIsActiveFromConnectionHistory(
+    Map<String, dynamic> organizationJson) {
+  final history = organizationJson['connection_status_history'] as List?;
+  if (history == null || history.isEmpty) return null;
+
+  final normalizedHistory = history
+      .whereType<Map>()
+      .map((item) => item.cast<String, dynamic>())
+      .toList();
+
+  normalizedHistory.sort((a, b) {
+    final aDate = _parseDateTime(a['status_date']);
+    final bDate = _parseDateTime(b['status_date']);
+    if (aDate != null && bDate != null) {
+      final dateCompare = bDate.compareTo(aDate);
+      if (dateCompare != 0) return dateCompare;
+    }
+    if (aDate == null) return 1;
+    if (bDate == null) return -1;
+
+    return _parseInt(b['id']).compareTo(_parseInt(a['id']));
+  });
+
+  final latestStatus =
+      normalizedHistory.first['status']?.toString().toLowerCase();
+  if (latestStatus == 'connected') return true;
+  if (latestStatus == 'disconnected') return false;
+  return null;
+}
+
+Tariff _resolveClientTariff(
+  Map<String, dynamic> organizationJson,
+  Map<String, dynamic> clientJson,
+) {
+  final connectedServices = organizationJson['connected_services'] as List?;
+  if (connectedServices != null && connectedServices.isNotEmpty) {
+    final primaryService = connectedServices.cast<dynamic>().firstWhere(
+          (service) =>
+              service is Map &&
+              service['tariff'] is Map &&
+              service['tariff']['is_tariff'] == 1,
+          orElse: () => connectedServices.first,
+        );
+
+    if (primaryService is Map &&
+        primaryService['tariff'] is Map<String, dynamic>) {
+      return Tariff.fromJson(primaryService['tariff'] as Map<String, dynamic>);
+    }
+
+    if (primaryService is Map && primaryService['tariff'] is Map) {
+      return Tariff.fromJson(
+        (primaryService['tariff'] as Map).cast<String, dynamic>(),
+      );
+    }
+  }
+
+  if (clientJson['tariff_price']?['tariff'] is Map<String, dynamic>) {
+    return Tariff.fromJson(clientJson['tariff_price']['tariff']);
+  }
+
+  if (clientJson['tariff_price']?['tariff'] is Map) {
+    return Tariff.fromJson(
+      (clientJson['tariff_price']['tariff'] as Map).cast<String, dynamic>(),
+    );
+  }
+
+  return Tariff(
+    id: 4,
+    name: 'VIP',
+  );
+}
+
 class Client {
   final int organizationId;
   final int id;
@@ -119,28 +191,28 @@ class Client {
         currencyCode != null && rawBalance.toString().split(' ').length == 1
             ? '$rawBalance $currencyCode'
             : rawBalance.toString();
+    final isActiveFromHistory =
+        _parseIsActiveFromConnectionHistory(organizationJson);
 
     return Client(
       organizationId: _parseInt(organizationJson['id']),
-      id: _parseInt(
-          clientJson['id'] ?? organizationJson['client_id'] ?? organizationJson['id']),
+      id: _parseInt(clientJson['id'] ??
+          organizationJson['client_id'] ??
+          organizationJson['id']),
       name: (clientJson['name'] ?? organizationJson['name'] ?? '').toString(),
-      phone: (clientJson['phone'] ?? organizationJson['phone'] ?? '').toString(),
+      phone:
+          (clientJson['phone'] ?? organizationJson['phone'] ?? '').toString(),
       subDomain: (clientJson['sub_domain'] ?? '').toString(),
       balance: balance,
-      isActive: organizationJson['has_access'] != null
-          ? _parseBool(organizationJson['has_access'])
-          : _parseBool(clientJson['is_active']),
+      isActive: isActiveFromHistory ??
+          (organizationJson['has_access'] != null
+              ? _parseBool(organizationJson['has_access'])
+              : _parseBool(clientJson['is_active'])),
       isDemo: _parseBool(clientJson['is_demo'] ?? organizationJson['is_demo']),
       email: (clientJson['email'] ?? organizationJson['email'])?.toString(),
       clientType: (clientJson['client_type'] ?? '').toString(),
       lastActivity: _parseDateTime(clientJson['last_activity']),
-      tariff: clientJson['tariff_price']?['tariff'] != null
-          ? Tariff.fromJson(clientJson['tariff_price']['tariff'])
-          : Tariff(
-              id: 0,
-              name: 'Unknown',
-            ),
+      tariff: _resolveClientTariff(organizationJson, clientJson),
       nfr: _parseInt(clientJson['nfr']),
     );
   }
@@ -158,7 +230,7 @@ class Tariff {
   factory Tariff.fromJson(Map<String, dynamic> json) {
     return Tariff(
       id: json['id'] ?? 0,
-      name: json['name'] ?? 'Unknown',
+      name: json['name'] ?? 'VIP',
     );
   }
 }

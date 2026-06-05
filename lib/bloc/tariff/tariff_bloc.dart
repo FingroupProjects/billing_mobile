@@ -15,13 +15,9 @@ class TariffBloc extends Bloc<TariffEvent, TariffState> {
     emit(TariffLoadingState());
     try {
       final tariffs = await apiService.getTariffs(event.code); // Pass code to getTariffs
-      if (tariffs.isEmpty) {
-        emit(TariffErrorState('No tariffs found for code ${event.code}'));
-      } else {
-        emit(TariffLoadedState(tariffs));
-      }
+      emit(TariffLoadedState(tariffs));
     } catch (e) {
-      emit(TariffErrorState('Failed to load tariffs: $e'));
+      emit(const TariffLoadedState([]));
     }
   }
 
