@@ -29,88 +29,89 @@ class DemoBloc extends Bloc<DemoEvent, DemoState> {
   }
 
   Future<void> _onFetchDemo(FetchDemo event, Emitter<DemoState> emit) async {
-  emit(DemoLoading());
-  if (!await _checkInternetConnection()) {
-    emit(DemoError('Нет подключения к интернету'));
-    return;
-  }
-  
-  try {
-    _currentPage = 1;
-    final demoData = await apiService.getDemoClients(
-      page: _currentPage,
-      search: _currentSearchQuery,
-      demo: _currentFilters['demo'],
-      status: _currentFilters['status'],
-      tariff: _currentFilters['tariff'],
-      partner: _currentFilters['partner'],
-        countryId: _currentFilters['country_id'], // Added country_id filter
-          currencyId: _currentFilters['currency_id'], // Added currency_id filter 
-    );
-    emit(DemoLoaded(demoData, isLoadingMore: false));
-  } catch (e) {
-    emit(DemoError(e.toString()));
-  }
-}
-
-Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) async {
-  if (_isFetchingMore) return;
-  _isFetchingMore = true;
-
-  if (!await _checkInternetConnection()) {
-    emit(DemoError('Нет подключения к интернету'));
-    _isFetchingMore = false;
-    return;
-  }
-
-  if (state is DemoLoaded) {
-    final currentState = state as DemoLoaded;
-    if (currentState.clientData.data.clients.data.length >=
-        currentState.clientData.data.clients.total) {
-      _isFetchingMore = false;
+    emit(DemoLoading());
+    if (!await _checkInternetConnection()) {
+      emit(DemoError('Нет подключения к интернету'));
       return;
     }
 
     try {
-      emit(DemoLoaded(currentState.clientData, isLoadingMore: true));
-      final nextPageData = await apiService.getDemoClients(
-        page: _currentPage + 1,
-        search: _currentSearchQuery, 
+      _currentPage = 1;
+      final demoData = await apiService.getDemoClients(
+        page: _currentPage,
+        search: _currentSearchQuery,
         demo: _currentFilters['demo'],
         status: _currentFilters['status'],
-        tariff: _currentFilters['tariff'],
         partner: _currentFilters['partner'],
-         countryId: _currentFilters['country_id'], // Added country_id filter
-        currencyId: _currentFilters['currency_id'], // Added currency_id filter
+        countryId: _currentFilters['country'],
       );
-      
-      final updatedClients = ClientList(
-        currentPage: nextPageData.data.clients.currentPage,
-        data: [...currentState.clientData.data.clients.data, ...nextPageData.data.clients.data],
-        total: nextPageData.data.clients.total,
-      );
-      
-      final updatedData = ClientData(
-        clients: updatedClients,
-        tariffs: currentState.clientData.data.tariffs,
-      );
-      
-      final updatedResponse = ClientListResponse(
-        view: currentState.clientData.view,
-        data: updatedData,
-      );
-      
-      _currentPage++;
-      emit(DemoLoaded(updatedResponse, isLoadingMore: false));
+      emit(DemoLoaded(demoData, isLoadingMore: false));
     } catch (e) {
       emit(DemoError(e.toString()));
-    } finally {
-      _isFetchingMore = false;
     }
   }
-}
 
-  Future<void> _onDemoApplyFilters(DemoApplyFilters event, Emitter<DemoState> emit) async {
+  Future<void> _onFetchMoreDemo(
+      FetchMoreDemo event, Emitter<DemoState> emit) async {
+    if (_isFetchingMore) return;
+    _isFetchingMore = true;
+
+    if (!await _checkInternetConnection()) {
+      emit(DemoError('Нет подключения к интернету'));
+      _isFetchingMore = false;
+      return;
+    }
+
+    if (state is DemoLoaded) {
+      final currentState = state as DemoLoaded;
+      if (currentState.clientData.data.clients.data.length >=
+          currentState.clientData.data.clients.total) {
+        _isFetchingMore = false;
+        return;
+      }
+
+      try {
+        emit(DemoLoaded(currentState.clientData, isLoadingMore: true));
+        final nextPageData = await apiService.getDemoClients(
+          page: _currentPage + 1,
+          search: _currentSearchQuery,
+          demo: _currentFilters['demo'],
+          status: _currentFilters['status'],
+          partner: _currentFilters['partner'],
+          countryId: _currentFilters['country'],
+        );
+
+        final updatedClients = ClientList(
+          currentPage: nextPageData.data.clients.currentPage,
+          data: [
+            ...currentState.clientData.data.clients.data,
+            ...nextPageData.data.clients.data
+          ],
+          total: nextPageData.data.clients.total,
+        );
+
+        final updatedData = ClientData(
+          clients: updatedClients,
+          tariffs: currentState.clientData.data.tariffs,
+        );
+
+        final updatedResponse = ClientListResponse(
+          view: currentState.clientData.view,
+          data: updatedData,
+        );
+
+        _currentPage++;
+        emit(DemoLoaded(updatedResponse, isLoadingMore: false));
+      } catch (e) {
+        emit(DemoError(e.toString()));
+      } finally {
+        _isFetchingMore = false;
+      }
+    }
+  }
+
+  Future<void> _onDemoApplyFilters(
+      DemoApplyFilters event, Emitter<DemoState> emit) async {
     _currentFilters = event.filters;
     add(FetchDemo());
   }
@@ -119,5 +120,4 @@ Future<void> _onFetchMoreDemo(FetchMoreDemo event, Emitter<DemoState> emit) asyn
     _currentSearchQuery = event.query;
     add(FetchDemo());
   }
-  
 }

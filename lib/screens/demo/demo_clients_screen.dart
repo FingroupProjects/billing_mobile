@@ -99,8 +99,8 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ClientDetailsScreen(organizationId: client.organizationId),
+                  builder: (context) => ClientDetailsScreen(
+                      organizationId: client.organizationId),
                 ),
               );
             },
@@ -147,8 +147,7 @@ class _DemoClientsScreenState extends State<DemoClientsScreen> {
                       onFilterSelected: (filters) {
                         setState(() {
                           _currentFilters = filters;
-                          print(
-                              'Applied filters: $_currentFilters'); // Debug: Log filters to verify country_id
+                          print('Applied filters: $_currentFilters');
                         });
                         context.read<DemoBloc>().add(DemoApplyFilters(filters));
                       },

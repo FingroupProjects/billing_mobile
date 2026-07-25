@@ -15,11 +15,12 @@ class Partner {
 
   factory Partner.fromJson(Map<String, dynamic> json) {
     return Partner(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      phone: json['phone'],
-      address: json['address'],
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      // The partners endpoint may return a null address.
+      address: json['address']?.toString() ?? '',
     );
   }
 }

@@ -32,7 +32,7 @@ class DemoClientCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start, 
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
@@ -58,15 +58,7 @@ class DemoClientCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text(
-                  client.isDemo ? 'Демо' : (client.nfr == 1 ? 'NFR' : ''),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Gilroy',
-                    fontWeight: FontWeight.w500,
-                    color: Colors.green,
-                  ),
-                )
+                _buildStatusBadge(),
               ],
             ),
             const SizedBox(height: 8),
@@ -89,14 +81,16 @@ class DemoClientCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: TaskCardStyles.priorityContainerDecoration.copyWith(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration:
+                      TaskCardStyles.priorityContainerDecoration.copyWith(
                     color: Colors.white,
                   ),
                   child: Text(
                     formattedBalance,
                     style: TaskCardStyles.priorityStyle.copyWith(
-                      color: const Color(0xff1E2E52), 
+                      color: const Color(0xff1E2E52),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -107,6 +101,30 @@ class DemoClientCard extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge() {
+    final isActive = client.isActive;
+    final color = isActive ? const Color(0xff198754) : const Color(0xffD14343);
+    final background =
+        isActive ? const Color(0xffE8F7EE) : const Color(0xffFDECEC);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        isActive ? 'Активный' : 'Неактивный',
+        style: TextStyle(
+          fontSize: 14,
+          fontFamily: 'Gilroy',
+          fontWeight: FontWeight.w600,
+          color: color,
         ),
       ),
     );

@@ -444,7 +444,6 @@ class ApiService {
     int? tariff,
     int? partner,
     int? countryId, // Added countryId parameter
-    int? currencyId, // Added currencyId parameter
   }) async {
     try {
       final queryParameters = {
@@ -454,12 +453,7 @@ class ApiService {
         if (status != null) 'status': status.toString(),
         if (tariff != null) 'tariff': tariff.toString(),
         if (partner != null) 'partner': partner.toString(),
-        if (countryId != null)
-          'country_id':
-              countryId.toString(), // Added country_id to query parameters
-        if (currencyId != null)
-          'currency_id':
-              currencyId.toString(), // Added currency_id to query parameters
+        if (countryId != null) 'country': countryId.toString(),
       };
 
       final uri = Uri.parse('/organizations-demo-v2')
@@ -715,15 +709,19 @@ class ApiService {
       final response = await _getRequest('/partners');
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        final List<dynamic> partnersJson = jsonData['result']['data'];
+        final result = jsonData['result'];
+        final partnersJson = result is Map<String, dynamic>
+            ? (result['data'] as List? ?? const [])
+            : const [];
         return partnersJson
-            .map((orgJson) => Partner.fromJson(orgJson))
+            .whereType<Map<String, dynamic>>()
+            .map(Partner.fromJson)
             .toList();
       } else {
         throw Exception('Failed to load partners: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Failed to load partners: ');
+      throw Exception('Failed to load partners: $e');
     }
   }
 
@@ -886,7 +884,8 @@ class ApiService {
     }
   }
 
-  Future<OrganizationDetails> getOrganizationsById(String organizationId) async {
+  Future<OrganizationDetails> getOrganizationsById(
+      String organizationId) async {
     try {
       final response = await _getRequest('/organizations-v2/$organizationId');
       if (response.statusCode == 200) {

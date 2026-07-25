@@ -450,6 +450,8 @@ String _statusText(String value) {
       return 'Оплачено';
     case 'canceled':
       return 'Отменено';
+    case 'draft':
+      return 'Черновик';
     case 'rejected':
       return 'Отклонено';
     default:

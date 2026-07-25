@@ -1,12 +1,8 @@
-import 'package:billing_mobile/bloc/tariff/tariff_bloc.dart';
-import 'package:billing_mobile/bloc/tariff/tariff_event.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_ui.dart';
+import 'package:billing_mobile/custom_widget/filter/status_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/country_list.dart';
-import 'package:billing_mobile/screens/clients/client_details/currency_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/partner_list.dart';
-import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FilterDemoScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onFilterSelected;
@@ -23,47 +19,41 @@ class FilterDemoScreen extends StatefulWidget {
 }
 
 class _FilterDemoScreenState extends State<FilterDemoScreen> {
-  int? _selectedTariff;
+  int? _selectedStatus;
   int? _selectedPartner;
-  int? _selectedCountryId;
-  int? _selectedCurrencyId;
+  int? _selectedCountry;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialFilters != null) {
-      _selectedTariff = widget.initialFilters!['tariff'];
+      _selectedStatus = widget.initialFilters!['status'];
       _selectedPartner = widget.initialFilters!['partner'];
-      _selectedCountryId = widget.initialFilters!['country_id'];
-      _selectedCurrencyId = widget.initialFilters!['currency_id'];
+      _selectedCountry = widget.initialFilters!['country'];
     }
-    context.read<TariffBloc>().add(const LoadTariffEvent('998'));
   }
 
   void _resetFilters() {
     setState(() {
-      _selectedTariff = null;
+      _selectedStatus = null;
       _selectedPartner = null;
-      _selectedCountryId = null;
-      _selectedCurrencyId = null;
+      _selectedCountry = null;
     });
     widget.onFilterSelected?.call({});
   }
 
   void _applyFilters() {
-    if (_selectedTariff == null &&
+    if (_selectedStatus == null &&
         _selectedPartner == null &&
-        _selectedCountryId == null &&
-        _selectedCurrencyId == null) {
+        _selectedCountry == null) {
       Navigator.pop(context);
       return;
     }
 
     widget.onFilterSelected?.call({
-      'tariff': _selectedTariff,
+      'status': _selectedStatus,
       'partner': _selectedPartner,
-      'country_id': _selectedCountryId,
-      'currency_id': _selectedCurrencyId,
+      'country': _selectedCountry,
     });
     Navigator.pop(context);
   }
@@ -113,12 +103,12 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
           child: Column(
             children: [
               FilterSectionCard(
-                child: TariffList(
-                  selectedTariff: _selectedTariff?.toString(),
-                  onChanged: (String? newValue) {
+                child: StatusList(
+                  selectedstatus: _selectedStatus?.toString(),
+                  onChanged: (newValue) {
                     setState(() {
-                      _selectedTariff =
-                          newValue != null ? int.parse(newValue) : null;
+                      _selectedStatus =
+                          newValue == null ? null : int.parse(newValue);
                     });
                   },
                 ),
@@ -138,22 +128,10 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
               const SizedBox(height: 18),
               FilterSectionCard(
                 child: CountryList(
-                  selectedCountry: _selectedCountryId?.toString(),
+                  selectedCountry: _selectedCountry?.toString(),
                   onChanged: (value) {
                     setState(() {
-                      _selectedCountryId =
-                          value != null ? int.parse(value) : null;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 18),
-              FilterSectionCard(
-                child: CurrencyList(
-                  selectedCurrency: _selectedCurrencyId?.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCurrencyId =
+                      _selectedCountry =
                           value != null ? int.parse(value) : null;
                     });
                   },

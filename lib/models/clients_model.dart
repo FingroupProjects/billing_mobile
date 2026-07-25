@@ -194,6 +194,13 @@ class Client {
     final isActiveFromHistory =
         _parseIsActiveFromConnectionHistory(organizationJson);
 
+    final isActive = clientJson.containsKey('is_active')
+        ? _parseBool(clientJson['is_active'])
+        : (isActiveFromHistory ??
+            (organizationJson['has_access'] != null
+                ? _parseBool(organizationJson['has_access'])
+                : false));
+
     return Client(
       organizationId: _parseInt(organizationJson['id']),
       id: _parseInt(clientJson['id'] ??
@@ -204,10 +211,7 @@ class Client {
           (clientJson['phone'] ?? organizationJson['phone'] ?? '').toString(),
       subDomain: (clientJson['sub_domain'] ?? '').toString(),
       balance: balance,
-      isActive: isActiveFromHistory ??
-          (organizationJson['has_access'] != null
-              ? _parseBool(organizationJson['has_access'])
-              : _parseBool(clientJson['is_active'])),
+      isActive: isActive,
       isDemo: _parseBool(clientJson['is_demo'] ?? organizationJson['is_demo']),
       email: (clientJson['email'] ?? organizationJson['email'])?.toString(),
       clientType: (clientJson['client_type'] ?? '').toString(),

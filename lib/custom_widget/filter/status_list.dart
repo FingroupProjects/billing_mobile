@@ -19,13 +19,14 @@ class StatusList extends StatefulWidget {
 
 class _StatusListState extends State<StatusList> {
   final List<StatusData> statussList = [
-    StatusData( id: 1, name: "Активынй" ),
-    StatusData( id: 0, name: "Неактивынй" ),
+    StatusData(id: 1, name: 'Активные'),
+    StatusData(id: 0, name: 'Неактивные'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    List<DropdownMenuItem<String>> dropdownItems = statussList.map<DropdownMenuItem<String>>((StatusData status) {
+    List<DropdownMenuItem<String>> dropdownItems =
+        statussList.map<DropdownMenuItem<String>>((StatusData status) {
       return DropdownMenuItem<String>(
         value: status.id.toString(),
         child: Text(
@@ -50,7 +51,8 @@ class _StatusListState extends State<StatusList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text( 'Статус',
+        const Text(
+          'Статус',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -61,10 +63,12 @@ class _StatusListState extends State<StatusList> {
         const SizedBox(height: 4),
         Container(
           child: DropdownButtonFormField<String>(
-            value: dropdownItems.any((item) => item.value == widget.selectedstatus)
-                ? widget.selectedstatus
-                : null,
-            hint: Text( 'Выберете статус',
+            value:
+                dropdownItems.any((item) => item.value == widget.selectedstatus)
+                    ? widget.selectedstatus
+                    : null,
+            hint: Text(
+              'Выберете статус',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

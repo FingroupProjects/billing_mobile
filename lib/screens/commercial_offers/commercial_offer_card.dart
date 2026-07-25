@@ -18,8 +18,7 @@ class CommercialOfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canConfirm =
-        offer.status != 'paid' && offer.status != 'canceled';
+    final canConfirm = offer.status == 'pending';
     final createdDate = offer.createdAt != null
         ? DateFormat('dd.MM.yyyy').format(offer.createdAt!.toLocal())
         : '';
@@ -87,6 +86,8 @@ class CommercialOfferCard extends StatelessWidget {
                           barrierDismissible: false,
                           builder: (context) => CommercialOfferStatusDialog(
                             offerId: offer.id,
+                            paymentMethod:
+                                offer.latestOfferStatus?.paymentMethod ?? '',
                           ),
                         );
 
@@ -161,6 +162,8 @@ class _StatusBadge extends StatelessWidget {
         return 'Оплачено';
       case 'canceled':
         return 'Отменено';
+      case 'draft':
+        return 'Черновик';
       case 'rejected':
         return 'Отклонено';
       default:
@@ -172,6 +175,8 @@ class _StatusBadge extends StatelessWidget {
     switch (value) {
       case 'paid':
         return const Color(0xff22A06B);
+      case 'draft':
+        return const Color(0xff99A4BA);
       case 'canceled':
       case 'rejected':
         return const Color(0xffFF4D3D);
