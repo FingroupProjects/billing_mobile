@@ -1,5 +1,7 @@
 import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/models/ai_subscription_model.dart';
+import 'package:billing_mobile/screens/ai_clients/ai_balance_history_section.dart';
+import 'package:billing_mobile/screens/ai_clients/ai_usage_logs_section.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -18,6 +20,8 @@ class AiClientDetailsScreen extends StatefulWidget {
 class _AiClientDetailsScreenState extends State<AiClientDetailsScreen> {
   final ApiService _apiService = ApiService();
   late AiSubscription _subscription;
+  List<AiBalanceTransaction> _transactions = const [];
+  List<AiUsagePeriod> _usageLogs = const [];
   bool _isRefreshing = false;
 
   @override
@@ -39,7 +43,9 @@ class _AiClientDetailsScreenState extends State<AiClientDetailsScreen> {
 
     if (!mounted) return;
     setState(() {
-      _subscription = details ?? widget.subscription;
+      _subscription = details.subscription;
+      _transactions = details.transactions;
+      _usageLogs = details.usageLogs;
       _isRefreshing = false;
     });
   }
@@ -148,6 +154,10 @@ class _AiClientDetailsScreenState extends State<AiClientDetailsScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            AiBalanceHistorySection(transactions: _transactions),
+            const SizedBox(height: 16),
+            AiUsageLogsSection(usageLogs: _usageLogs),
           ],
         ),
       ),

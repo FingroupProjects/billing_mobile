@@ -255,16 +255,159 @@ class AiBalance {
   double get aiBalanceValue => double.tryParse(aiBalance) ?? 0;
 }
 
-AiSubscription? parseAiSubscriptionDetails(
+List<dynamic> _extractList(dynamic source) {
+  if (source is List) return source;
+  if (source is! Map) return const [];
+
+  final map = source.cast<String, dynamic>();
+  if (map['properties'] is List) return map['properties'] as List;
+  final properties = _asStringMap(map['properties']);
+  if (properties?['data'] is List) return properties!['data'] as List;
+  if (map['data'] is List) return map['data'] as List;
+  return const [];
+}
+
+class AiSubscriptionDetails {
+  final AiSubscription subscription;
+  final List<AiBalanceTransaction> transactions;
+  final List<AiUsagePeriod> usageLogs;
+
+  AiSubscriptionDetails({
+    required this.subscription,
+    this.transactions = const [],
+    this.usageLogs = const [],
+  });
+}
+
+class AiBalanceTransaction {
+  final int id;
+  final String type;
+  final String targetBalance;
+  final String amount;
+  final String description;
+  final String currencyCode;
+  final DateTime? createdAt;
+
+  AiBalanceTransaction({
+    required this.id,
+    required this.type,
+    required this.targetBalance,
+    required this.amount,
+    required this.description,
+    required this.currencyCode,
+    this.createdAt,
+  });
+
+  factory AiBalanceTransaction.fromJson(Map<String, dynamic> json) {
+    final currency = _asStringMap(json['currency']);
+    return AiBalanceTransaction(
+      id: _parseInt(json['id']),
+      type: _parseString(json['type']),
+      targetBalance: _parseString(json['target_balance']),
+      amount: _parseString(json['amount'], '0'),
+      description: _parseString(json['description']),
+      currencyCode: _parseString(currency?['symbol_code'], 'USD'),
+      createdAt: _parseDate(json['created_at']),
+    );
+  }
+
+  double get amountValue => double.tryParse(amount) ?? 0;
+}
+
+class AiUsagePeriod {
+  final int id;
+  final String totalCost;
+  final String deductedFromLimited;
+  final String deductedFromAiBalance;
+  final String currencyCode;
+  final DateTime? periodStart;
+  final DateTime? periodEnd;
+  final List<AiUsageRequest> requests;
+
+  AiUsagePeriod({
+    required this.id,
+    required this.totalCost,
+    required this.deductedFromLimited,
+    required this.deductedFromAiBalance,
+    required this.currencyCode,
+    this.periodStart,
+    this.periodEnd,
+    this.requests = const [],
+  });
+
+  factory AiUsagePeriod.fromJson(Map<String, dynamic> json) {
+    final currency = _asStringMap(json['currency']);
+    final requests = <AiUsageRequest>[];
+    for (final item in _extractList(json['raw_logs'])) {
+      final map = _asStringMap(item);
+      if (map == null) continue;
+      try {
+        requests.add(AiUsageRequest.fromJson(map));
+      } catch (_) {}
+    }
+
+    return AiUsagePeriod(
+      id: _parseInt(json['id']),
+      totalCost: _parseString(json['total_cost'], '0'),
+      deductedFromLimited: _parseString(json['deducted_from_limited'], '0'),
+      deductedFromAiBalance: _parseString(json['deducted_from_ai_balance'], '0'),
+      currencyCode: _parseString(currency?['symbol_code'], 'USD'),
+      periodStart: _parseDate(json['period_start']),
+      periodEnd: _parseDate(json['period_end']),
+      requests: requests,
+    );
+  }
+
+  double get totalCostValue => double.tryParse(totalCost) ?? 0;
+
+  double get limitedValue => double.tryParse(deductedFromLimited) ?? 0;
+
+  double get aiAccountValue => double.tryParse(deductedFromAiBalance) ?? 0;
+}
+
+class AiUsageRequest {
+  final int id;
+  final String modelName;
+  final int promptTokens;
+  final int cacheTokens;
+  final int completionTokens;
+  final String calculatedCost;
+  final DateTime? createdAt;
+
+  AiUsageRequest({
+    required this.id,
+    required this.modelName,
+    required this.promptTokens,
+    required this.cacheTokens,
+    required this.completionTokens,
+    required this.calculatedCost,
+    this.createdAt,
+  });
+
+  factory AiUsageRequest.fromJson(Map<String, dynamic> json) {
+    return AiUsageRequest(
+      id: _parseInt(json['id']),
+      modelName: _parseString(json['model_name']),
+      promptTokens: _parseInt(json['prompt_tokens']),
+      cacheTokens: _parseInt(json['prompt_cache_hit_tokens']),
+      completionTokens: _parseInt(json['completion_tokens']),
+      calculatedCost: _parseString(json['calculated_cost'], '0'),
+      createdAt: _parseDate(json['created_at']),
+    );
+  }
+
+  double get costValue => double.tryParse(calculatedCost) ?? 0;
+}
+
+AiSubscriptionDetails parseAiSubscriptionDetails(
   dynamic json, {
   AiSubscription? fallback,
 }) {
   final root = _asStringMap(json);
-  if (root == null) return fallback;
-
-  final data = _asStringMap(root['data']) ??
-      _asStringMap(root['result']) ??
-      root;
+  final data = _asStringMap(root?['data']) ??
+      _asStringMap(root?['result']) ??
+      root ??
+      <String, dynamic>{};
 
   final subscriptionMap = _asStringMap(data['aiSubscription']) ??
       _asStringMap(data['ai_subscription']) ??
@@ -275,11 +418,20 @@ AiSubscription? parseAiSubscriptionDetails(
       _asStringMap(data['ai_balance']) ??
       _asStringMap(data['aiBalance']);
 
-  if (subscriptionMap == null && fallback == null) return null;
-
-  if (subscriptionMap == null) {
-    if (fallback == null || balanceMap == null) return fallback;
-    return fallback.merge(
+  AiSubscription? subscription;
+  if (subscriptionMap != null) {
+    final merged = Map<String, dynamic>.from(subscriptionMap);
+    if (balanceMap != null && merged['ai_balance'] == null) {
+      merged['ai_balance'] = balanceMap;
+    }
+    try {
+      final parsed = AiSubscription.fromJson(merged);
+      subscription = fallback == null ? parsed : fallback.merge(parsed);
+    } catch (_) {
+      subscription = fallback;
+    }
+  } else if (fallback != null && balanceMap != null) {
+    subscription = fallback.merge(
       AiSubscription(
         id: fallback.id,
         organizationId: fallback.organizationId,
@@ -295,17 +447,47 @@ AiSubscription? parseAiSubscriptionDetails(
         aiBalance: AiBalance.fromJson(balanceMap),
       ),
     );
+  } else {
+    subscription = fallback;
   }
 
-  final merged = Map<String, dynamic>.from(subscriptionMap);
-  if (balanceMap != null && merged['ai_balance'] == null) {
-    merged['ai_balance'] = balanceMap;
+  final transactions = <AiBalanceTransaction>[];
+  for (final item in _extractList(
+    data['transactions'] ?? root?['transactions'],
+  )) {
+    final map = _asStringMap(item);
+    if (map == null) continue;
+    try {
+      transactions.add(AiBalanceTransaction.fromJson(map));
+    } catch (_) {}
   }
 
-  try {
-    final parsed = AiSubscription.fromJson(merged);
-    return fallback == null ? parsed : fallback.merge(parsed);
-  } catch (_) {
-    return fallback;
+  final usageLogs = <AiUsagePeriod>[];
+  for (final item in _extractList(
+    data['usageLogs'] ??
+        data['usage_logs'] ??
+        root?['usageLogs'] ??
+        root?['usage_logs'],
+  )) {
+    final map = _asStringMap(item);
+    if (map == null) continue;
+    try {
+      usageLogs.add(AiUsagePeriod.fromJson(map));
+    } catch (_) {}
   }
+
+  return AiSubscriptionDetails(
+    subscription: subscription ??
+        fallback ??
+        AiSubscription(
+          id: 0,
+          organizationId: 0,
+          planId: 0,
+          status: false,
+          periodMonths: 0,
+          pricePaid: '0',
+        ),
+    transactions: transactions,
+    usageLogs: usageLogs,
+  );
 }

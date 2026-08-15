@@ -1155,7 +1155,7 @@ class ApiService {
     }
   }
 
-  Future<AiSubscription?> getAiSubscriptionById(
+  Future<AiSubscriptionDetails> getAiSubscriptionById(
     int id, {
     AiSubscription? fallback,
   }) async {
@@ -1167,10 +1167,19 @@ class ApiService {
           fallback: fallback,
         );
       }
-      return fallback;
-    } catch (_) {
-      return fallback;
-    }
+    } catch (_) {}
+
+    return AiSubscriptionDetails(
+      subscription: fallback ??
+          AiSubscription(
+            id: id,
+            organizationId: 0,
+            planId: 0,
+            status: false,
+            periodMonths: 0,
+            pricePaid: '0',
+          ),
+    );
   }
 
   //_________________________________ END____API_SCREEN__AI_CLIENTS____________________________________________//
