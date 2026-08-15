@@ -557,11 +557,27 @@ class ApiService {
   Future<CommercialOfferListResponse> getCommercialOffers({
     int page = 1,
     String? search,
+    int? partnerId,
+    String? requestType,
+    int? tariffId,
+    int? periodMonths,
+    String? operationStatus,
+    String? dateFrom,
+    String? dateTo,
   }) async {
     try {
       final queryParameters = {
         'page': page.toString(),
         if (search != null && search.isNotEmpty) 'search': search,
+        if (partnerId != null) 'partner_id': partnerId.toString(),
+        if (requestType != null && requestType.isNotEmpty)
+          'request_type': requestType,
+        if (tariffId != null) 'tariff_id': tariffId.toString(),
+        if (periodMonths != null) 'period_months': periodMonths.toString(),
+        if (operationStatus != null && operationStatus.isNotEmpty)
+          'operation_status': operationStatus,
+        if (dateFrom != null && dateFrom.isNotEmpty) 'date_from': dateFrom,
+        if (dateTo != null && dateTo.isNotEmpty) 'date_to': dateTo,
       };
 
       final uri = Uri.parse('/commercial-foofers')
@@ -570,11 +586,24 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        return CommercialOfferListResponse.fromJson(jsonData);
+        final map = jsonData is Map<String, dynamic>
+            ? jsonData
+            : jsonData is Map
+                ? jsonData.cast<String, dynamic>()
+                : null;
+        if (map == null) {
+          return CommercialOfferListResponse(
+            currentPage: page,
+            data: const [],
+            total: 0,
+            lastPage: 1,
+          );
+        }
+        return CommercialOfferListResponse.fromJson(map);
       }
 
       throw ('Ошибка загрузки подключений!');
-    } catch (e) {
+    } catch (_) {
       throw ('Ошибка загрузки подключений!');
     }
   }
@@ -587,9 +616,13 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        final statuses = jsonData['statuses'] as List? ?? [];
+        final statuses = jsonData is Map ? jsonData['statuses'] : null;
+        if (statuses is! List) return const [];
         return statuses
-            .map((statusJson) => CommercialOfferStatus.fromJson(statusJson))
+            .whereType<Map>()
+            .map((statusJson) => CommercialOfferStatus.fromJson(
+                  statusJson.cast<String, dynamic>(),
+                ))
             .toList();
       }
 
@@ -605,9 +638,13 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        final accounts = jsonData['accounts'] as List? ?? [];
+        final accounts = jsonData is Map ? jsonData['accounts'] : null;
+        if (accounts is! List) return const [];
         return accounts
-            .map((accountJson) => CommercialOfferAccount.fromJson(accountJson))
+            .whereType<Map>()
+            .map((accountJson) => CommercialOfferAccount.fromJson(
+                  accountJson.cast<String, dynamic>(),
+                ))
             .toList();
       }
 
@@ -808,6 +845,81 @@ class ApiService {
       print('Error in getTariffs: $e'); // Добавим отладочную информацию
       throw Exception('Failed to load tariffs: $e');
     }
+  }
+
+  Future<List<TariffCatalogItem>> getTariffCatalog() async {
+    try {
+      final response = await _getRequest('/tariff');
+      if (response.statusCode == 200) {
+        final catalog = _parseTariffCatalog(json.decode(response.body));
+        if (catalog.isNotEmpty) return catalog;
+      }
+    } catch (_) {}
+
+    final fallback = await getTariffs('998');
+    return fallback
+        .map((item) => TariffCatalogItem(
+              id: item.tariff.id,
+              name: item.tariff.name,
+            ))
+        .where((item) => item.id != 0 && item.name.isNotEmpty)
+        .toList();
+  }
+
+  List<TariffCatalogItem> _parseTariffCatalog(dynamic jsonData) {
+    final items = <int, TariffCatalogItem>{};
+
+    void addItems(dynamic source) {
+      for (final item in _extractCollection(source)) {
+        if (item is! Map) continue;
+        final map = item.cast<String, dynamic>();
+        final nestedTariff = map['tariff'];
+        final catalogItem = nestedTariff is Map
+            ? TariffCatalogItem.fromJson(nestedTariff.cast<String, dynamic>())
+            : TariffCatalogItem.fromJson(map);
+        if (catalogItem.id == 0 || catalogItem.name.isEmpty) continue;
+        items[catalogItem.id] = catalogItem;
+      }
+    }
+
+    if (jsonData is List) {
+      addItems(jsonData);
+      return items.values.toList();
+    }
+
+    if (jsonData is! Map) return const [];
+
+    final roots = <dynamic>[
+      jsonData,
+      jsonData['data'],
+      jsonData['result'],
+      jsonData['result'] is Map ? jsonData['result']['data'] : null,
+    ];
+
+    for (final root in roots) {
+      if (root == null) continue;
+      addItems(root);
+      if (root is Map) {
+        addItems(root['tariffs']);
+        addItems(root['services']);
+        addItems(root['baseTariffs']);
+      }
+    }
+
+    final catalog = items.values.toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return catalog;
+  }
+
+  List<dynamic> _extractCollection(dynamic source) {
+    if (source is List) return source;
+    if (source is Map && source['properties'] is List) {
+      return source['properties'] as List;
+    }
+    if (source is Map && source['data'] is List) {
+      return source['data'] as List;
+    }
+    return const [];
   }
 
   Future<List<History>> getClientHistory(int clientId) async {

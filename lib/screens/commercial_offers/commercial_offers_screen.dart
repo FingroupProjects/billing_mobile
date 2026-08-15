@@ -3,6 +3,7 @@ import 'package:billing_mobile/bloc/commercial_offers/commercial_offers_event.da
 import 'package:billing_mobile/bloc/commercial_offers/commercial_offers_state.dart';
 import 'package:billing_mobile/custom_widget/custom_app_bar.dart';
 import 'package:billing_mobile/custom_widget/custom_button.dart';
+import 'package:billing_mobile/custom_widget/filter/filter_commercial_offers_app_bar.dart';
 import 'package:billing_mobile/screens/commercial_offers/commercial_offer_card.dart';
 import 'package:billing_mobile/screens/commercial_offers/commercial_offer_details_screen.dart';
 import 'package:billing_mobile/screens/profile/profile_screen.dart';
@@ -22,6 +23,7 @@ class _CommercialOffersScreenState extends State<CommercialOffersScreen> {
   late ScrollController _scrollController;
   bool _isSearching = false;
   bool isClickAvatarIcon = false;
+  Map<String, dynamic> _currentFilters = {};
 
   @override
   void initState() {
@@ -141,8 +143,27 @@ class _CommercialOffersScreenState extends State<CommercialOffersScreen> {
               },
               clearButtonClickFiltr: (isSearching) {},
               showSearchIcon: true,
-              showFilterIcon: false,
+              showFilterIcon: true,
+              isFilterActive: _currentFilters.isNotEmpty,
               onChangedSearchInput: (String value) {},
+              onFilterTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FilterCommercialOffersScreen(
+                      onFilterSelected: (filters) {
+                        setState(() {
+                          _currentFilters = filters;
+                        });
+                        context.read<CommercialOffersBloc>().add(
+                              ApplyCommercialOfferFilters(filters),
+                            );
+                      },
+                      initialFilters: _currentFilters,
+                    ),
+                  ),
+                );
+              },
               textEditingController: _searchController,
               focusNode: _searchFocusNode,
               clearButtonClick: (value) {

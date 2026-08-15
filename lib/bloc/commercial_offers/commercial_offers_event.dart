@@ -10,6 +10,12 @@ class SearchCommercialOffers extends CommercialOffersEvent {
   SearchCommercialOffers(this.query);
 }
 
+class ApplyCommercialOfferFilters extends CommercialOffersEvent {
+  final Map<String, dynamic> filters;
+
+  ApplyCommercialOfferFilters(this.filters);
+}
+
 class FetchCommercialOfferStatuses extends CommercialOffersEvent {
   final int offerId;
 

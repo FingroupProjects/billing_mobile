@@ -30,7 +30,7 @@ class _PartnerListState extends State<PartnerList> {
         if (state is PartnerLoadingState) {
           return _buildLoadingWidget();
         } else if (state is PartnerErrorState) {
-          return _buildErrorWidget(state.message);
+          return _buildErrorWidget('Ошибка загрузки партнеров');
         } else if (state is PartnerLoadedState) {
           return _buildPartnerDropdown(state.partners);
         } else {
@@ -140,11 +140,18 @@ class _PartnerListState extends State<PartnerList> {
   }
 
   Widget _buildPartnerDropdown(List<Partner> partners) {
-    List<DropdownMenuItem<String>> dropdownItems = partners.map<DropdownMenuItem<String>>((Partner partner) {
+    final uniquePartners = <int, Partner>{};
+    for (final partner in partners) {
+      if (partner.id == 0) continue;
+      uniquePartners[partner.id] = partner;
+    }
+
+    List<DropdownMenuItem<String>> dropdownItems =
+        uniquePartners.values.map<DropdownMenuItem<String>>((Partner partner) {
       return DropdownMenuItem<String>(
         value: partner.id.toString(),
         child: Text(
-          partner.name,
+          partner.name.isEmpty ? 'Партнер ${partner.id}' : partner.name,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -189,7 +196,7 @@ class _PartnerListState extends State<PartnerList> {
             ),
           ),
           items: dropdownItems,
-          onChanged: widget.onChanged,
+          onChanged: dropdownItems.isEmpty ? null : widget.onChanged,
           decoration: _inputDecoration(),
           dropdownColor: Colors.white,
           icon: Image.asset(

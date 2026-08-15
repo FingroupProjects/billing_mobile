@@ -9,8 +9,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class TariffList extends StatefulWidget {
   final String? selectedTariff;
   final ValueChanged<String?> onChanged;
+  final String label;
+  final String hint;
 
-  const TariffList({required this.selectedTariff, required this.onChanged});
+  const TariffList({
+    required this.selectedTariff,
+    required this.onChanged,
+    this.label = 'Тариф',
+    this.hint = 'Выберите тариф',
+  });
 
   @override
   _TariffListState createState() => _TariffListState();
@@ -62,9 +69,9 @@ class _TariffListState extends State<TariffList> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Тариф',
-              style: TextStyle(
+            Text(
+              widget.label,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Gilroy',
@@ -77,9 +84,9 @@ class _TariffListState extends State<TariffList> {
               value: dropdownItems.any((item) => item.value == widget.selectedTariff)
                   ? widget.selectedTariff
                   : null,
-              hint: const Text(
-                'Выберите тариф',
-                style: TextStyle(
+              hint: Text(
+                widget.hint,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Gilroy',

@@ -1,3 +1,22 @@
+int _parseInt(dynamic value, [int fallback = 0]) {
+  if (value == null) return fallback;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString().trim()) ?? fallback;
+}
+
+String _parseString(dynamic value, [String fallback = '']) {
+  if (value == null) return fallback;
+  final text = value.toString();
+  return text == 'null' ? fallback : text;
+}
+
+Map<String, dynamic>? _asStringMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return value.cast<String, dynamic>();
+  return null;
+}
+
 class CommercialOfferListResponse {
   final int currentPage;
   final List<CommercialOffer> data;
@@ -12,14 +31,23 @@ class CommercialOfferListResponse {
   });
 
   factory CommercialOfferListResponse.fromJson(Map<String, dynamic> json) {
+    final items = <CommercialOffer>[];
+    final rawData = json['data'];
+    if (rawData is List) {
+      for (final item in rawData) {
+        final map = _asStringMap(item);
+        if (map == null) continue;
+        try {
+          items.add(CommercialOffer.fromJson(map));
+        } catch (_) {}
+      }
+    }
+
     return CommercialOfferListResponse(
-      currentPage: json['current_page'] ?? 1,
-      data: (json['data'] as List?)
-              ?.map((e) => CommercialOffer.fromJson(e))
-              .toList() ??
-          [],
-      total: json['total'] ?? 0,
-      lastPage: json['last_page'] ?? 1,
+      currentPage: _parseInt(json['current_page'], 1),
+      data: items,
+      total: _parseInt(json['total']),
+      lastPage: _parseInt(json['last_page'], 1),
     );
   }
 }
@@ -80,38 +108,40 @@ class CommercialOffer {
   });
 
   factory CommercialOffer.fromJson(Map<String, dynamic> json) {
+    final tariff = _asStringMap(json['tariff']);
+    final organization = _asStringMap(json['organization']);
+    final latestStatus = _asStringMap(json['latest_offer_status']);
+
     return CommercialOffer(
-      id: json['id'] ?? 0,
-      organizationId: json['organization_id'] ?? 0,
-      status: json['status'] ?? '',
-      requestType: json['request_type'] ?? '',
+      id: _parseInt(json['id']),
+      organizationId: _parseInt(json['organization_id']),
+      status: _parseString(json['status']),
+      requestType: _parseString(json['request_type']),
       statusDate: _parseDate(json['status_date']),
       createdAt: _parseDate(json['created_at']),
-      currency: json['currency'] ?? '',
-      payableCurrency: json['payable_currency'] ?? '',
-      periodMonths: json['period_months'] ?? 0,
-      clientName: json['client_name'] ?? '',
-      clientPhone: json['client_phone'] ?? '',
-      clientEmail: json['client_email'] ?? '',
-      partnerName: json['partner_name'] ?? '',
-      partnerPhone: json['partner_phone'] ?? '',
-      partnerEmail: json['partner_email'] ?? '',
-      payerType: json['payer_type'] ?? '',
-      managerName: json['manager_name'] ?? '',
-      monthlyTotal: (json['monthly_total'] ?? '0').toString(),
-      grandTotal: (json['grand_total'] ?? '0').toString(),
-      payableTotal: (json['payable_total'] ?? '0').toString(),
-      paymentLink: json['payment_link'],
-      cardPaymentType: json['card_payment_type'],
-      tariff: json['tariff'] is Map<String, dynamic>
-          ? CommercialOfferTariff.fromJson(json['tariff'])
-          : null,
-      organization: json['organization'] is Map<String, dynamic>
-          ? CommercialOfferOrganization.fromJson(json['organization'])
-          : null,
-      latestOfferStatus: json['latest_offer_status'] is Map<String, dynamic>
-          ? CommercialOfferLatestStatus.fromJson(json['latest_offer_status'])
-          : null,
+      currency: _parseString(json['currency']),
+      payableCurrency: _parseString(json['payable_currency']),
+      periodMonths: _parseInt(json['period_months']),
+      clientName: _parseString(json['client_name']),
+      clientPhone: _parseString(json['client_phone']),
+      clientEmail: _parseString(json['client_email']),
+      partnerName: _parseString(json['partner_name']),
+      partnerPhone: _parseString(json['partner_phone']),
+      partnerEmail: _parseString(json['partner_email']),
+      payerType: _parseString(json['payer_type']),
+      managerName: _parseString(json['manager_name']),
+      monthlyTotal: _parseString(json['monthly_total'], '0'),
+      grandTotal: _parseString(json['grand_total'], '0'),
+      payableTotal: _parseString(json['payable_total'], '0'),
+      paymentLink: _parseNullableString(json['payment_link']),
+      cardPaymentType: _parseNullableString(json['card_payment_type']),
+      tariff: tariff == null ? null : CommercialOfferTariff.fromJson(tariff),
+      organization: organization == null
+          ? null
+          : CommercialOfferOrganization.fromJson(organization),
+      latestOfferStatus: latestStatus == null
+          ? null
+          : CommercialOfferLatestStatus.fromJson(latestStatus),
     );
   }
 }
@@ -127,8 +157,8 @@ class CommercialOfferTariff {
 
   factory CommercialOfferTariff.fromJson(Map<String, dynamic> json) {
     return CommercialOfferTariff(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      id: _parseInt(json['id']),
+      name: _parseString(json['name']),
     );
   }
 }
@@ -150,11 +180,11 @@ class CommercialOfferOrganization {
 
   factory CommercialOfferOrganization.fromJson(Map<String, dynamic> json) {
     return CommercialOfferOrganization(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      phone: json['phone'] ?? '',
-      email: json['email'] ?? '',
-      orderNumber: json['order_number'] ?? '',
+      id: _parseInt(json['id']),
+      name: _parseString(json['name']),
+      phone: _parseString(json['phone']),
+      email: _parseString(json['email']),
+      orderNumber: _parseString(json['order_number']),
     );
   }
 }
@@ -174,10 +204,10 @@ class CommercialOfferLatestStatus {
 
   factory CommercialOfferLatestStatus.fromJson(Map<String, dynamic> json) {
     return CommercialOfferLatestStatus(
-      id: json['id'] ?? 0,
-      status: json['status'] ?? '',
+      id: _parseInt(json['id']),
+      status: _parseString(json['status']),
       statusDate: _parseDate(json['status_date']),
-      paymentMethod: json['payment_method'] ?? '',
+      paymentMethod: _parseString(json['payment_method']),
     );
   }
 }
@@ -206,20 +236,19 @@ class CommercialOfferStatus {
   });
 
   factory CommercialOfferStatus.fromJson(Map<String, dynamic> json) {
+    final author = _asStringMap(json['author']);
+    final account = _asStringMap(json['account']);
+
     return CommercialOfferStatus(
-      id: json['id'] ?? 0,
-      commercialOfferId: json['commercial_offer_id'] ?? 0,
-      status: json['status'] ?? '',
+      id: _parseInt(json['id']),
+      commercialOfferId: _parseInt(json['commercial_offer_id']),
+      status: _parseString(json['status']),
       statusDate: _parseDate(json['status_date']),
-      paymentMethod: json['payment_method'] ?? '',
-      paymentOrderNumber: json['payment_order_number'],
+      paymentMethod: _parseString(json['payment_method']),
+      paymentOrderNumber: _parseNullableString(json['payment_order_number']),
       createdAt: _parseDate(json['created_at']),
-      author: json['author'] is Map<String, dynamic>
-          ? CommercialOfferAuthor.fromJson(json['author'])
-          : null,
-      account: json['account'] is Map<String, dynamic>
-          ? CommercialOfferAccount.fromJson(json['account'])
-          : null,
+      author: author == null ? null : CommercialOfferAuthor.fromJson(author),
+      account: account == null ? null : CommercialOfferAccount.fromJson(account),
     );
   }
 }
@@ -235,8 +264,8 @@ class CommercialOfferAuthor {
 
   factory CommercialOfferAuthor.fromJson(Map<String, dynamic> json) {
     return CommercialOfferAuthor(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      id: _parseInt(json['id']),
+      name: _parseString(json['name']),
     );
   }
 }
@@ -253,10 +282,11 @@ class CommercialOfferAccount {
   });
 
   factory CommercialOfferAccount.fromJson(Map<String, dynamic> json) {
+    final currency = _asStringMap(json['currency']);
     return CommercialOfferAccount(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      currencyCode: json['currency']?['symbol_code'] ?? '',
+      id: _parseInt(json['id']),
+      name: _parseString(json['name']),
+      currencyCode: _parseString(currency?['symbol_code']),
     );
   }
 }
@@ -268,7 +298,16 @@ extension CommercialOfferAccountTitle on CommercialOfferAccount {
   }
 }
 
+String? _parseNullableString(dynamic value) {
+  if (value == null) return null;
+  final text = value.toString().trim();
+  if (text.isEmpty || text == 'null') return null;
+  return text;
+}
+
 DateTime? _parseDate(dynamic value) {
-  if (value == null || value.toString().isEmpty) return null;
-  return DateTime.tryParse(value.toString());
+  if (value == null) return null;
+  final text = value.toString().trim();
+  if (text.isEmpty || text == 'null') return null;
+  return DateTime.tryParse(text);
 }

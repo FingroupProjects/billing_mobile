@@ -96,3 +96,17 @@ class TariffData {
     return 0;
   }
 }
+
+class TariffCatalogItem {
+  final int id;
+  final String name;
+
+  TariffCatalogItem({required this.id, required this.name});
+
+  factory TariffCatalogItem.fromJson(Map<String, dynamic> json) {
+    return TariffCatalogItem(
+      id: Tariff._parseInt(json['id']),
+      name: Tariff._parseString(json['name']),
+    );
+  }
+}
