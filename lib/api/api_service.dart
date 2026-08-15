@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:billing_mobile/models/Country_model.dart';
+import 'package:billing_mobile/models/ai_subscription_model.dart';
 import 'package:billing_mobile/models/businessType_model.dart';
 import 'package:billing_mobile/models/client_history_model.dart';
 import 'package:billing_mobile/models/clientsById_model.dart';
@@ -1127,4 +1128,50 @@ class ApiService {
   }
 
   //_________________________________ END____API_SCREEN__TRANSACTION____________________________________________//
+
+  //_________________________________ START____API_SCREEN__AI_CLIENTS____________________________________________//
+
+  Future<AiSubscriptionListResponse> getAiSubscriptions({
+    int page = 1,
+    String? search,
+  }) async {
+    try {
+      final queryParameters = {
+        'page': page.toString(),
+        if (search != null && search.isNotEmpty) 'search': search,
+      };
+
+      final uri = Uri.parse('/ai-subscription')
+          .replace(queryParameters: queryParameters);
+      final response = await _getRequest(uri.toString());
+
+      if (response.statusCode == 200) {
+        return AiSubscriptionListResponse.fromJson(json.decode(response.body));
+      }
+
+      throw ('Ошибка загрузки ИИ-клиентов!');
+    } catch (_) {
+      throw ('Ошибка загрузки ИИ-клиентов!');
+    }
+  }
+
+  Future<AiSubscription?> getAiSubscriptionById(
+    int id, {
+    AiSubscription? fallback,
+  }) async {
+    try {
+      final response = await _getRequest('/ai-subscription/$id');
+      if (response.statusCode == 200) {
+        return parseAiSubscriptionDetails(
+          json.decode(response.body),
+          fallback: fallback,
+        );
+      }
+      return fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  //_________________________________ END____API_SCREEN__AI_CLIENTS____________________________________________//
 }

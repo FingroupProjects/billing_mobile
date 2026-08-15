@@ -2,6 +2,7 @@ import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/bloc/BusinessType/BusinessType_bloc.dart';
 import 'package:billing_mobile/bloc/Country/Country_bloc.dart';
 import 'package:billing_mobile/bloc/client_history/client_history_bloc.dart';
+import 'package:billing_mobile/bloc/ai_clients/ai_clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients/NfrClientBloc.dart';
 import 'package:billing_mobile/bloc/clients/clients_bloc.dart';
 import 'package:billing_mobile/bloc/clients_InActive/InActive_clients_bloc.dart';
@@ -78,6 +79,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => InActiveBloc(apiService: apiService)),
         BlocProvider(
             create: (context) => CommercialOffersBloc(apiService: apiService)),
+        BlocProvider(create: (context) => AiClientsBloc(apiService: apiService)),
         BlocProvider(
             create: (context) => OrganizationBloc(apiService: apiService)),
         BlocProvider(

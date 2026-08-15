@@ -1,5 +1,6 @@
 import 'package:billing_mobile/MyNavBar.dart';
 import 'package:billing_mobile/api/api_service.dart';
+import 'package:billing_mobile/screens/ai_clients/ai_clients_screen.dart';
 import 'package:billing_mobile/screens/clients/NfrClientsScreen.dart';
 import 'package:billing_mobile/screens/commercial_offers/commercial_offers_screen.dart';
 import 'package:billing_mobile/screens/demo/demo_clients_screen.dart';
@@ -53,6 +54,12 @@ class _HomeScreenState extends State<HomeScreen> {
     navBarTitleKeys.add('Клиенты');
     activeIcons.add('assets/icons/MyNavBar/clients_ON.png');
     inactiveIcons.add('assets/icons/MyNavBar/clients_OFF.png');
+
+    widgets.add(const AiClientsScreen());
+    titleKeys.add('Аппбар ИИ-клиенты');
+    navBarTitleKeys.add('ИИ-клиенты');
+    activeIcons.add('material:smart_toy');
+    inactiveIcons.add('material:smart_toy');
 
     widgets.add(DemoClientsScreen());
     titleKeys.add('Аппбар демо');
