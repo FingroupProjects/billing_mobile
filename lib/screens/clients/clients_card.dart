@@ -98,6 +98,11 @@ class ClientCard extends StatelessWidget {
                         label: 'Тариф: ',
                         value: client.tariff.name,
                       ),
+                      const SizedBox(height: 4),
+                      _buildInfoRow(
+                        label: 'Срок действие: ',
+                        value: _formatValidUntil(client.calculatedValidUntil),
+                      ),
                     ],
                   ),
                 ),
@@ -123,6 +128,11 @@ class ClientCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatValidUntil(DateTime? dateTime) {
+    if (dateTime == null) return 'Не указана';
+    return DateFormat('dd.MM.yyyy').format(dateTime.toLocal());
   }
 
   Widget _buildInfoRow({required String label, required String value}) {

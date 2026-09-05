@@ -47,6 +47,8 @@ class ClientBloc extends Bloc<ClientEvent, ClientState> {
       partner: _currentFilters['partner'],
       countryId: _currentFilters['country_id'], // Added country_id filter
         currencyId: _currentFilters['currency_id'], // Added currency_id filter
+      validUntilFrom: _currentFilters['valid_until_from'],
+      validUntilTo: _currentFilters['valid_until_to'],
     );
     emit(ClientLoaded(clientData, isLoadingMore: false));
   } catch (e) {
@@ -82,7 +84,9 @@ Future<void> _onFetchMoreClients(FetchMoreClients event, Emitter<ClientState> em
         tariff: _currentFilters['tariff'],
         partner: _currentFilters['partner'],
         countryId: _currentFilters['country_id'], // Added country_id filter
-          currencyId: _currentFilters['currency_id'], // Added currency_id filter 
+          currencyId: _currentFilters['currency_id'], // Added currency_id filter
+        validUntilFrom: _currentFilters['valid_until_from'],
+        validUntilTo: _currentFilters['valid_until_to'],
       );
       
       final updatedClients = ClientList(

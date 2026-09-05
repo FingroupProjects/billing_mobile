@@ -159,6 +159,7 @@ class Client {
   final DateTime? lastActivity;
   final Tariff tariff;
   final int nfr;
+  final DateTime? calculatedValidUntil;
 
   Client({
     required this.organizationId,
@@ -174,6 +175,7 @@ class Client {
     this.lastActivity,
     required this.tariff,
     required this.nfr,
+    this.calculatedValidUntil,
   });
 
   factory Client.fromJson(Map<String, dynamic> json) {
@@ -218,6 +220,10 @@ class Client {
       lastActivity: _parseDateTime(clientJson['last_activity']),
       tariff: _resolveClientTariff(organizationJson, clientJson),
       nfr: _parseInt(clientJson['nfr']),
+      calculatedValidUntil: _parseDateTime(
+        organizationJson['calculated_valid_until'] ??
+            clientJson['calculated_valid_until'],
+      ),
     );
   }
 }

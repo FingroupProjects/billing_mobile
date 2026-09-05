@@ -1,5 +1,6 @@
 import 'package:billing_mobile/bloc/tariff/tariff_bloc.dart';
 import 'package:billing_mobile/bloc/tariff/tariff_event.dart';
+import 'package:billing_mobile/custom_widget/filter/filter_date_range_field.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_ui.dart';
 import 'package:billing_mobile/screens/clients/client_details/country_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/currency_list.dart';
@@ -7,6 +8,7 @@ import 'package:billing_mobile/screens/clients/client_details/partner_list.dart'
 import 'package:billing_mobile/screens/clients/client_details/tariff_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class FilterClientScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onFilterSelected;
@@ -27,6 +29,8 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
   int? _selectedPartner;
   int? _selectedCountryId;
   int? _selectedCurrencyId;
+  DateTime? _validUntilFrom;
+  DateTime? _validUntilTo;
 
   @override
   void initState() {
@@ -36,9 +40,31 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
       _selectedPartner = widget.initialFilters!['partner'];
       _selectedCountryId = widget.initialFilters!['country_id'];
       _selectedCurrencyId = widget.initialFilters!['currency_id'];
+      _validUntilFrom = _parseApiDate(widget.initialFilters!['valid_until_from']);
+      _validUntilTo = _parseApiDate(widget.initialFilters!['valid_until_to']);
     }
     context.read<TariffBloc>().add(const LoadTariffEvent('998'));
   }
+
+  DateTime? _parseApiDate(dynamic value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    if (text.isEmpty || text == 'null') return null;
+    return DateTime.tryParse(text);
+  }
+
+  String? _formatApiDate(DateTime? date) {
+    if (date == null) return null;
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
+  bool get _hasSelectedFilters =>
+      _selectedTariff != null ||
+      _selectedPartner != null ||
+      _selectedCountryId != null ||
+      _selectedCurrencyId != null ||
+      _validUntilFrom != null ||
+      _validUntilTo != null;
 
   void _resetFilters() {
     setState(() {
@@ -46,15 +72,14 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
       _selectedPartner = null;
       _selectedCountryId = null;
       _selectedCurrencyId = null;
+      _validUntilFrom = null;
+      _validUntilTo = null;
     });
     widget.onFilterSelected?.call({});
   }
 
   void _applyFilters() {
-    if (_selectedTariff == null &&
-        _selectedPartner == null &&
-        _selectedCountryId == null &&
-        _selectedCurrencyId == null) {
+    if (!_hasSelectedFilters) {
       Navigator.pop(context);
       return;
     }
@@ -64,6 +89,8 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
       'partner': _selectedPartner,
       'country_id': _selectedCountryId,
       'currency_id': _selectedCurrencyId,
+      'valid_until_from': _formatApiDate(_validUntilFrom),
+      'valid_until_to': _formatApiDate(_validUntilTo),
     });
     Navigator.pop(context);
   }
@@ -155,6 +182,20 @@ class _FilterClientScreenState extends State<FilterClientScreen> {
                     setState(() {
                       _selectedCurrencyId =
                           value != null ? int.parse(value) : null;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 18),
+              FilterSectionCard(
+                child: FilterDateRangeField(
+                  label: 'Срок действия:',
+                  startDate: _validUntilFrom,
+                  endDate: _validUntilTo,
+                  onChanged: (range) {
+                    setState(() {
+                      _validUntilFrom = range?.start;
+                      _validUntilTo = range?.end;
                     });
                   },
                 ),

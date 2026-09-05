@@ -142,12 +142,16 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
           _buildOverviewInfoRow('Поддомен', _valueOrFallback(client.subDomain)),
           _buildOverviewInfoRow(
             'Статус',
-            organization.isActive ? 'Активный' : 'Неактивный',
-            valueColor: organization.isActive ? Colors.green : Colors.red,
+            client.isActive ? 'Активный' : 'Неактивный',
+            valueColor: client.isActive ? Colors.green : Colors.red,
           ),
           _buildOverviewInfoRow(
             'Последняя активность',
             _formatDateTime(client.lastActivity, withTime: true),
+          ),
+          _buildOverviewInfoRow(
+            'Срок действие',
+            _formatDateTime(organization.calculatedValidUntil),
           ),
           _buildOverviewInfoRow(
             'Баланс',

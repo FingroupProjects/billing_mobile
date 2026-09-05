@@ -15,6 +15,7 @@ class Organization {
   final String businessTypeName;
   final double? balance;
   final bool isActive;
+  final DateTime? calculatedValidUntil;
 
   Organization({
     required this.id,
@@ -31,6 +32,7 @@ class Organization {
     required this.businessTypeName,
     this.balance,
     required this.isActive,
+    this.calculatedValidUntil,
   });
 
   factory Organization.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class Organization {
       businessTypeName: json['business_type']?['name']?.toString() ?? '',
       balance: _tryParseDouble(json['real_balance'] ?? json['balance']),
       isActive: _parseOrganizationActiveStatus(json),
+      calculatedValidUntil: _parseDateTime(json['calculated_valid_until']),
     );
   }
 }
@@ -83,6 +86,8 @@ class OrganizationDetails {
         ...organizationJson,
         'real_balance':
             json['real_balance'] ?? organizationJson['real_balance'],
+        'calculated_valid_until': json['calculated_valid_until'] ??
+            organizationJson['calculated_valid_until'],
         'connection_status_history': json['connection_status_history'] ??
             organizationJson['connection_status_history'],
       }),
@@ -304,6 +309,15 @@ class IntegrationLog {
 }
 
 bool _parseOrganizationActiveStatus(Map<String, dynamic> json) {
+  final client = json['client'];
+  if (client is Map && client.containsKey('is_active')) {
+    return _parseBool(client['is_active']);
+  }
+
+  if (json.containsKey('is_active')) {
+    return _parseBool(json['is_active']);
+  }
+
   final history = json['connection_status_history'] as List?;
   if (history != null && history.isNotEmpty) {
     final normalizedHistory = history

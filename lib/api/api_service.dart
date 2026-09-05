@@ -328,6 +328,8 @@ class ApiService {
     int? partner,
     int? countryId, // Added countryId parameter
     int? currencyId, // Added currencyId parameter
+    String? validUntilFrom,
+    String? validUntilTo,
   }) async {
     try {
       final queryParameters = {
@@ -343,6 +345,10 @@ class ApiService {
         if (currencyId != null)
           'currency_id':
               currencyId.toString(), // Added currency_id to query parameters
+        if (validUntilFrom != null && validUntilFrom.isNotEmpty)
+          'valid_until_from': validUntilFrom,
+        if (validUntilTo != null && validUntilTo.isNotEmpty)
+          'valid_until_to': validUntilTo,
       };
 
       final uri = Uri.parse('/organizations-active-v2')
