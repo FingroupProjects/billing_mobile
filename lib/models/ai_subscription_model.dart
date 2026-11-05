@@ -103,6 +103,12 @@ Map<String, dynamic>? _findPaginator(dynamic json) {
   return root;
 }
 
+String _currencyCode(dynamic value) {
+  if (value is String) return _parseString(value);
+  final currency = _asStringMap(value);
+  return _parseString(currency?['symbol_code']);
+}
+
 class AiSubscription {
   final int id;
   final int organizationId;
@@ -110,6 +116,7 @@ class AiSubscription {
   final bool status;
   final int periodMonths;
   final String pricePaid;
+  final String offerCurrencyCode;
   final DateTime? startedAt;
   final DateTime? expiresAt;
   final DateTime? lastCrmFetchAt;
@@ -124,6 +131,7 @@ class AiSubscription {
     required this.status,
     required this.periodMonths,
     required this.pricePaid,
+    this.offerCurrencyCode = '',
     this.startedAt,
     this.expiresAt,
     this.lastCrmFetchAt,
@@ -138,6 +146,7 @@ class AiSubscription {
     final balance = _asStringMap(json['ai_balance']) ??
         _asStringMap(json['balance']) ??
         _asStringMap(json['aiBalance']);
+    final offer = _asStringMap(json['commercial_offer']);
 
     return AiSubscription(
       id: _parseInt(json['id']),
@@ -146,6 +155,7 @@ class AiSubscription {
       status: _parseBool(json['status']),
       periodMonths: _parseInt(json['period_months']),
       pricePaid: _parseString(json['price_paid'], '0'),
+      offerCurrencyCode: _currencyCode(offer?['currency']),
       startedAt: _parseDate(json['started_at']),
       expiresAt: _parseDate(json['expires_at']),
       lastCrmFetchAt: _parseDate(json['last_crm_fetch_at']),
@@ -165,6 +175,9 @@ class AiSubscription {
       status: other.status,
       periodMonths: other.periodMonths != 0 ? other.periodMonths : periodMonths,
       pricePaid: other.pricePaid.isNotEmpty ? other.pricePaid : pricePaid,
+      offerCurrencyCode: other.offerCurrencyCode.isNotEmpty
+          ? other.offerCurrencyCode
+          : offerCurrencyCode,
       startedAt: other.startedAt ?? startedAt,
       expiresAt: other.expiresAt ?? expiresAt,
       lastCrmFetchAt: other.lastCrmFetchAt ?? lastCrmFetchAt,
@@ -179,6 +192,17 @@ class AiSubscription {
   String get planName => plan?.name ?? '';
 
   String get organizationPhone => organization?.phone ?? '';
+
+  String get currencyCode {
+    final balanceCode = aiBalance?.currencyCode ?? '';
+    if (balanceCode.isNotEmpty) return balanceCode;
+    return offerCurrencyCode;
+  }
+
+  bool get isExpired =>
+      expiresAt != null && expiresAt!.isBefore(DateTime.now());
+
+  bool get isAgentEnabled => aiBalance?.isAgentEnabled ?? false;
 
   double get limitedBalance => aiBalance?.limitedBalanceValue ?? 0;
 
@@ -232,12 +256,14 @@ class AiBalance {
   final String limitedBalance;
   final String aiBalance;
   final bool isAgentEnabled;
+  final String currencyCode;
 
   AiBalance({
     required this.id,
     required this.limitedBalance,
     required this.aiBalance,
     required this.isAgentEnabled,
+    this.currencyCode = '',
   });
 
   factory AiBalance.fromJson(Map<String, dynamic> json) {
@@ -246,6 +272,7 @@ class AiBalance {
       limitedBalance: _parseString(json['limited_balance'], '0'),
       aiBalance: _parseString(json['ai_balance'], '0'),
       isAgentEnabled: _parseBool(json['is_agent_enabled']),
+      currencyCode: _currencyCode(json['currency']),
     );
   }
 
@@ -299,14 +326,13 @@ class AiBalanceTransaction {
   });
 
   factory AiBalanceTransaction.fromJson(Map<String, dynamic> json) {
-    final currency = _asStringMap(json['currency']);
     return AiBalanceTransaction(
       id: _parseInt(json['id']),
       type: _parseString(json['type']),
       targetBalance: _parseString(json['target_balance']),
       amount: _parseString(json['amount'], '0'),
       description: _parseString(json['description']),
-      currencyCode: _parseString(currency?['symbol_code'], 'USD'),
+      currencyCode: _currencyCode(json['currency']),
       createdAt: _parseDate(json['created_at']),
     );
   }
@@ -336,7 +362,6 @@ class AiUsagePeriod {
   });
 
   factory AiUsagePeriod.fromJson(Map<String, dynamic> json) {
-    final currency = _asStringMap(json['currency']);
     final requests = <AiUsageRequest>[];
     for (final item in _extractList(json['raw_logs'])) {
       final map = _asStringMap(item);
@@ -351,7 +376,7 @@ class AiUsagePeriod {
       totalCost: _parseString(json['total_cost'], '0'),
       deductedFromLimited: _parseString(json['deducted_from_limited'], '0'),
       deductedFromAiBalance: _parseString(json['deducted_from_ai_balance'], '0'),
-      currencyCode: _parseString(currency?['symbol_code'], 'USD'),
+      currencyCode: _currencyCode(json['currency']),
       periodStart: _parseDate(json['period_start']),
       periodEnd: _parseDate(json['period_end']),
       requests: requests,
@@ -439,6 +464,7 @@ AiSubscriptionDetails parseAiSubscriptionDetails(
         status: fallback.status,
         periodMonths: fallback.periodMonths,
         pricePaid: fallback.pricePaid,
+        offerCurrencyCode: fallback.offerCurrencyCode,
         startedAt: fallback.startedAt,
         expiresAt: fallback.expiresAt,
         lastCrmFetchAt: fallback.lastCrmFetchAt,

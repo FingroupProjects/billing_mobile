@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 
 class AiBalanceHistorySection extends StatefulWidget {
   final List<AiBalanceTransaction> transactions;
+  final String currencyCode;
 
   const AiBalanceHistorySection({
     super.key,
     required this.transactions,
+    this.currencyCode = '',
   });
 
   @override
@@ -137,7 +139,12 @@ class _AiBalanceHistorySectionState extends State<AiBalanceHistorySection> {
               ...items.map(
                 (item) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: _TransactionCard(transaction: item),
+                  child: _TransactionCard(
+                    transaction: item,
+                    currencyCode: item.currencyCode.isNotEmpty
+                        ? item.currencyCode
+                        : widget.currencyCode,
+                  ),
                 ),
               ),
           ],
@@ -187,8 +194,12 @@ class _TypeChip extends StatelessWidget {
 
 class _TransactionCard extends StatelessWidget {
   final AiBalanceTransaction transaction;
+  final String currencyCode;
 
-  const _TransactionCard({required this.transaction});
+  const _TransactionCard({
+    required this.transaction,
+    required this.currencyCode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +228,10 @@ class _TransactionCard extends StatelessWidget {
                 ),
               ),
               Text(
-                AiDisplay.usd(transaction.amountValue),
+                AiDisplay.money(
+                  transaction.amountValue,
+                  currency: currencyCode,
+                ),
                 style: const TextStyle(
                   fontSize: 14,
                   fontFamily: 'Gilroy',

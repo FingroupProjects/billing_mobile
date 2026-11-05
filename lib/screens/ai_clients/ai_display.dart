@@ -18,6 +18,8 @@ class AiDisplay {
         return 'Пропорц. начисление лимита';
       case 'monthly_purchase':
         return 'Покупка лимита';
+      case 'expired_profit':
+        return 'Сгорание лимита';
       default:
         return type.isEmpty ? 'Операция' : type;
     }
@@ -35,6 +37,8 @@ class AiDisplay {
         return const Color(0xff3D8BDB);
       case 'monthly_purchase':
         return const Color(0xffC75B39);
+      case 'expired_profit':
+        return const Color(0xffD14343);
       default:
         return const Color(0xff99A4BA);
     }
@@ -52,6 +56,8 @@ class AiDisplay {
         return const Color(0xffEAF4FF);
       case 'monthly_purchase':
         return const Color(0xffFBECE6);
+      case 'expired_profit':
+        return const Color(0xffFDECEC);
       default:
         return const Color(0xffF1F3F7);
     }
@@ -90,14 +96,25 @@ class AiDisplay {
     return '${DateFormat(_dateTime).format(localStart)} — ${DateFormat(_dateTime).format(localEnd)}';
   }
 
-  static String usd(dynamic value, {int decimals = 4}) {
+  static String money(
+    dynamic value, {
+    String currency = '',
+    int decimals = 4,
+  }) {
     final number = value is num
         ? value.toDouble()
         : double.tryParse(value?.toString() ?? '') ?? 0;
     final pattern = decimals <= 0
         ? '#,##0'
         : '#,##0.${List.filled(decimals, '0').join()}';
-    return '${NumberFormat(pattern, 'ru_RU').format(number)} USD';
+    final formatted = NumberFormat(pattern, 'ru_RU').format(number);
+    if (currency.isEmpty) return formatted;
+    return '$formatted $currency';
+  }
+
+  static String date(DateTime? value) {
+    if (value == null) return '—';
+    return DateFormat(_date).format(value.toLocal());
   }
 
   static String tokens(int total, int cache) {

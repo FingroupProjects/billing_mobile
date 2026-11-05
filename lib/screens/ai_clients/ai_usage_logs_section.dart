@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 
 class AiUsageLogsSection extends StatefulWidget {
   final List<AiUsagePeriod> usageLogs;
+  final String currencyCode;
 
   const AiUsageLogsSection({
     super.key,
     required this.usageLogs,
+    this.currencyCode = '',
   });
 
   @override
@@ -101,10 +103,14 @@ class _AiUsageLogsSectionState extends State<AiUsageLogsSection> {
             else
               ...widget.usageLogs.map((period) {
               final expanded = _expandedIds.contains(period.id);
+              final currency = period.currencyCode.isNotEmpty
+                  ? period.currencyCode
+                  : widget.currencyCode;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: _PeriodCard(
                   period: period,
+                  currencyCode: currency,
                   expanded: expanded,
                   onTap: () {
                     setState(() {
@@ -127,11 +133,13 @@ class _AiUsageLogsSectionState extends State<AiUsageLogsSection> {
 
 class _PeriodCard extends StatelessWidget {
   final AiUsagePeriod period;
+  final String currencyCode;
   final bool expanded;
   final VoidCallback onTap;
 
   const _PeriodCard({
     required this.period,
+    required this.currencyCode,
     required this.expanded,
     required this.onTap,
   });
@@ -180,7 +188,11 @@ class _PeriodCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        AiDisplay.usd(period.totalCostValue, decimals: 6),
+                        AiDisplay.money(
+                          period.totalCostValue,
+                          currency: currencyCode,
+                          decimals: 6,
+                        ),
                         style: const TextStyle(
                           fontSize: 14,
                           fontFamily: 'Gilroy',
@@ -202,7 +214,7 @@ class _PeriodCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'С лимита: ${AiDisplay.usd(period.limitedValue, decimals: 6)}',
+                  'С лимита: ${AiDisplay.money(period.limitedValue, currency: currencyCode, decimals: 6)}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontFamily: 'Gilroy',
@@ -210,7 +222,7 @@ class _PeriodCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'С ИИ-счёта: ${AiDisplay.usd(period.aiAccountValue, decimals: 6)}',
+                  'С ИИ-счёта: ${AiDisplay.money(period.aiAccountValue, currency: currencyCode, decimals: 6)}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontFamily: 'Gilroy',
@@ -237,7 +249,10 @@ class _PeriodCard extends StatelessWidget {
               ...period.requests.map(
                 (request) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: _RequestCard(request: request),
+                  child: _RequestCard(
+                    request: request,
+                    currencyCode: currencyCode,
+                  ),
                 ),
               ),
           ],
@@ -249,8 +264,12 @@ class _PeriodCard extends StatelessWidget {
 
 class _RequestCard extends StatelessWidget {
   final AiUsageRequest request;
+  final String currencyCode;
 
-  const _RequestCard({required this.request});
+  const _RequestCard({
+    required this.request,
+    required this.currencyCode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -278,7 +297,11 @@ class _RequestCard extends StatelessWidget {
                 ),
               ),
               Text(
-                AiDisplay.usd(request.costValue, decimals: 6),
+                AiDisplay.money(
+                  request.costValue,
+                  currency: currencyCode,
+                  decimals: 6,
+                ),
                 style: const TextStyle(
                   fontSize: 13,
                   fontFamily: 'Gilroy',

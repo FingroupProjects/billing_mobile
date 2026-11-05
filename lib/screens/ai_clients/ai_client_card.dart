@@ -1,7 +1,7 @@
 import 'package:billing_mobile/custom_widget/custom_card_tasks_tabBar.dart';
 import 'package:billing_mobile/models/ai_subscription_model.dart';
+import 'package:billing_mobile/screens/ai_clients/ai_display.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class AiClientCard extends StatelessWidget {
   final AiSubscription subscription;
@@ -58,12 +58,43 @@ class AiClientCard extends StatelessWidget {
                 value: subscription.organizationPhone,
               ),
             ],
+            const SizedBox(height: 4),
+            _InfoRow(
+              label: 'Начало: ',
+              value: AiDisplay.date(subscription.startedAt),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Flexible(
+                  child: _InfoRow(
+                    label: 'Окончание: ',
+                    value: AiDisplay.date(subscription.expiresAt),
+                  ),
+                ),
+                if (subscription.isExpired) ...[
+                  const SizedBox(width: 8),
+                  const _ExpiredBadge(),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            _InfoRow(
+              label: 'Агент: ',
+              value: subscription.isAgentEnabled ? 'Включён' : 'Выключен',
+              valueColor: subscription.isAgentEnabled
+                  ? const Color(0xff22A06B)
+                  : const Color(0xffD14343),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: _AmountPill(
-                    value: _formatBalance(subscription.totalBalance),
+                    value: AiDisplay.money(
+                      subscription.totalBalance,
+                      currency: subscription.currencyCode,
+                    ),
                   ),
                 ),
               ],
@@ -101,13 +132,39 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
+class _ExpiredBadge extends StatelessWidget {
+  const _ExpiredBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xffD14343),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Text(
+        'Истекла',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontFamily: 'Gilroy',
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
+  final Color? valueColor;
 
   const _InfoRow({
     required this.label,
     required this.value,
+    this.valueColor,
   });
 
   @override
@@ -128,11 +185,11 @@ class _InfoRow extends StatelessWidget {
           ),
           TextSpan(
             text: value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontFamily: 'Gilroy',
               fontWeight: FontWeight.w500,
-              color: Color(0xff1E2E52),
+              color: valueColor ?? const Color(0xff1E2E52),
             ),
           ),
         ],
@@ -167,8 +224,4 @@ class _AmountPill extends StatelessWidget {
       ),
     );
   }
-}
-
-String _formatBalance(double value) {
-  return '${NumberFormat('#,##0.0000', 'ru_RU').format(value)} USD';
 }

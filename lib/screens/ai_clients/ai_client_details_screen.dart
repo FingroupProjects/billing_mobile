@@ -1,6 +1,7 @@
 import 'package:billing_mobile/api/api_service.dart';
 import 'package:billing_mobile/models/ai_subscription_model.dart';
 import 'package:billing_mobile/screens/ai_clients/ai_balance_history_section.dart';
+import 'package:billing_mobile/screens/ai_clients/ai_display.dart';
 import 'package:billing_mobile/screens/ai_clients/ai_usage_logs_section.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -100,7 +101,11 @@ class _AiClientDetailsScreenState extends State<AiClientDetailsScreen> {
                 ),
                 _CardRowData(
                   label: 'Оплачено',
-                  value: _formatPaid(_subscription.pricePaid),
+                  value: AiDisplay.money(
+                    _subscription.pricePaid,
+                    currency: _subscription.currencyCode,
+                    decimals: 2,
+                  ),
                 ),
                 _CardRowData(
                   label: 'Статус',
@@ -116,6 +121,13 @@ class _AiClientDetailsScreenState extends State<AiClientDetailsScreen> {
                 _CardRowData(
                   label: 'Окончание',
                   value: _formatDateTime(_subscription.expiresAt),
+                  badge: _subscription.isExpired
+                      ? const _StatusBadge(
+                          text: 'Истекла',
+                          isActive: false,
+                          isAlert: true,
+                        )
+                      : null,
                 ),
                 _CardRowData(
                   label: 'Последний фетч CRM',
@@ -129,35 +141,47 @@ class _AiClientDetailsScreenState extends State<AiClientDetailsScreen> {
               rows: [
                 _CardRowData(
                   label: 'Лимит',
-                  value: _formatUsd(_subscription.limitedBalance),
+                  value: AiDisplay.money(
+                    _subscription.limitedBalance,
+                    currency: _subscription.currencyCode,
+                  ),
                   valueColor: const Color(0xff22A06B),
                 ),
                 _CardRowData(
                   label: 'ИИ-счёт',
-                  value: _formatUsd(_subscription.walletBalance),
+                  value: AiDisplay.money(
+                    _subscription.walletBalance,
+                    currency: _subscription.currencyCode,
+                  ),
                   valueColor: const Color(0xff22A06B),
                 ),
                 _CardRowData(
                   label: 'Итого',
-                  value: _formatUsd(_subscription.totalBalance),
+                  value: AiDisplay.money(
+                    _subscription.totalBalance,
+                    currency: _subscription.currencyCode,
+                  ),
                   isStrong: true,
                 ),
                 _CardRowData(
                   label: 'Агент',
                   badge: _StatusBadge(
-                    text: (_subscription.aiBalance?.isAgentEnabled ?? false)
-                        ? 'Включён'
-                        : 'Выключен',
-                    isActive:
-                        _subscription.aiBalance?.isAgentEnabled ?? false,
+                    text: _subscription.isAgentEnabled ? 'Включён' : 'Выключен',
+                    isActive: _subscription.isAgentEnabled,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            AiBalanceHistorySection(transactions: _transactions),
+            AiBalanceHistorySection(
+              transactions: _transactions,
+              currencyCode: _subscription.currencyCode,
+            ),
             const SizedBox(height: 16),
-            AiUsageLogsSection(usageLogs: _usageLogs),
+            AiUsageLogsSection(
+              usageLogs: _usageLogs,
+              currencyCode: _subscription.currencyCode,
+            ),
           ],
         ),
       ),
@@ -259,22 +283,32 @@ class _CardRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              if (data.badge != null)
-                data.badge!
-              else
-                Flexible(
-                  child: Text(
-                    data.value ?? '',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Gilroy',
-                      fontWeight:
-                          data.isStrong ? FontWeight.w700 : FontWeight.w500,
-                      color: data.valueColor ?? const Color(0xff1E2E52),
-                    ),
-                  ),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (data.value != null)
+                      Flexible(
+                        child: Text(
+                          data.value!,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Gilroy',
+                            fontWeight: data.isStrong
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: data.valueColor ?? const Color(0xff1E2E52),
+                          ),
+                        ),
+                      ),
+                    if (data.badge != null) ...[
+                      if (data.value != null) const SizedBox(width: 8),
+                      data.badge!,
+                    ],
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -292,24 +326,31 @@ class _CardRow extends StatelessWidget {
 class _StatusBadge extends StatelessWidget {
   final String text;
   final bool isActive;
+  final bool isAlert;
 
   const _StatusBadge({
     required this.text,
     required this.isActive,
+    this.isAlert = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = isAlert
+        ? const Color(0xffD14343)
+        : isActive
+            ? const Color(0xff22A06B)
+            : const Color(0xff99A4BA);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xffE8F8F0) : const Color(0xffF1F3F7),
+        color: isAlert ? const Color(0xffFDECEC) : color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: isActive ? const Color(0xff22A06B) : const Color(0xff99A4BA),
+          color: color,
           fontSize: 12,
           fontFamily: 'Gilroy',
           fontWeight: FontWeight.w600,
@@ -322,13 +363,4 @@ class _StatusBadge extends StatelessWidget {
 String _formatDateTime(DateTime? value) {
   if (value == null) return '—';
   return DateFormat('dd.MM.yyyy HH:mm').format(value.toLocal());
-}
-
-String _formatPaid(String value) {
-  final number = double.tryParse(value) ?? 0;
-  return NumberFormat('#,##0.00', 'ru_RU').format(number);
-}
-
-String _formatUsd(double value) {
-  return '${NumberFormat('#,##0.0000', 'ru_RU').format(value)} USD';
 }
