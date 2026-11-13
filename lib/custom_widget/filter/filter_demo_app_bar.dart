@@ -1,8 +1,10 @@
+import 'package:billing_mobile/custom_widget/filter/filter_date_range_field.dart';
 import 'package:billing_mobile/custom_widget/filter/filter_ui.dart';
 import 'package:billing_mobile/custom_widget/filter/status_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/country_list.dart';
 import 'package:billing_mobile/screens/clients/client_details/partner_list.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class FilterDemoScreen extends StatefulWidget {
   final Function(Map<String, dynamic>)? onFilterSelected;
@@ -22,6 +24,10 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
   int? _selectedStatus;
   int? _selectedPartner;
   int? _selectedCountry;
+  DateTime? _dateFrom;
+  DateTime? _dateTo;
+  DateTime? _createdFrom;
+  DateTime? _createdTo;
 
   @override
   void initState() {
@@ -30,22 +36,49 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
       _selectedStatus = widget.initialFilters!['status'];
       _selectedPartner = widget.initialFilters!['partner'];
       _selectedCountry = widget.initialFilters!['country'];
+      _dateFrom = _parseApiDate(widget.initialFilters!['date_from']);
+      _dateTo = _parseApiDate(widget.initialFilters!['date_to']);
+      _createdFrom = _parseApiDate(widget.initialFilters!['create_at_from']);
+      _createdTo = _parseApiDate(widget.initialFilters!['create_at_to']);
     }
   }
+
+  DateTime? _parseApiDate(dynamic value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    if (text.isEmpty || text == 'null') return null;
+    return DateTime.tryParse(text);
+  }
+
+  String? _formatApiDate(DateTime? date) {
+    if (date == null) return null;
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
+  bool get _hasSelectedFilters =>
+      _selectedStatus != null ||
+      _selectedPartner != null ||
+      _selectedCountry != null ||
+      _dateFrom != null ||
+      _dateTo != null ||
+      _createdFrom != null ||
+      _createdTo != null;
 
   void _resetFilters() {
     setState(() {
       _selectedStatus = null;
       _selectedPartner = null;
       _selectedCountry = null;
+      _dateFrom = null;
+      _dateTo = null;
+      _createdFrom = null;
+      _createdTo = null;
     });
     widget.onFilterSelected?.call({});
   }
 
   void _applyFilters() {
-    if (_selectedStatus == null &&
-        _selectedPartner == null &&
-        _selectedCountry == null) {
+    if (!_hasSelectedFilters) {
       Navigator.pop(context);
       return;
     }
@@ -54,6 +87,10 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
       'status': _selectedStatus,
       'partner': _selectedPartner,
       'country': _selectedCountry,
+      if (_dateFrom != null) 'date_from': _formatApiDate(_dateFrom),
+      if (_dateTo != null) 'date_to': _formatApiDate(_dateTo),
+      if (_createdFrom != null) 'create_at_from': _formatApiDate(_createdFrom),
+      if (_createdTo != null) 'create_at_to': _formatApiDate(_createdTo),
     });
     Navigator.pop(context);
   }
@@ -133,6 +170,34 @@ class _FilterDemoScreenState extends State<FilterDemoScreen> {
                     setState(() {
                       _selectedCountry =
                           value != null ? int.parse(value) : null;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 18),
+              FilterSectionCard(
+                child: FilterDateRangeField(
+                  label: 'Срок действия',
+                  startDate: _dateFrom,
+                  endDate: _dateTo,
+                  onChanged: (range) {
+                    setState(() {
+                      _dateFrom = range?.start;
+                      _dateTo = range?.end;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 18),
+              FilterSectionCard(
+                child: FilterDateRangeField(
+                  label: 'Дата создания',
+                  startDate: _createdFrom,
+                  endDate: _createdTo,
+                  onChanged: (range) {
+                    setState(() {
+                      _createdFrom = range?.start;
+                      _createdTo = range?.end;
                     });
                   },
                 ),

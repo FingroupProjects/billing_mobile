@@ -77,6 +77,11 @@ class DemoClientCard extends StatelessWidget {
                         label: 'Тариф: ',
                         value: client.tariff.name,
                       ),
+                      const SizedBox(height: 4),
+                      _buildInfoRow(
+                        label: 'Дата создания: ',
+                        value: _formatCreatedAt(client.createdAt),
+                      ),
                     ],
                   ),
                 ),
@@ -128,6 +133,11 @@ class DemoClientCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatCreatedAt(DateTime? dateTime) {
+    if (dateTime == null) return 'Не указана';
+    return DateFormat('dd.MM.yyyy').format(dateTime.toLocal());
   }
 
   String _formatBalance(String balance) {

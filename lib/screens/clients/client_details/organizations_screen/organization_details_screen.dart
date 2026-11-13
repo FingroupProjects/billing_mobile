@@ -146,6 +146,10 @@ class _OrganizationDetailsScreenState extends State<OrganizationDetailsScreen> {
             valueColor: client.isActive ? Colors.green : Colors.red,
           ),
           _buildOverviewInfoRow(
+            'Дата создания',
+            _formatDateTime(organization.createdAt),
+          ),
+          _buildOverviewInfoRow(
             'Последняя активность',
             _formatDateTime(client.lastActivity, withTime: true),
           ),

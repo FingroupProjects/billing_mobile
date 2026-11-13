@@ -451,6 +451,10 @@ class ApiService {
     int? tariff,
     int? partner,
     int? countryId, // Added countryId parameter
+    String? dateFrom,
+    String? dateTo,
+    String? createAtFrom,
+    String? createAtTo,
   }) async {
     try {
       final queryParameters = {
@@ -461,6 +465,12 @@ class ApiService {
         if (tariff != null) 'tariff': tariff.toString(),
         if (partner != null) 'partner': partner.toString(),
         if (countryId != null) 'country': countryId.toString(),
+        if (dateFrom != null && dateFrom.isNotEmpty) 'date_from': dateFrom,
+        if (dateTo != null && dateTo.isNotEmpty) 'date_to': dateTo,
+        if (createAtFrom != null && createAtFrom.isNotEmpty)
+          'create_at_from': createAtFrom,
+        if (createAtTo != null && createAtTo.isNotEmpty)
+          'create_at_to': createAtTo,
       };
 
       final uri = Uri.parse('/organizations-demo-v2')

@@ -198,6 +198,22 @@ class _FilterDateRangeFieldState extends State<FilterDateRangeField> {
     );
   }
 
+  void _pressPickerOk(BuildContext context) {
+    var pressed = false;
+    void visit(Element element) {
+      if (pressed) return;
+      final widget = element.widget;
+      if (widget is TextButton && widget.onPressed != null) {
+        widget.onPressed!.call();
+        pressed = true;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    context.visitChildElements(visit);
+  }
+
   Future<void> _selectDateRange() async {
     final pickedRange = await showDateRangePicker(
       context: context,
@@ -207,15 +223,57 @@ class _FilterDateRangeFieldState extends State<FilterDateRangeField> {
       cancelText: 'Назад',
       confirmText: 'Ок',
       helpText: 'Выберите период',
-      saveText: 'Ок',
+      saveText: '',
       fieldStartHintText: 'ддммгггг',
       fieldEndHintText: 'ддммгггг',
       fieldStartLabelText: 'Дата от',
       fieldEndLabelText: 'Дата до',
-      builder: (BuildContext context, Widget? child) {
+      builder: (BuildContext dialogContext, Widget? child) {
+        final media = MediaQuery.of(dialogContext);
         return Theme(
           data: _pickerTheme(),
-          child: child ?? const SizedBox.shrink(),
+          child: Builder(
+            builder: (rootContext) {
+              return Stack(
+                children: [
+                  MediaQuery(
+                    data: media.copyWith(
+                      padding: media.padding.copyWith(
+                        bottom: media.padding.bottom + 84,
+                      ),
+                    ),
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: media.padding.bottom + 12,
+                    child: SizedBox(
+                      height: 56,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _pressPickerOk(rootContext),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: _navy,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Gilroy',
+                          ),
+                        ),
+                        child: const Text('Ок'),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         );
       },
     );
@@ -246,12 +304,12 @@ class _FilterDateRangeFieldState extends State<FilterDateRangeField> {
             child: TextFormField(
               controller: _controller,
               decoration: buildFilterDropdownDecoration().copyWith(
-                hintText: 'дд/мм/гггг — дд/мм/гггг',
+                hintText: 'Выберите дату от и до',
                 hintStyle: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Gilroy',
-                  color: kFilterTextColor,
+                  color: Color(0xff99A4BA),
                 ),
                 suffixIcon: Padding(
                   padding: const EdgeInsets.all(12),

@@ -157,6 +157,7 @@ class Client {
   final String? email;
   final String clientType;
   final DateTime? lastActivity;
+  final DateTime? createdAt;
   final Tariff tariff;
   final int nfr;
   final DateTime? calculatedValidUntil;
@@ -173,6 +174,7 @@ class Client {
     this.email,
     this.clientType = '',
     this.lastActivity,
+    this.createdAt,
     required this.tariff,
     required this.nfr,
     this.calculatedValidUntil,
@@ -218,6 +220,9 @@ class Client {
       email: (clientJson['email'] ?? organizationJson['email'])?.toString(),
       clientType: (clientJson['client_type'] ?? '').toString(),
       lastActivity: _parseDateTime(clientJson['last_activity']),
+      createdAt: _parseDateTime(
+        organizationJson['created_at'] ?? clientJson['created_at'],
+      ),
       tariff: _resolveClientTariff(organizationJson, clientJson),
       nfr: _parseInt(clientJson['nfr']),
       calculatedValidUntil: _parseDateTime(

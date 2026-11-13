@@ -44,6 +44,10 @@ class DemoBloc extends Bloc<DemoEvent, DemoState> {
         status: _currentFilters['status'],
         partner: _currentFilters['partner'],
         countryId: _currentFilters['country'],
+        dateFrom: _filterDate('date_from'),
+        dateTo: _filterDate('date_to'),
+        createAtFrom: _filterDate('create_at_from'),
+        createAtTo: _filterDate('create_at_to'),
       );
       emit(DemoLoaded(demoData, isLoadingMore: false));
     } catch (e) {
@@ -79,6 +83,10 @@ class DemoBloc extends Bloc<DemoEvent, DemoState> {
           status: _currentFilters['status'],
           partner: _currentFilters['partner'],
           countryId: _currentFilters['country'],
+          dateFrom: _filterDate('date_from'),
+          dateTo: _filterDate('date_to'),
+          createAtFrom: _filterDate('create_at_from'),
+          createAtTo: _filterDate('create_at_to'),
         );
 
         final updatedClients = ClientList(
@@ -108,6 +116,14 @@ class DemoBloc extends Bloc<DemoEvent, DemoState> {
         _isFetchingMore = false;
       }
     }
+  }
+
+  String? _filterDate(String key) {
+    final value = _currentFilters[key];
+    if (value == null) return null;
+    final text = value.toString().trim();
+    if (text.isEmpty || text == 'null') return null;
+    return text;
   }
 
   Future<void> _onDemoApplyFilters(
